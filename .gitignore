@@ -1,0 +1,5 @@
+.opencode
+.env
+.dev.vars
+node_modules
+dist

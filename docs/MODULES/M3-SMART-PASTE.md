@@ -1,0 +1,53 @@
+# M3 — Smart Paste (fitur paling strategis)
+
+## Tujuan & nilai
+Pengguna menyalin/membagikan chat WhatsApp → draft pesanan terisi → tinggal periksa &
+konfirmasi ≤60 detik. Target kualitas: **pemeriksa, bukan pengetik ulang**.
+Akurasi final ≥90%; hit-rate parser pola ≥70% (format pilot).
+
+## Entitas & relasi
+Input teks → log `ai_usage_logs` → draft `orders`+`order_items` (status DRAFT, insert
+via supabase-js RLS) + `customers` baru (setelah konfirmasi). Matching ke `products`.
+
+## Halaman & API
+- Routes: `/share` (target Web Share Target PWA), `/paste` (textarea + tombol tempel),
+  `/paste/confirm` (tiap kolom menampilkan sumber & penanda).
+- Worker (Hono): `POST /api/smart-paste` (parser pola + matching — TIDAK menyimpan);
+  `POST /api/smart-paste/ai` (fallback AI — key & kuota di Worker, rules/02 §6).
+- Fixture parser: `apps/worker/tests/parser/`.
+
+## Alur user
+1. Tempel/share teks → hasil + skor keyakinan (tinggi/sedang/rendah).
+2. Kolom menandai: dari katalog (hijau), tebakan/kosong (kuning, wajib diisi).
+3. Pengguna mengoreksi/pilih dari katalog → total & sisa dihitung ulang di Worker
+   (zod dari `packages/shared`) → konfirmasi.
+4. Konfirmasi → insert order DRAFT (supabase-js, RLS) → lanjut alur M4.
+Pipeline & keamanan: `rules/02-parser-safety.md` (WAJIB dibaca sebelum coding).
+
+## Aturan khusus
+- Harga dari katalog atau kosong; perhitungan uang server-side dengan BIGINT.
+- Fallback AI hanya jika parser pola gagal/keyakinan rendah; output JSON schema ketat;
+  kuota per paket dihitung SERVER (`ai_usage_logs` via service_role di Worker).
+- Matching: persis → alias → trigram ≥0,8; dua kandidat mirip → tampilkan pilihan.
+- Format angka Indonesia: "75.000", "75rb", "75k"; qty "3 pcs", "x3", "3x".
+
+## Golden tests
+1. Chat Siti lengkap (SSoT Lampiran A) → semua kolom benar, keyakinan tinggi.
+2. Chat COD singkat ("COD 2 sosis 25rb") → produk cocok, COD terdeteksi.
+3. Angka varian ("75rb", "75k", "75.000") → BIGINT sama.
+4. Qty varian ("x3", "3 pcs", "3x").
+5. Ongkir di baris terakhir.
+6. Teks acak tanpa produk → keyakinan RENDAH, nol tebakan.
+7. Produk luar katalog → kolom kosong + penanda, harga kosong.
+8. Dua produk dalam satu pesan → 2 order_items.
+9. AI fallback: matikan parser (unit test) → hasil benar + terlog + kuota terpakai.
+10. Kuota habis → pesan jelas, parser pola tetap jalan, tidak ada crash.
+11. Format pesan dari katalog (M9 Fase 1: produk/varian/qty terstruktur) → parse
+    benar TANPA AI (fixture baru, MERAH dulu).
+
+## DoD
+11 fixture lulus di CI; uji manual di HP dengan Web Share Target dari WhatsApp;
+hit-rate & akurasi tampil di admin internal; log aktif; RLS; status diperbarui.
+
+## Urutan build
+W2 (utama). Dependensi: M1, M2. Prasyarat M4.

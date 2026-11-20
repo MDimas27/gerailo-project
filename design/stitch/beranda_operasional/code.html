@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "tertiary-container": "#9c573a", "on-surface-variant": "#3e4947", "status-warning": "#D97706", "on-background": "#121c26", "on-tertiary-fixed-variant": "#72361b", "on-secondary-fixed": "#00201c", "inverse-on-surface": "#e8f2ff", "on-tertiary-fixed": "#370e00", "error-container": "#ffdad6", "surface-container": "#e4effd", "on-secondary-container": "#416c65", "inverse-surface": "#27313c", "outline-variant": "#bdc9c6", "outline": "#6e7977", "status-danger": "#DC2626", "on-primary-fixed": "#00201d", "on-primary": "#ffffff", "text-secondary": "#667085", "status-success": "#15803D", "surface-dim": "#d1dbe9", "surface-container-high": "#dfe9f7", "primary-fixed": "#9cf2e8", "status-info": "#2563EB", "on-secondary-fixed-variant": "#224e47", "secondary-container": "#bdece2", "surface-tint": "#006a63", "on-tertiary": "#ffffff", "secondary-fixed": "#bdece2", "surface": "#FFFFFF", "surface-bright": "#f7f9ff", "on-error-container": "#93000a", "on-secondary": "#ffffff", "tertiary-fixed-dim": "#ffb598", "on-primary-container": "#a3faef", "on-error": "#ffffff", "primary": "#005c55", "border": "#E6E9ED", "inverse-primary": "#80d5cb", "primary-fixed-dim": "#80d5cb", "secondary": "#3b665f", "primary-container": "#0f766e", "surface-variant": "#d9e3f1", "background": "#F7F8FA", "on-primary-fixed-variant": "#00504a", "tertiary": "#7f4025", "tertiary-fixed": "#ffdbce", "on-tertiary-container": "#ffe5db", "surface-container-highest": "#d9e3f1", "error": "#ba1a1a", "surface-container-low": "#edf4ff", "on-surface": "#121c26", "surface-container-lowest": "#ffffff", "secondary-fixed-dim": "#a2d0c6" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "margin-desktop": "2rem", "space-lg": "1rem", "space-xl": "1.5rem", "margin": "1rem", "space-sm": "0.5rem" }, "fontFamily": { "currency-body": ["Inter"], "headline-sm": ["Inter"], "headline-md": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "currency-display": ["Inter"], "label-md": ["Inter"], "label-lg": ["Inter"], "body-sm": ["Inter"], "label-sm": ["Inter"], "body-lg": ["Inter"] }, "fontSize": { "currency-body": ["14px", {"lineHeight": "20px", "fontWeight": "600"}], "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}], "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "currency-display": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}], "label-lg": ["15px", {"lineHeight": "20px", "fontWeight": "600"}], "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}], "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600"}], "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#F7F8FA;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;display:inline-block;vertical-align:middle;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0 flex-1"><img alt="Ringkas WhatsApp Business Logo" class="h-8 w-auto object-contain shrink-0" src="https://lh3.googleusercontent.com/aida/ALJJyrDdbqZIAzIZeymRFc5T_qkdCxzqtwDgKPmZv9flSoAZqkIlT0OR-s9sR-9hGTEjvyi0DwAXfooCQDRNK0Fp9lYqj9Lz2x3oxjz1pbuiM5abTjeWpHs0rGALLMIYg0MQLJxxyFzBVQG5BXU1Hs8jzm76LHhrDdjehhFH0S-668oRGHvs-fvE57ZJr6sms3W-fBB2V-9OMx2ehbsZDRRGA21C0k3tLDm5EuGC7xp71qc"/><div class="flex flex-col min-w-0"><div class="flex items-center gap-1.5"><span class="font-label-lg text-label-lg text-on-surface truncate">Dapur Bu Rena</span><span class="px-1.5 py-0.5 rounded-full bg-secondary-container text-status-success font-label-sm text-label-sm inline-flex items-center gap-1 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>Buka</span></div><span class="font-body-sm text-body-sm text-text-secondary truncate">Beranda</span></div></div><div class="flex items-center gap-space-xs shrink-0"><button aria-label="Notifikasi" class="w-11 h-11 flex items-center justify-center relative rounded-full text-on-surface hover:bg-surface-container active:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-4 h-4 bg-status-danger text-on-primary font-label-sm text-[10px] rounded-full flex items-center justify-center font-bold">3</span></button><div class="pl-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-[0_1px_4px_rgba(0,0,0,0.08)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQO5kEnQw6hAVaaOejyZQWO9LvgzapAHw8Wfzk5kdn1xVcSF2BoElk97S2IK0oQKmw0kvGN50WzzZm-WC_RY5-0eh9eGBYHpvjF2nCgmgii7v3TuyRUKd59wwRyIahdR1ti5eS2Yr7FVVoK26wzEigbSB6FjzPG7PNqFdXv0RVhXBFdrUHJAY6yvjwgHh6LmxlF7H_PR6fK1moccp-SCK3zLiHw4OFKsp36FygsIU"/></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 px-gutter bg-background"><div class="flex flex-col w-full gap-space-xl">
+<!-- 1. Warm Greeting & Operational Sync Header -->
+<section class="flex flex-col gap-1.5 pt-1">
+<div class="flex items-center justify-between gap-2">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container">
+<span class="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
+<span class="font-label-sm text-label-sm font-semibold tracking-wide">WhatsApp Terhubung</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary">Kamis, 24 Okt 2024</span>
+</div>
+<div class="flex flex-col">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Halo, Bu Rena! 👋</h1>
+<p class="font-body-md text-body-md text-text-secondary">Siap proses pesanan hari ini? Toko Anda ramai lancar.</p>
+</div>
+</section>
+<!-- 2. Metric Grid (Today's Pulse) -->
+<section class="flex flex-col gap-space-sm">
+<!-- Featured Metric: Penjualan Hari Ini -->
+<div class="bg-surface rounded-2xl p-space-lg shadow-sm flex flex-col gap-2 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-primary-fixed/30 pointer-events-none blur-xl"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<span class="font-label-md text-label-md text-text-secondary">Penjualan Hari Ini</span>
+</div>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-secondary-container text-status-success font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+          +18%
+        </span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-currency-display text-currency-display text-on-surface">Rp1.450.000</span>
+<span class="font-body-sm text-body-sm text-text-secondary">dari kemarin</span>
+</div>
+</div>
+<!-- 3-Column Micro Metrics -->
+<div class="grid grid-cols-3 gap-2">
+<!-- Pesanan Masuk -->
+<div class="bg-surface rounded-2xl p-3 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">inbox</span>
+<span class="w-2 h-2 rounded-full bg-status-danger"></span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">12</span>
+<span class="font-label-sm text-label-sm text-text-secondary leading-tight mt-0.5">Pesanan Masuk</span>
+<span class="font-body-sm text-[10px] text-status-danger font-medium mt-0.5">3 belum dibuka</span>
+</div>
+</div>
+<!-- Menunggu Pembayaran -->
+<div class="bg-surface rounded-2xl p-3 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1.5">
+<span class="material-symbols-outlined text-status-warning text-[20px]">pending_actions</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">4</span>
+<span class="font-label-sm text-label-sm text-text-secondary leading-tight mt-0.5">Tunggu Bayar</span>
+<span class="font-currency-body text-[10px] text-status-warning font-semibold mt-0.5 truncate">Rp580.000</span>
+</div>
+</div>
+<!-- Perlu Dikirim -->
+<div class="bg-surface rounded-2xl p-3 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1.5">
+<span class="material-symbols-outlined text-status-info text-[20px]">local_shipping</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">5</span>
+<span class="font-label-sm text-label-sm text-text-secondary leading-tight mt-0.5">Perlu Kirim</span>
+<span class="font-body-sm text-[10px] text-text-secondary mt-0.5">Kurir sore ini</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Aksi Cepat Operasional -->
+<section class="flex flex-col gap-space-sm">
+<h2 class="font-label-lg text-label-lg text-on-surface">Aksi Cepat</h2>
+<!-- Hero Action: Smart Paste Order Card -->
+<div class="bg-primary-container text-on-primary rounded-2xl p-space-lg shadow-md relative overflow-hidden flex flex-col gap-3">
+<div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 rounded-full bg-white/10 pointer-events-none blur-lg"></div>
+<div class="flex items-start justify-between relative z-10">
+<div class="flex items-center gap-2">
+<div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">auto_awesome</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-primary">Smart Paste Order</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">AI Instan</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-primary/80 mt-0.5">Salin obrolan WhatsApp pelanggan, sistem buat nota otomatis</p>
+</div>
+</div>
+</div>
+<div class="relative z-10 flex gap-2">
+<button class="flex-1 h-11 px-4 rounded-xl bg-surface text-primary-container font-label-lg text-label-lg shadow-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[20px]">content_paste</span>
+          Tempel Chat Sekarang
+        </button>
+</div>
+</div>
+<!-- Secondary Quick Actions: 3 Mini Touch Targets -->
+<div class="grid grid-cols-3 gap-2">
+<button class="bg-surface rounded-2xl p-3 shadow-sm flex flex-col items-center justify-center text-center gap-2 active:bg-surface-container transition-colors" type="button">
+<div class="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">add_circle</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface leading-tight">Order Manual</span>
+</button>
+<button class="bg-surface rounded-2xl p-3 shadow-sm flex flex-col items-center justify-center text-center gap-2 active:bg-surface-container transition-colors" type="button">
+<div class="w-9 h-9 rounded-xl bg-error-container/60 flex items-center justify-center text-status-danger">
+<span class="material-symbols-outlined text-[22px]">receipt_long</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface leading-tight">Catat Kas</span>
+</button>
+<button class="bg-surface rounded-2xl p-3 shadow-sm flex flex-col items-center justify-center text-center gap-2 active:bg-surface-container transition-colors" type="button">
+<div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">inventory</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface leading-tight">Cek Stok</span>
+</button>
+</div>
+</section>
+<!-- 4. Perlu Ditangani Segera (Action-Oriented Task Cards) -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<h2 class="font-label-lg text-label-lg text-on-surface">Perlu Ditangani Segera</h2>
+<span class="px-1.5 py-0.5 rounded-full bg-status-danger text-on-primary font-label-sm text-[10px] font-bold">3</span>
+</div>
+<a class="font-label-sm text-label-sm text-primary font-semibold flex items-center" href="#">
+        Lihat Semua
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</a>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Task 1: Menunggu Pelunasan DP -->
+<div class="bg-surface rounded-2xl p-space-lg shadow-sm flex flex-col gap-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary font-label-lg shrink-0">
+              RS
+            </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Rina Sasmita</span>
+<span class="font-body-sm text-[11px] text-text-secondary">#ORD-1048</span>
+</div>
+<span class="font-body-sm text-body-sm text-status-warning font-medium">Sisa Pelunasan: Rp120.000</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-amber-50 text-status-warning font-label-sm text-label-sm shrink-0">Tunggu DP</span>
+</div>
+<div class="flex items-center justify-between text-body-sm text-text-secondary bg-surface-bright p-2 rounded-xl">
+<span class="truncate">Paket Rendang Paru 500g + Sambal Ijo</span>
+<span class="font-label-sm text-on-surface shrink-0 ml-2">Total Rp220.000</span>
+</div>
+<div class="flex items-center gap-2 pt-0.5">
+<button class="flex-1 h-10 rounded-xl bg-secondary-container text-on-secondary-container font-label-md text-label-md flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+            Kirim Pengingat WA
+          </button>
+<button class="px-3.5 h-10 rounded-xl bg-surface-container text-primary font-label-md text-label-md flex items-center justify-center active:scale-[0.98] transition-transform" type="button">
+            Lunas
+          </button>
+</div>
+</div>
+<!-- Task 2: Siap Dikirim -->
+<div class="bg-surface rounded-2xl p-space-lg shadow-sm flex flex-col gap-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-primary font-label-lg shrink-0">
+              BS
+            </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Budi Santoso</span>
+<span class="font-body-sm text-[11px] text-text-secondary">#ORD-1045</span>
+</div>
+<span class="font-body-sm text-body-sm text-status-info font-medium">Siap Dikirim • J&amp;T Express</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-status-success font-label-sm text-label-sm shrink-0">Lunas</span>
+</div>
+<div class="flex items-center justify-between text-body-sm text-text-secondary bg-surface-bright p-2 rounded-xl">
+<span class="truncate">2x Sambal Roa Spesial (Toples 200g)</span>
+<span class="font-label-sm text-on-surface shrink-0 ml-2">Rp90.000</span>
+</div>
+<div class="flex items-center gap-2 pt-0.5">
+<button class="flex-1 h-10 rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>
+            Cetak Label Kirim
+          </button>
+<button class="px-3.5 h-10 rounded-xl bg-surface-container text-on-surface-variant font-label-md text-label-md flex items-center justify-center active:scale-[0.98] transition-transform" type="button">
+            Tandai Dikirim
+          </button>
+</div>
+</div>
+<!-- Task 3: Peringatan Stok Rendah -->
+<div class="bg-surface rounded-2xl p-space-lg shadow-sm flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-amber-50 text-status-warning flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Daster Rayon Premium (Navy)</span>
+<span class="font-body-sm text-body-sm text-status-danger font-semibold">Tersisa 2 pcs</span>
+</div>
+</div>
+<button class="h-9 px-3 rounded-xl bg-surface-container text-primary font-label-sm text-label-sm font-semibold shrink-0 active:scale-[0.98] transition-transform" type="button">
+          + Tambah Stok
+        </button>
+</div>
+</div>
+</section>
+<!-- 5. Ringkasan Aktivitas Terkini (Recent Activity Feed) -->
+<section class="flex flex-col gap-space-sm mb-2">
+<div class="flex items-center justify-between">
+<h2 class="font-label-lg text-label-lg text-on-surface">Aktivitas Terkini</h2>
+<span class="font-body-sm text-body-sm text-text-secondary">Hari Ini</span>
+</div>
+<div class="bg-surface rounded-2xl p-space-lg shadow-sm flex flex-col gap-3">
+<!-- Item 1 -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+</div>
+<div class="flex-1 flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-md text-label-md text-on-surface truncate">Order Masuk via Smart Paste</span>
+<span class="font-body-sm text-[11px] text-text-secondary shrink-0">14:15</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+            Siti Aisyah • <span class="font-medium text-on-surface">#ORD-1049</span> (<span class="text-status-success font-semibold">Lunas Rp240.000</span>)
+          </p>
+</div>
+</div>
+<div class="h-[1px] w-full bg-surface-container-high"></div>
+<!-- Item 2 -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-status-success shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<div class="flex-1 flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-md text-label-md text-on-surface truncate">Pembayaran DP Diverifikasi</span>
+<span class="font-body-sm text-[11px] text-text-secondary shrink-0">13:40</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+            Rp100.000 via Transfer BCA untuk <span class="font-medium text-on-surface">#ORD-1047</span>
+</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<script>
+  // Simple micro-interaction for tactile buttons
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      // Light feedback ripple effect simulation
+      this.classList.add('opacity-90');
+      setTimeout(() => this.classList.remove('opacity-90'), 150);
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary font-label-md"><div class="flex justify-between items-center h-20 px-space-xs"><a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] py-1 transition-colors text-primary font-label-md" data-path="beranda" href="#"><span class="material-symbols-outlined text-[24px]">home</span><span class="font-label-sm text-label-sm mt-0.5">Beranda</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] py-1 relative text-text-secondary hover:text-primary transition-colors" data-path="pesanan" href="#"><div class="relative"><span class="material-symbols-outlined text-[24px]">inventory_2</span><span class="absolute -top-1 -right-2 px-1 min-w-[16px] h-4 bg-status-danger text-on-primary font-label-sm text-[10px] rounded-full flex items-center justify-center font-bold">5</span></div><span class="font-label-sm text-label-sm mt-0.5">Pesanan</span></a><div class="flex items-center justify-center px-1 -mt-5"><a aria-label="Smart Paste" class="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-primary-container text-on-primary shadow-[0_4px_12px_-2px_rgba(15,118,110,0.4)] active:scale-95 transition-transform" data-path="smart-paste" href="#"><span class="material-symbols-outlined text-[26px]">auto_awesome</span><span class="font-label-sm text-[9px] font-semibold text-center leading-tight mt-0.5">Paste</span></a></div><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] py-1 text-text-secondary hover:text-primary transition-colors" data-path="produk" href="#"><span class="material-symbols-outlined text-[24px]">layers</span><span class="font-label-sm text-label-sm mt-0.5">Produk</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] py-1 text-text-secondary hover:text-primary transition-colors" data-path="keuangan" href="#"><span class="material-symbols-outlined text-[24px]">account_balance_wallet</span><span class="font-label-sm text-label-sm mt-0.5">Keuangan</span></a></div></nav></body></html>

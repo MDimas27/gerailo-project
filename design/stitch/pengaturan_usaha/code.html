@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><title>Ringkas UMKM</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#F7F8FA;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary-fixed-variant": "#00504a", "on-surface-variant": "#3e4947", "on-surface": "#121c26", "surface-tint": "#006a63", "primary-container": "#0f766e", "secondary": "#3b665f", "on-error": "#ffffff", "on-primary-container": "#a3faef", "surface-container-low": "#edf4ff", "inverse-surface": "#27313c", "surface-bright": "#f7f9ff", "border": "#E6E9ED", "on-secondary-fixed-variant": "#224e47", "tertiary-container": "#9c573a", "primary-fixed-dim": "#80d5cb", "on-primary": "#ffffff", "error": "#ba1a1a", "secondary-fixed": "#bdece2", "on-secondary-container": "#416c65", "status-danger": "#DC2626", "error-container": "#ffdad6", "surface-dim": "#d1dbe9", "surface-container": "#e4effd", "on-tertiary-fixed": "#370e00", "surface-container-high": "#dfe9f7", "surface-container-lowest": "#ffffff", "status-warning": "#D97706", "on-tertiary-fixed-variant": "#72361b", "inverse-primary": "#80d5cb", "outline": "#6e7977", "text-secondary": "#667085", "background": "#F7F8FA", "on-secondary": "#ffffff", "on-background": "#121c26", "primary-fixed": "#9cf2e8", "status-info": "#2563EB", "tertiary": "#7f4025", "surface": "#FFFFFF", "secondary-container": "#bdece2", "secondary-fixed-dim": "#a2d0c6", "on-tertiary-container": "#ffe5db", "on-secondary-fixed": "#00201c", "status-success": "#15803D", "tertiary-fixed": "#ffdbce", "outline-variant": "#bdc9c6", "primary": "#005c55", "surface-container-highest": "#d9e3f1", "surface-variant": "#d9e3f1", "on-tertiary": "#ffffff", "tertiary-fixed-dim": "#ffb598", "inverse-on-surface": "#e8f2ff", "on-error-container": "#93000a", "on-primary-fixed": "#00201d" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin-desktop": "2rem", "space-md": "0.75rem", "space-sm": "0.5rem", "space-lg": "1rem", "gutter": "1rem", "margin": "1rem", "space-xs": "0.25rem", "space-xl": "1.5rem" }, "fontFamily": { "label-md": ["Inter"], "currency-body": ["Inter"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "body-md": ["Inter"], "label-sm": ["Inter"], "body-sm": ["Inter"], "label-lg": ["Inter"], "headline-sm": ["Inter"], "currency-display": ["Inter"], "body-lg": ["Inter"] }, "fontSize": { "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "500" }], "currency-body": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "600" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "currency-display": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-space-md flex items-center justify-between"><div class="flex items-center gap-space-sm min-w-0"><button aria-label="Kembali" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container-low active:bg-surface-container transition-colors shrink-0" onclick="history.back()"><span class="material-symbols-outlined text-[22px]">arrow_back</span></button><h1 class="font-headline-sm text-headline-sm text-on-surface truncate">Pengaturan Usaha</h1></div><div class="flex items-center gap-space-xs shrink-0"><a aria-label="Bantuan Operasional" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container-low transition-colors" href="#"><span class="material-symbols-outlined text-[22px]">help_outline</span></a><div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-semibold">BR</div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-background"><div class="flex flex-col w-full pb-12">
+<!-- Toast Feedback Notifikasi Interaktif -->
+<div class="fixed top-20 left-4 right-4 z-50 transform -translate-y-28 opacity-0 transition-all duration-300 pointer-events-none flex justify-center" id="toastNotification">
+<div class="bg-inverse-surface text-inverse-on-surface px-space-lg py-space-sm rounded-xl shadow-xl flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-status-success" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md" id="toastMessage">Pengaturan berhasil diperbarui</span>
+</div>
+</div>
+<div class="px-margin flex flex-col gap-space-xl pt-space-md">
+<!-- 1. Profil Usaha Ringkas -->
+<section class="bg-surface rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="relative shrink-0">
+<img class="w-16 h-16 rounded-full object-cover shadow-sm" data-alt="A warm, vibrant photo of an Indonesian woman shop owner smiling proudly wearing an apron inside an artisanal homemade chili sauce kitchen studio, high resolution editorial culinary portrait, teal and warm amber brand tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCel6vdi_fL1Vgz7BaLS7IU-GLZxvYnc8V44jJAUSB9DGNcV_K7K9k5IAe-tZw5uUULRDnrjpoE9-S2LJgxNVcxC1PrP6JjyrV6cRd1sG4j9i8pakOVojxj-E7LNiUTp9DfxQ79H_9xgirnJQC5Xijx1IQ6KhobAhC23QzlRSRTXEHMlVveVNlQ802XDKqrrHhVk4w_opSsCTQmmaqRRzkTuj2ii6X8WFnZh1w8xEs"/>
+<div class="absolute -bottom-1 -right-1 bg-surface rounded-full p-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-1.5 flex-wrap">
+<h2 class="font-headline-sm text-headline-sm text-on-surface truncate">Dapur &amp; Sambal Bu Rena</h2>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">Kuliner &amp; F&amp;B Homemade</p>
+<div class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+            Toko Resmi Aktif
+          </div>
+</div>
+</div>
+<button class="w-full h-11 bg-surface-container-low hover:bg-secondary-container text-primary font-label-md text-label-md rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.99]" onclick="showToast('Membuka editor profil &amp; katalog usaha...')">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+        Ubah Profil &amp; Katalog Menu
+      </button>
+<!-- Status WhatsApp Bisnis Card -->
+<div class="bg-surface-bright rounded-xl p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest flex items-center justify-center text-status-success shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">chat</span>
+</div>
+<div class="min-w-0">
+<p class="font-label-md text-label-md text-on-surface truncate">WhatsApp Bisnis API</p>
+<p class="font-body-sm text-body-sm text-text-secondary truncate">+62 812-4912-8821</p>
+</div>
+</div>
+<!-- Toggle switch -->
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-status-success">
+<span class="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
+            Server Cloud Terhubung Stabil
+          </span>
+<button class="text-primary hover:text-on-primary-fixed-variant font-label-sm text-label-sm underline flex items-center gap-1" onclick="showToast('Uji ping sukses: Latensi 42ms normal')">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+            Uji Koneksi
+          </button>
+</div>
+</div>
+</section>
+<!-- 2. Pengaturan Operasional & Otomasi WhatsApp -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">auto_fix_high</span>
+          Otomasi WhatsApp &amp; Format Pesan
+        </h3>
+<span class="font-label-sm text-label-sm text-text-secondary">Smart Parser</span>
+</div>
+<div class="bg-surface rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Smart Paste Toggle -->
+<div class="p-space-lg flex items-start justify-between gap-space-md">
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<p class="font-label-md text-label-md text-on-surface font-semibold">Smart Paste Ekstraksi AI</p>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Aktif</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-1">
+              Otomatis mengenali nama pembeli, varian sambal, jumlah botol, dan alamat dari chat WA tanpa mengetik ulang.
+            </p>
+</div>
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0 mt-0.5" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+<div class="px-space-lg pb-space-md">
+<div class="bg-surface-bright rounded-lg p-space-sm flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-secondary">Tingkat Ketepatan Parser</span>
+<span class="font-label-md text-label-md text-primary font-semibold">Tinggi (Saran Otomatis)</span>
+</div>
+</div>
+<!-- Format Pesan & Template -->
+<div class="p-space-lg bg-surface-container-lowest flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Template Konfirmasi &amp; Tagihan</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Format sapaan ramah khas Dapur Bu Rena</p>
+</div>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-low text-primary font-label-sm text-label-sm hover:bg-secondary-container transition-colors" onclick="showToast('Membuka editor template pesan')">
+              Pustaka Template
+            </button>
+</div>
+<div class="bg-surface-bright p-3 rounded-xl flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-text-secondary shrink-0 mt-0.5">notes</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic line-clamp-2">
+              "Halo Kak {nama_pembeli}! Terima kasih sudah order sambal khas Bu Rena. Total pesanan Kakak adalah {total_belanja}..."
+            </p>
+</div>
+</div>
+<!-- Jam Buka & Auto-reply -->
+<div class="p-space-lg flex items-center justify-between gap-space-md">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Jam Operasional Balas Cepat</p>
+<p class="font-body-sm text-body-sm text-text-secondary">08:00 - 18:00 WIB (Kirim pesan tunda di luar jam)</p>
+</div>
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+</div>
+</section>
+<!-- 3. Rekening Kas & Pembayaran -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">account_balance_wallet</span>
+          Rekening Pembayaran &amp; DP
+        </h3>
+<button class="text-primary hover:text-on-primary-fixed-variant font-label-sm text-label-sm font-semibold flex items-center gap-1" onclick="showToast('Formulir tambah rekening baru terbuka')">
+<span class="material-symbols-outlined text-[16px]">add_circle</span>
+          Tambah
+        </button>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Rekening 1: BCA (Utama) -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center font-bold text-primary text-[13px] shrink-0">
+                BCA
+              </div>
+<div>
+<div class="flex items-center gap-2">
+<p class="font-label-md text-label-md text-on-surface font-semibold">Bank Central Asia</p>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Rekening Utama</span>
+</div>
+<p class="font-currency-body text-currency-body text-on-surface tracking-wider mt-0.5">8820 1928 11</p>
+<p class="font-body-sm text-body-sm text-text-secondary">a.n. Rena Marlina (Bu Rena)</p>
+</div>
+</div>
+<button class="p-2 text-text-secondary hover:text-primary rounded-lg transition-colors" onclick="showToast('Nomor rekening BCA disalin')">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+<div class="pt-2 flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-secondary">Tampil pada struk PDF &amp; pesan WA</span>
+<span class="font-label-sm text-label-sm text-status-success font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check</span> Aktif
+            </span>
+</div>
+</div>
+<!-- Rekening 2: QRIS Dinamis -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-bright flex items-center justify-center text-on-surface shrink-0">
+<span class="material-symbols-outlined text-[24px]">qr_code_2</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">QRIS UMKM Dinamis</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Otomatis buat nominal QR per nota pesanan</p>
+</div>
+</div>
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+<!-- Opsi Pembayaran Bertahap DP -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex items-start justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-2">
+<p class="font-label-md text-label-md text-on-surface font-semibold">Aktifkan Sistem DP (Uang Muka 50%)</p>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-1">
+              Sangat praktis untuk pesanan katering &amp; hampers toples besar. Sisa pelunasan otomatis dicatat sebagai tagihan.
+            </p>
+</div>
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0 mt-0.5" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+</div>
+</section>
+<!-- 4. Pengiriman, Ekspedisi & Ongkir -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">local_shipping</span>
+          Pengiriman &amp; Ekspedisi
+        </h3>
+<span class="font-label-sm text-label-sm text-text-secondary">4 Kurir Aktif</span>
+</div>
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<!-- Alamat Dapur Asal -->
+<div class="bg-surface-bright rounded-xl p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider font-semibold">Dapur &amp; Gudang Asal</span>
+<button class="text-primary font-label-sm text-label-sm font-semibold underline" onclick="showToast('Ubah alamat titik penjemputan')">Ubah</button>
+</div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Tebet Barat Dalam, Jakarta Selatan</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Kode Pos 12810 (Patokan: Seberang Taman Honda Tebet)</p>
+</div>
+<!-- Ekspedisi Chips / Toggles -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface">Pilihan Layanan Pengiriman Aktif</label>
+<div class="grid grid-cols-2 gap-2">
+<!-- J&T -->
+<button class="courier-card bg-surface-container-low text-primary p-3 rounded-xl flex items-center justify-between text-left transition-all" onclick="toggleCourier(this)" type="button">
+<div>
+<p class="font-label-md text-label-md font-semibold text-on-surface">J&amp;T Express</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Reguler &amp; COD</p>
+</div>
+<span class="material-symbols-outlined text-[20px] text-primary status-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<!-- SiCepat -->
+<button class="courier-card bg-surface-container-low text-primary p-3 rounded-xl flex items-center justify-between text-left transition-all" onclick="toggleCourier(this)" type="button">
+<div>
+<p class="font-label-md text-label-md font-semibold text-on-surface">SiCepat</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Bisa Drop Point</p>
+</div>
+<span class="material-symbols-outlined text-[20px] text-primary status-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<!-- Paxel -->
+<button class="courier-card bg-surface-container-low text-primary p-3 rounded-xl flex items-center justify-between text-left transition-all" onclick="toggleCourier(this)" type="button">
+<div>
+<p class="font-label-md text-label-md font-semibold text-on-surface">Paxel Frozen</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Khusus Suhu Dingin</p>
+</div>
+<span class="material-symbols-outlined text-[20px] text-primary status-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<!-- Instant / Sameday -->
+<button class="courier-card bg-surface-container-low text-primary p-3 rounded-xl flex items-center justify-between text-left transition-all" onclick="toggleCourier(this)" type="button">
+<div>
+<p class="font-label-md text-label-md font-semibold text-on-surface">Grab &amp; GoSend</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Instan / Same Day</p>
+</div>
+<span class="material-symbols-outlined text-[20px] text-primary status-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+</div>
+</div>
+<!-- Auto Cek Resi & Ongkir -->
+<div class="flex items-center justify-between pt-1">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Kalkulator Ongkir Otomatis</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Cek ongkir instan saat input kecamatan pembeli</p>
+</div>
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+</div>
+</section>
+<!-- 5. Otomasi Stok & Buku Kas Keuangan -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">inventory_2</span>
+          Otomasi Stok &amp; Keuangan
+        </h3>
+</div>
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<!-- Potong stok otomatis -->
+<div class="flex items-start justify-between gap-space-md">
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Potong Stok Otomatis</p>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+              Stok toples sambal berkurang seketika begitu pesanan disetujui / disimpan.
+            </p>
+</div>
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+<!-- Batas Peringatan Restock -->
+<div class="bg-surface-bright rounded-xl p-space-md flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Peringatan Stok Menipis</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Notifikasi muncul saat tersisa</p>
+</div>
+<div class="flex items-center gap-2">
+<input class="w-14 h-9 bg-surface text-center font-currency-body text-currency-body text-on-surface rounded-lg shadow-sm focus:outline-none focus:bg-surface-container-lowest" max="100" min="1" type="number" value="5"/>
+<span class="font-label-md text-label-md text-on-surface">pcs</span>
+</div>
+</div>
+<!-- Sync Buku Kas Masuk -->
+<div class="flex items-start justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-2">
+<p class="font-label-md text-label-md text-on-surface font-semibold">Catat Kas Masuk Otomatis</p>
+<span class="px-2 py-0.5 rounded-full bg-status-success/15 text-status-success font-label-sm text-label-sm">Rekomendasi</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+              Begitu pesanan ditandai "Lunas", uang langsung tercatat di Buku Kas tanpa perlu pembukuan manual ganda.
+            </p>
+</div>
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative transition-colors duration-200 focus:outline-none p-0.5 shrink-0" onclick="toggleSwitch(this)" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform translate-x-5 transition-transform duration-200"></div>
+</button>
+</div>
+</div>
+</section>
+<!-- 6. Hak Akses Staf / Tim Toko -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">group</span>
+          Pengelola Toko (Admin &amp; Staf)
+        </h3>
+<span class="font-label-sm text-label-sm text-text-secondary">2 Akun</span>
+</div>
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<!-- List Staf -->
+<div class="flex flex-col gap-space-sm">
+<!-- Bu Rena -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-bold">
+                BR
+              </div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Rena Marlina (Anda)</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Pemilik Toko • Akses Penuh &amp; Rekening</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-text-secondary">lock</span>
+</div>
+<!-- Siti Staf -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-label-md text-label-md font-bold">
+                ST
+              </div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Siti Aminah</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Staf Operasional • WhatsApp &amp; Packing</p>
+</div>
+</div>
+<button class="p-1 text-primary hover:text-on-primary-fixed-variant" onclick="showToast('Ubah hak akses Siti Aminah')">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+</div>
+</div>
+<button class="w-full h-11 bg-surface-container-low text-primary font-label-md text-label-md rounded-xl flex items-center justify-center gap-2 hover:bg-secondary-container transition-colors" onclick="showToast('Fitur Tambah Staf Baru')">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+          Tambah Anggota Tim Dapur
+        </button>
+</div>
+</section>
+<!-- 7. Cadangan Data, Info Versi & Logout -->
+<section class="flex flex-col gap-space-sm">
+<h3 class="font-label-lg text-label-lg text-on-surface px-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">security</span>
+        Keamanan &amp; Cadangan Data
+      </h3>
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<!-- Cadangan Cloud -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">cloud_sync</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Cadangan Otomatis</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Sinkron ke Google Drive: Hari ini 06:00 WIB</p>
+</div>
+</div>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold hover:bg-secondary-container transition-colors" onclick="showToast('Sedang mencadangkan data toko...')">
+            Cadangkan
+          </button>
+</div>
+<!-- Pusat Bantuan CS -->
+<a class="flex items-center justify-between p-space-sm rounded-xl bg-surface-bright hover:bg-surface-container-low transition-colors" href="#" onclick="showToast('Menghubungkan ke Tim Bantuan Ringkas UMKM...'); return false;">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-status-success" style="font-variation-settings: 'FILL' 1;">support_agent</span>
+<span class="font-label-md text-label-md text-on-surface">Bantuan Langsung CS WhatsApp Ringkas</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-text-secondary">chevron_right</span>
+</a>
+<!-- Versi Aplikasi -->
+<div class="flex items-center justify-between pt-1">
+<span class="font-body-sm text-body-sm text-text-secondary">Versi Aplikasi</span>
+<span class="font-label-sm text-label-sm text-text-secondary">Ringkas UMKM v1.4.2 (Stabil)</span>
+</div>
+</div>
+<!-- Tombol Keluar Akun -->
+<button class="w-full h-12 mt-2 bg-surface hover:bg-error-container/30 text-status-danger font-label-lg text-label-lg rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors active:scale-[0.99]" onclick="showToast('Konfirmasi keluar akun aman ditampilkan')">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+        Keluar dari Akun Dapur Bu Rena
+      </button>
+<p class="text-center font-body-sm text-body-sm text-text-secondary mt-1">
+        Ringkas UMKM • Dirancang khusus untuk wirausaha kuliner Indonesia
+      </p>
+</section>
+</div>
+</div>
+<script>
+  function toggleSwitch(button) {
+    const isChecked = button.getAttribute('aria-checked') === 'true';
+    const newState = !isChecked;
+    button.setAttribute('aria-checked', newState);
+
+    const circle = button.querySelector('div');
+    if (newState) {
+      button.classList.remove('bg-outline-variant');
+      button.classList.add('bg-primary');
+      circle.classList.remove('translate-x-0.5');
+      circle.classList.add('translate-x-5');
+      showToast('Pengaturan diaktifkan');
+    } else {
+      button.classList.remove('bg-primary');
+      button.classList.add('bg-outline-variant');
+      circle.classList.remove('translate-x-5');
+      circle.classList.add('translate-x-0.5');
+      showToast('Pengaturan dinonaktifkan');
+    }
+  }
+
+  function toggleCourier(card) {
+    const icon = card.querySelector('.status-icon');
+    const isSelected = icon.innerText.trim() === 'check_circle';
+
+    if (isSelected) {
+      icon.innerText = 'radio_button_unchecked';
+      icon.classList.remove('text-primary');
+      icon.classList.add('text-outline');
+      card.classList.remove('bg-surface-container-low');
+      card.classList.add('bg-surface-bright');
+      showToast('Layanan ekspedisi dinonaktifkan');
+    } else {
+      icon.innerText = 'check_circle';
+      icon.classList.remove('text-outline');
+      icon.classList.add('text-primary');
+      card.classList.remove('bg-surface-bright');
+      card.classList.add('bg-surface-container-low');
+      showToast('Layanan ekspedisi diaktifkan');
+    }
+  }
+
+  let toastTimeout;
+  function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    if (!toast || !toastMsg) return;
+
+    toastMsg.innerText = message;
+    toast.classList.remove('-translate-y-28', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('-translate-y-28', 'opacity-0');
+    }, 2400);
+  }
+</script></main></body></html>
