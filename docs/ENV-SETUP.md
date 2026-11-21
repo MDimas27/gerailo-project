@@ -69,6 +69,9 @@ agent boleh tahu NAMA kunci, bukan isinya.
 - `supabase config push` mengirim seluruh config auth — selalu jalankan
   `config diff` dulu. Config lokal tetap `localhost`; jangan commit nilai staging
   ke `packages/supabase/config.toml`.
+- Migrasi CI memakai **session pooler** `aws-0-ap-southeast-2.pooler.supabase.com:5432`
+  karena host `db.<ref>.supabase.co` hanya AAAA (IPv6) dan runner GitHub IPv4-only.
+  Workflow menulis ulang host + username dari `SUPABASE_DB_URL`; tidak perlu secret baru.
 
 ## 5. Deploy pertama (definisi selesai fase 0)
 

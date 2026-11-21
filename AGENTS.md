@@ -103,4 +103,4 @@ staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui.
 - Sprint aktif: W1 (19–25 Nov) — W1a selesai 21 Nov (Task 1–5); berikutnya W1b M2 produk (Task 6–10)
 - Modul selesai: M1 parsial (auth OTP, usaha, 19 COA, settings); M2 belum
 - Deploy staging terakhir: 21 Nov 2026 — https://gerailo-staging.mdimas-jobs.workers.dev (health + SPA ok); migrasi 0001 + RLS/RPC terverifikasi; smoke test auth cloud PASS (email OTP → onboarding → beranda).
-- Halangan: KYC gateway; secret CI `SUPABASE_ACCESS_TOKEN`/`SUPABASE_DB_URL` perlu diverifikasi di run `db-migrate-staging` berikutnya; template email staging masih default free tier (tautan masuk, tanpa kode 6 digit); consent PDP belum dipersist ke skema.
+- Halangan: KYC gateway; template email staging masih default free tier (tautan masuk, tanpa kode 6 digit); consent PDP belum dipersist ke skema.

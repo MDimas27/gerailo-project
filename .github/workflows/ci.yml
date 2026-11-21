@@ -90,7 +90,12 @@ jobs:
 
       - name: Push migrations to staging
         if: env.SUPABASE_DB_URL != ''
-        run: supabase db push --db-url "$SUPABASE_DB_URL" --workdir packages --yes
+        # db.<ref>.supabase.co hanya punya AAAA (IPv6); runner GitHub IPv4-only.
+        # Alihkan ke session pooler Sydney (IPv4). Jika secret sudah pooler, sed no-op.
+        run: |
+          set -euo pipefail
+          DB_URL="$(printf '%s' "$SUPABASE_DB_URL" | sed -e 's#@db\.wdpkhhvxroxfiqkikinb\.supabase\.co:#@aws-0-ap-southeast-2.pooler.supabase.com:#' -e 's#//postgres:#//postgres.wdpkhhvxroxfiqkikinb:#')"
+          supabase db push --db-url "$DB_URL" --workdir packages --yes
 
   deploy-staging:
     needs: quality
