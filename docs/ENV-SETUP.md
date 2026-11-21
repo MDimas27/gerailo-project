@@ -58,6 +58,18 @@ agent boleh tahu NAMA kunci, bukan isinya.
       orders & jurnal migrasi W2–W3 mengikuti kebutuhan modul); setiap migrasi →
       `supabase gen types` → commit `packages/supabase/types/db.ts`.
 
+### 4.1 Auth cloud (staging)
+
+- Site URL + redirect URLs staging sudah di-set 21 Nov 2026 via `supabase config push`:
+  `https://gerailo-staging.mdimas-jobs.workers.dev` dan `.../**`; `otp_length=6`,
+  `enable_confirmations=false`.
+- Free tier Supabase **tidak mengizinkan ubah template email**. Email default berisi
+  tautan masuk (bukan kode 6 digit); UI mendukung klik tautan. Kode 6 digit baru
+  muncul setelah SMTP kustom/upgrade aktif dan `templates/magic_link.html` di-push.
+- `supabase config push` mengirim seluruh config auth — selalu jalankan
+  `config diff` dulu. Config lokal tetap `localhost`; jangan commit nilai staging
+  ke `packages/supabase/config.toml`.
+
 ## 5. Deploy pertama (definisi selesai fase 0)
 
 - [ ] Worker Hono (`/api/health`) + SPA shell online di domain staging Cloudflare

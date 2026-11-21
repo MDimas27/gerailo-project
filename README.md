@@ -68,18 +68,18 @@ Satu sesi = satu modul (atau satu potongan modul). Jangan pernah dua modul dalam
 ## 4. Adaptasi ke jcode
 
 ECC dirancang untuk Claude Code (skills, slash commands, hooks). jcode memiliki konsep
-serupa; petakan dengan tabel ini. **Isi kolom "skill di jcode" setelah kamu melihat
-daftar skill yang tersedia di instalasi jcode kamu** — nama di kolom itu hanya tebakan awal.
+serupa; petakan dengan tabel ini. Kolom "skill di jcode" diisi 21 Nov 2026 dari daftar
+skill instalasi; audit ulang dengan `/skill-stocktake` bila kit berubah.
 
 | Kebutuhan | Komponen di kit | Jika jcode punya skill serupa |
 |---|---|---|
-| Memuat konteks sesi | `commands/prep.md` | skill "context"/"recall"/"memory" |
-| Membuat rencana | `commands/plan.md` + `plans/TEMPLATE-PLAN.md` | skill "planning"/"task-breakdown" |
-| Implementasi TDD | `commands/execute.md` + `skills/ecc-core/SKILL.md` | skill "TDD"/"test-runner"/"scaffold" |
-| Migrasi DB + RPC | `docs/DATA-MODEL.md` + `docs/API-CONTRACTS.md` | skill "db-migrate"/"supabase" |
-| Review kode | `commands/review.md` + `rules/*.md` | skill "code-review" |
-| Simpan pelajaran | `commands/remember.md` + `LESSONS-LEARNED.md` | skill "memory"/"journal" |
-| Enforcement otomatis (hooks ECC) | `rules/*.md` (versi prompt, portabel) | kalau jcode mendukung hooks: blokir commit tanpa test, deteksi secret, grep bundle — opsional, tidak menghalangi |
+| Memuat konteks sesi | `commands/prep.md` | `/resume-session`, `/save-session`, `/ck` (memori proyek) |
+| Membuat rencana | `commands/plan.md` + `plans/TEMPLATE-PLAN.md` | `/blueprint`, `/plan-orchestrate`, `/orch-pipeline` |
+| Implementasi TDD | `commands/execute.md` + `skills/ecc-core/SKILL.md` | `/tdd-workflow`, `/verification-loop`, `/react-testing` |
+| Migrasi DB + RPC | `docs/DATA-MODEL.md` + `docs/API-CONTRACTS.md` | `/database-migrations`, `/postgres-patterns` (Supabase spesifik tetap via CLI + docs) |
+| Review kode | `commands/review.md` + `rules/*.md` | `/code-reviewer`, `/security-review`, `/production-audit` |
+| Simpan pelajaran | `commands/remember.md` + `LESSONS-LEARNED.md` | `/save-session`, `/ck`, `/growth-log` |
+| Enforcement otomatis (hooks ECC) | `rules/*.md` (versi prompt, portabel) | `/delivery-gate`, `/gateguard`, `/safety-guard` — prompt-level; CI tetap penjaga utama |
 
 Jika jcode tidak punya konsep skill/command: cukup tempel isi file `commands/*.md`
 sebagai prompt, atau sebut nama filenya dalam instruksi ("ikuti alur di

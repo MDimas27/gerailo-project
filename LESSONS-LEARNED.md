@@ -76,6 +76,16 @@ multi-item via Smart Paste (bukan order publik), rating tanpa sumber data DITOLA
 ikon tetap Lucide. · Tindakan: docs/STITCH-DESIGN.md + UI-UX §3/§10 + execute.md +
 AGENTS/README diupdate; aset 10 layar + DESIGN.md di design/stitch/.
 
+#12 · 21 Nov 2026 · tooling · Dua jebakan saat menutup W1a: (a) `git` lokal
+menggantung pada semua perintah karena menunggu stdin shell agent — `git ... < nul`
+langsung normal; (b) `supabase config push` mengirim seluruh config auth, dan free
+tier menolak perubahan template email (`entitlement_required`) sehingga push harus
+tanpa blok `auth.email.template.*`. Email staging jadi tautan masuk default (bukan
+kode 6 digit), jadi UI auth wajib mendukung klik tautan; kode 6 digit baru aktif
+setelah SMTP kustom/upgrade. · Tindakan: ENV-SETUP §4.1 ditambahkan, copy auth
+diperbarui, smoke test cloud PASS (OTP → onboarding → beranda), status AGENTS
+diperbarui.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
