@@ -65,30 +65,148 @@ isOneToOne: true
                   ]
                 },"businesses": {
                   Row: {
-                    "created_at": string,"id": string,"jenis": string,"metode_bayar": string,"nama": string,"owner_id": string,"updated_at": string
+                    "created_at": string,"id": string,"jenis": string,"metode_bayar": string,"nama": string,"onboarding_selesai": boolean,"owner_id": string,"plan": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"jenis": string,"metode_bayar"?: string,"nama": string,"owner_id": string,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"jenis": string,"metode_bayar"?: string,"nama": string,"onboarding_selesai"?: boolean,"owner_id": string,"plan"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"jenis"?: string,"metode_bayar"?: string,"nama"?: string,"owner_id"?: string,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"jenis"?: string,"metode_bayar"?: string,"nama"?: string,"onboarding_selesai"?: boolean,"owner_id"?: string,"plan"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     
                   ]
+                },"product_aliases": {
+                  Row: {
+                    "alias": string,"business_id": string,"created_at": string,"id": string,"product_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "alias": string,"business_id": string,"created_at"?: string,"id"?: string,"product_id": string
+                  }
+                  Update: {
+                    "alias"?: string,"business_id"?: string,"created_at"?: string,"id"?: string,"product_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "product_aliases_product_fkey"
+      columns: ["product_id","business_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "product_aliases_product_fkey"
+      columns: ["product_id","business_id"]
+isOneToOne: false
+      referencedRelation: "v_stock_balance"
+      referencedColumns: ["product_id","business_id"]
+    }
+                  ]
+                },"product_variants": {
+                  Row: {
+                    "aktif": boolean,"business_id": string,"created_at": string,"id": string,"nama": string,"product_id": string,"selisih_harga": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aktif"?: boolean,"business_id": string,"created_at"?: string,"id"?: string,"nama": string,"product_id": string,"selisih_harga"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "aktif"?: boolean,"business_id"?: string,"created_at"?: string,"id"?: string,"nama"?: string,"product_id"?: string,"selisih_harga"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "product_variants_product_fkey"
+      columns: ["product_id","business_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "product_variants_product_fkey"
+      columns: ["product_id","business_id"]
+isOneToOne: false
+      referencedRelation: "v_stock_balance"
+      referencedColumns: ["product_id","business_id"]
+    }
+                  ]
+                },"products": {
+                  Row: {
+                    "aktif": boolean,"business_id": string,"created_at": string,"deskripsi_singkat": string | null,"foto_paths": (string)[],"harga_jual": number,"harga_promo": number | null,"id": string,"kategori": string | null,"nama": string,"stok_min": number,"tampil_katalog": boolean,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aktif"?: boolean,"business_id": string,"created_at"?: string,"deskripsi_singkat"?: string | null,"foto_paths"?: (string)[],"harga_jual": number,"harga_promo"?: number | null,"id"?: string,"kategori"?: string | null,"nama": string,"stok_min"?: number,"tampil_katalog"?: boolean,"updated_at"?: string
+                  }
+                  Update: {
+                    "aktif"?: boolean,"business_id"?: string,"created_at"?: string,"deskripsi_singkat"?: string | null,"foto_paths"?: (string)[],"harga_jual"?: number,"harga_promo"?: number | null,"id"?: string,"kategori"?: string | null,"nama"?: string,"stok_min"?: number,"tampil_katalog"?: boolean,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "products_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stock_movements": {
+                  Row: {
+                    "alasan": string,"business_id": string,"created_at": string,"harga_beli": number | null,"id": string,"jenis": Database["public"]['Enums']["stock_movement_type"],"order_id": string | null,"product_id": string,"qty": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "alasan": string,"business_id": string,"created_at"?: string,"harga_beli"?: number | null,"id"?: string,"jenis": Database["public"]['Enums']["stock_movement_type"],"order_id"?: string | null,"product_id": string,"qty": number
+                  }
+                  Update: {
+                    "alasan"?: string,"business_id"?: string,"created_at"?: string,"harga_beli"?: number | null,"id"?: string,"jenis"?: Database["public"]['Enums']["stock_movement_type"],"order_id"?: string | null,"product_id"?: string,"qty"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stock_movements_product_fkey"
+      columns: ["product_id","business_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "stock_movements_product_fkey"
+      columns: ["product_id","business_id"]
+isOneToOne: false
+      referencedRelation: "v_stock_balance"
+      referencedColumns: ["product_id","business_id"]
+    }
+                  ]
                 }
           }
           Views: {
-            [_ in never]: never
+            "v_stock_balance": {
+                  Row: {
+                    "business_id": string | null,"product_id": string | null,"saldo": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "products_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
           }
           Functions: {
             "create_business":
 { Args: { "p_jenis": string,"p_metode_bayar"?: string,"p_nama": string }; Returns: string
+                           },
+"create_product":
+{ Args: { "p_aliases"?: (string)[],"p_business_id": string,"p_harga_beli"?: number,"p_harga_jual": number,"p_nama": string,"p_stok_awal"?: number,"p_stok_min"?: number }; Returns: string
+                           },
+"record_stock_move":
+{ Args: { "p_order_id"?: string,"p_product_id": string,"p_qty": number,"p_reason"?: string,"p_type": string,"p_unit_price"?: number }; Returns: string
                            }
           }
           Enums: {
-            "account_type": "ASET"|"LIABILITAS"|"EKUITAS"|"PENDAPATAN"|"HPP"|"BEBAN"
+            "account_type": "ASET"|"LIABILITAS"|"EKUITAS"|"PENDAPATAN"|"HPP"|"BEBAN","stock_movement_type": "MASUK"|"KELUAR"|"PENYESUAIAN"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -208,7 +326,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "account_type": ["ASET", "LIABILITAS", "EKUITAS", "PENDAPATAN", "HPP", "BEBAN"]
+            "account_type": ["ASET", "LIABILITAS", "EKUITAS", "PENDAPATAN", "HPP", "BEBAN"],"stock_movement_type": ["MASUK", "KELUAR", "PENYESUAIAN"]
           }
         }
 } as const

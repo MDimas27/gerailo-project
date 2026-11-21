@@ -9,18 +9,19 @@
 
 | Tabel | Fungsi | Kolom/relasi kunci |
 |---|---|---|
-| businesses | Profil usaha | id, owner_id (auth.users), nama, jenis, metode_bayar |
+| businesses | Profil usaha | id, owner_id (auth.users), nama, jenis, metode_bayar, plan, onboarding_selesai |
 | store_profiles | Identitas toko: halaman pembeli (M8) & katalog publik (M9) | business_id unique, nama_toko, logo_path, kontak, alamat_singkat, slug (unique, katalog), katalog_aktif |
 | bank_accounts | Rekening tampil di instruksi pembayaran (M8) | id, business_id, bank, nomor_rekening, atas_nama, aktif |
-| products | Master produk (+ data katalog publik M9) | id, business_id, nama, alias, harga_jual BIGINT, harga_promo BIGINT?, foto_paths text[] (max 3), deskripsi_singkat, kategori, tampil_katalog (default false), stok_min, aktif |
-| product_variants | Varian teks sederhana | id, product_id, nama, selisih_harga BIGINT |
+| products | Master produk (+ data katalog publik M9) | id, business_id, nama, harga_jual BIGINT, harga_promo BIGINT?, foto_paths text[] (max 3), deskripsi_singkat, kategori, tampil_katalog (default false), stok_min, aktif |
+| product_aliases | Alias nama untuk parser M3 (unik case-insensitive per usaha) | id, business_id, product_id, alias |
+| product_variants | Varian teks sederhana | id, business_id, product_id, nama, selisih_harga BIGINT, aktif |
 | customers | Pelanggan | id, business_id, nama, telepon (unique per usaha, bentuk 628…), alamat, catatan |
 | orders | Pesanan | id, business_id, customer_id, status enum, ongkir BIGINT, metode_bayar, nomor (ORD-YYYYMMDD-###, unik), share_token (hex 32, unik), kurir_nama?, nomor_resi?, due_date? (batas pelunasan DP) |
 | order_items | Item per order | id, order_id, product_id/variant_id, qty, harga_satuan BIGINT |
 | payments | Riwayat pembayaran | id, order_id, jenis (DP/PELUNASAN/COD), jumlah BIGINT, kanal |
 | payment_reports | Laporan bayar dari buyer (M8 P1) | id, order_id, jumlah BIGINT, tanggal, catatan, url_bukti?, status (DILAPORKAN/KONFIRMASI/DITOLAK); insert HANYA via RPC by token |
 | order_leads | Pesanan masuk dari katalog publik (M9 Fase 2) | id, business_id, slug, items jsonb, nama, telepon, alamat?, catatan?, status (BARU/DIKONVERSI/DITOLAK); insert HANYA via RPC by slug; TIDAK pernah otomatis jadi orders |
-| stock_movements | Pergerakan stok | id, product_id, jenis (MASUK/KELUAR/PENYESUAIAN), qty, harga_beli BIGINT?, alasan, order_id? |
+| stock_movements | Pergerakan stok | id, business_id, product_id, jenis (MASUK/KELUAR/PENYESUAIAN), qty, harga_beli BIGINT?, alasan, order_id? |
 | accounts | COA per usaha | id, business_id, kode, nama, tipe (seed 19 akun) |
 | journal_entries | Header jurnal | id, business_id, kejadian (T0..T12), tanggal, order_id?, expense_id?, reversi_dari? |
 | journal_lines | Baris debit-kredit | id, entry_id, account_id, debit BIGINT, kredit BIGINT |
@@ -38,7 +39,8 @@
 - `stock_movements` KELUAR selalu merujuk order status DIKIRIM; PENYESUAIAN wajib alasan.
 - Index wajib: journal_lines (business_id, account_id, tanggal); orders (business_id,
   status) + UNIQUE (business_id, nomor) + UNIQUE (share_token); products (business_id +
-  trigram nama/alias untuk cari instan); store_profiles.slug UNIQUE.
+  trigram nama) + product_aliases (UNIQUE business_id + lower(alias), trigram
+  lower(alias)) untuk cari instan; store_profiles.slug UNIQUE.
 - Semua query modul usaha difilter `business_id` + RLS policy deny-by-default.
 
 ## RPC — sumber kebenaran operasi atomik (kontrak: docs/API-CONTRACTS.md §B)
@@ -46,7 +48,8 @@
 | RPC | Jaminan |
 |---|---|
 | `create_business(...)` | Transaksi: usaha + seed 19 akun COA + app_settings; SECURITY DEFINER + guard `auth.uid()` |
-| `record_stock_move(...)` | MASUK+harga → rata-rata bergerak (T8); PENYESUAIAN wajib alasan; KELUAR ditolak dari klien |
+| `create_product(...)` | Transaksi: produk + alias + stok awal (MASUK) sekaligus; kuota paket diperiksa trigger; SECURITY DEFINER + guard pemilik usaha |
+| `record_stock_move(...)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien (menunggu RPC order M4) |
 | `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | Status DIKIRIM + T2+T3 + movement KELUAR + HPP rata-rata saat itu — satu transaksi; kurir/resi opsional; guard dari DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM |
 | `record_payment(...)` | T1/T4; tolak kelebihan bayar; dua DP parsial → UMP akumulasi |
 | `cancel_order(p_order_id)` | Reversi T2+T3/pembayaran + stok masuk kembali; status BATAL |

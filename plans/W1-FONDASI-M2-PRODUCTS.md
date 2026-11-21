@@ -24,10 +24,10 @@ onboarding minimal (M1 parsial) jalan di staging.
 | 3 | Migrasi 0001: businesses, accounts, app_settings + RLS deny-by-default + policy + RPC `create_business` (usaha+19 COA+settings, SECURITY DEFINER + guard auth.uid()) + `supabase gen types` | migrasi | packages/supabase/migrations/0001 | [x] |
 | 4 | Test RPC `create_business` (19 akun, rollback saat gagal) + test negatif RLS (Supabase lokal `supabase start`) | test | packages/supabase/tests/ | [x] |
 | 5 | Auth supabase-js (register/login OTP) + wizard profil usaha memanggil RPC `create_business` + consent checkbox | kode | apps/web/src/routes/auth | [x] |
-| 6 | Migrasi 0002: products, product_variants (unique alias + trigram), stock_movements + fungsi DB kuota paket (FREE 100/STARTER 500) + RPC `record_stock_move` + gen types | migrasi | packages/supabase/migrations/0002 | [ ] |
+| 6 | Migrasi 0002: products, product_variants, product_aliases, stock_movements + fungsi DB kuota paket (FREE 100/STARTER 500) + RPC `record_stock_move` + RPC atomik `create_product` + gen types | migrasi | packages/supabase/migrations/0002 | [x] |
 | 7 | Test: alias duplikat ditolak, harga BIGINT >0, produk ke-101 FREE ditolak, stok awal = movement MASUK, RLS negatif | test | packages/supabase/tests/ | [ ] |
 | 8 | UI produk (shadcn + TanStack Query): /products list+new+edit, cari instan (ilike/trigram), soft-delete, stok awal via RPC, harga tampil via money.ts | UI | apps/web/src/features/products | [ ] |
-| 9 | UI onboarding wizard 3 langkah (versi minim) + demo Smart Paste placeholder (chat Siti hardcoded) | UI | apps/web/src/routes/onboarding | [ ] |
+| 9 | UI onboarding wizard 3 langkah: profil → produk pertama → demo Smart Paste (chat Siti hardcoded) + flag `onboarding_selesai` | UI | apps/web/src/routes/onboarding | [ ] |
 | 10 | pnpm lint+test+build hijau & deploy staging; verify HP | ops | — | [ ] |
 
 ## Daftar test (wajib di CI)
@@ -61,6 +61,30 @@ onboarding minimal (M1 parsial) jalan di staging.
 - Task 5: alur UI nyata lolos via Chrome CDP di Supabase lokal: daftar OTP (template email lokal ditambah `{{ .Token }}`) → wizard profil usaha → beranda menampilkan usaha. Rate limit email lokal dinaikkan ke 100 untuk dev.
 - Cloud staging: migrasi `0001` di-push manual (`migration list` remote = 0001). REST `businesses`/`accounts` → 200 `[]`, RPC `create_business` oleh anon → 401 (sesuai grant). CI job `db-migrate-staging` sempat sukses lalu gagal karena host `db.<ref>` hanya IPv6; workflow diubah memakai session pooler Sydney (`aws-0-ap-southeast-2.pooler.supabase.com:5432`), tanpa secret baru.
 - Cloud auth: `supabase config push` menyetel Site URL + redirect URLs staging, `otp_length=6`, `enable_confirmations=false`. SMTP kustom Resend aktif (`smtp.resend.com:465`, `noreply@gerailo.com`) dan template `magic_link.html` berisi `{{ .Token }}` sudah di-push. Smoke test 21 Nov 2026 PASS: kode 6 digit → onboarding → beranda "Dapur OTP Resend"; tautan masuk juga diarahkan ke `/auth/callback` dengan error eksplisit.
+
+## PREP W1b — keputusan disetujui 21 Nov 2026
+
+- **Task 6 selesai 21 Nov 2026**: migrasi 0002 diterapkan lokal (`db reset`),
+  `gen types` diperbarui, 24 test pgTAP 0002 + 14 test 0001 hijau. RPC
+  `create_product` dan `record_stock_move` sudah ada; docs DATA-MODEL/API-CONTRACTS
+  diperbarui.
+- **E (koreksi founder)**: create produk memakai RPC atomik `create_product`
+  (produk + alias + stok awal satu transaksi), bukan beberapa query klien. Trigger
+  kuota tetap jadi lapis kedua. Ini deviasi sadar dari teks Task 6 awal.
+- `product_aliases` tabel terpisah (bukan `products.alias[]`) agar unik
+  case-insensitive per usaha bisa dijamin index `lower(alias)` + trigram; docs
+  DATA-MODEL/M2 diperbarui menyusul.
+- `stock_movements` level produk + `business_id`; stok per varian dan HPP rata-rata
+  ditunda ke W3. Semua stok hanya lewat RPC.
+- `businesses.plan` (FREE/STARTER) + `onboarding_selesai`; hak UPDATE `plan`
+  dicabut dari `authenticated` (hanya service_role/billing) agar kuota tidak bisa
+  diakali dari browser.
+- Kolom katalog M9 (foto/deskripsi/kategori/harga_promo/tampil_katalog) dibuat
+  sekarang sebagai fondasi data; UI katalog tetap W4.
+- UI produk mengikuti `design/stitch/produk_stok` + `docs/STITCH-DESIGN.md`;
+  angka stok boleh tampil di sisi seller (larangan hanya untuk katalog publik).
+- Test tambahan: soft-delete (`aktif=false`) membuat produk baru lolos kuota;
+  alias unik case-insensitive (`Kopi Gula` vs `kopi gula`).
 
 ## BACKLOG
 - Import CSV produk (W4 jika sisa waktu)

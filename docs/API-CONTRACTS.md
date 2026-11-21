@@ -26,7 +26,8 @@ Kontrak umum Worker: validasi input pakai zod dari `packages/shared`; error JSON
 | RPC | Menjamin | Menggantikan |
 |---|---|---|
 | `create_business(p_nama, p_jenis, p_metode_bayar)` | Satu transaksi: usaha + seed 19 akun COA + app_settings | alur registrasi M1 |
-| `record_stock_move(p_product_id, p_type, p_qty, p_unit_price, p_reason, p_order_id?)` | MASUK+harga → rata-rata bergerak (T8); PENYESUAIAN wajib alasan; KELUAR dari klien = DITOLAK | stok awal & pembelian M5 |
+| `create_product(p_business_id, p_nama, p_harga_jual, p_stok_min?, p_aliases?, p_stok_awal?, p_harga_beli?)` | Satu transaksi: produk + alias + movement MASUK stok awal; kuota paket dicek trigger; guard pemilik usaha | tambah produk M2 |
+| `record_stock_move(p_product_id, p_type, p_qty, p_unit_price, p_reason, p_order_id?)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR dari klien = DITOLAK (HPP rata-rata menyusul W3) | stok awal & pembelian M5 |
 | `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | Status DIKIRIM + jurnal T2+T3 + movement KELUAR + HPP — satu transaksi; kurir/resi opsional; guard dari DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM | aksi "kirim" M4 |
 | `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal)` | T1 (DP) / T4 (pelunasan); COD diproses complete_order (T5/T6); tolak kelebihan bayar | pembayaran M4 |
 | `cancel_order(p_order_id)` | Reversi jurnal (T11) + stok kembali; status BATAL | batal M4 |
@@ -46,12 +47,13 @@ Tambah RPC = migrasi baru + update daftar ini + golden test.
 
 ## C. Akses tabel langsung dari browser (supabase-js, RLS)
 
-- READ: products, product_variants, customers, orders, order_items, payments,
-  stock_movements, accounts (COA), journal_entries/journal_lines (hanya M7 laporan),
-  subscriptions (milik usaha sendiri).
-- INSERT sederhana: products/variants (soft-delete via UPDATE `aktif`; field katalog
-  M9 — foto/deskripsi/kategori/harga_promo/tampil_katalog — juga UPDATE langsung),
-  customers (dedup via unique index telepon-normalisasi), orders status DRAFT.
+- READ: products, product_variants, product_aliases, customers, orders, order_items,
+  payments, stock_movements, v_stock_balance, accounts (COA), journal_entries/
+  journal_lines (hanya M7 laporan), subscriptions (milik usaha sendiri).
+- INSERT sederhana: products/variants/aliases (soft-delete via UPDATE `aktif`; field
+  katalog M9 — foto/deskripsi/kategori/harga_promo/tampil_katalog — juga UPDATE
+  langsung), customers (dedup via unique index telepon-normalisasi), orders status DRAFT.
+  Untuk produk + alias + stok awal, pakai RPC `create_product` (atomik).
 - UPDATE/DELETE langsung pada `orders`, `payments`, `journal_*` = DILARANG —
   hanya lewat RPC (REVOKE di migrasi). Laporan = SQL views `security_invoker`
   (`v_rekap_harian`, `v_pnl_bulan`, `v_arus_kas`, `v_piutang_ump`).
