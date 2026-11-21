@@ -50,7 +50,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
 
     const { error: sendError } = await supabase.auth.signInWithOtp({
       email: trimmed,
-      options: { shouldCreateUser: mode === "register" },
+      options: {
+        shouldCreateUser: mode === "register",
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
 
     if (sendError) {

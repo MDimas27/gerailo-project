@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router";
 
 import { AuthPage } from "./routes/auth.js";
+import { AuthCallbackPage } from "./routes/auth-callback.js";
 import { HomePage } from "./routes/home.js";
 import { LegalPage, NotFoundPage } from "./routes/legal.js";
 import { OnboardingPage } from "./routes/onboarding.js";
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
   },
   { path: "/auth/login", element: <AuthPage mode="login" /> },
   { path: "/auth/register", element: <AuthPage mode="register" /> },
+  { path: "/auth/callback", element: <AuthCallbackPage /> },
   {
     path: "/onboarding",
     element: (

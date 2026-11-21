@@ -72,6 +72,10 @@ agent boleh tahu NAMA kunci, bukan isinya.
 - Migrasi CI memakai **session pooler** `aws-0-ap-southeast-2.pooler.supabase.com:5432`
   karena host `db.<ref>.supabase.co` hanya AAAA (IPv6) dan runner GitHub IPv4-only.
   Workflow menulis ulang host + username dari `SUPABASE_DB_URL`; tidak perlu secret baru.
+- Tautan masuk **sekali pakai** dan sesi terikat browser. Di HP: minta tautan baru
+  dari browser yang akan dipakai, buka tautan di browser yang sama (bukan in-app
+  Gmail/PWA terpisah). Redirect diarahkan ke `/auth/callback` agar error
+  `otp_expired`/tautan terpakai tampil jelas, bukan looping ke halaman masuk.
 
 ## 5. Deploy pertama (definisi selesai fase 0)
 
