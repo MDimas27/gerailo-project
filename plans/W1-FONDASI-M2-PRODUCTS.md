@@ -55,6 +55,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 
 ## Deviasi dari plan
 - (diisi saat berjalan)
+- Task 2: `wrangler.jsonc` (2 env + aset SPA) dan `wrangler deploy --dry-run` sudah hijau. Deploy staging menunggu `wrangler login` founder.
 
 ## BACKLOG
 - Import CSV produk (W4 jika sisa waktu)

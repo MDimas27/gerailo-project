@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "tsc --noEmit",
+    "build:bundle": "wrangler deploy --dry-run --env staging --outdir dist",
     "typecheck": "tsc --noEmit",
-    "deploy": "wrangler deploy"
+    "deploy:staging": "pnpm --filter @gerailo/web build && wrangler deploy --env staging",
+    "deploy:production": "pnpm --filter @gerailo/web build && wrangler deploy --env production"
   },
   "dependencies": {
     "@gerailo/shared": "workspace:*",

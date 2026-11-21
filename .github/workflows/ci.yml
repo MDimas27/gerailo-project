@@ -39,9 +39,47 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Validate Worker bundle
+        run: pnpm --filter @gerailo/worker build:bundle
+
       - name: Guard browser bundle
         run: |
           if grep -rE "service_role|LLM_API_KEY|SUPABASE_SERVICE_ROLE" apps/web/dist; then
             echo "Kredensial server terdeteksi di bundle browser"
             exit 1
           fi
+
+  deploy-staging:
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web assets
+        run: pnpm --filter @gerailo/web build
+
+      - name: Deploy staging
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/worker
+          command: deploy --env staging
