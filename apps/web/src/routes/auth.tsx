@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 
 import { useAuth } from "@/lib/auth";
@@ -15,6 +15,22 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (stage !== "code") {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          navigate("/", { replace: true });
+        }
+      });
+    }, 3000);
+
+    return () => window.clearInterval(timer);
+  }, [navigate, stage]);
 
   if (session) {
     return <Navigate to="/" replace />;
@@ -52,6 +68,23 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     }
 
     setBusy(false);
+  };
+
+  const checkSession = async () => {
+    setBusy(true);
+    setError(null);
+
+    const { data } = await supabase.auth.getSession();
+
+    if (data.session) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    setBusy(false);
+    setError(
+      "Sesi belum terdeteksi. Buka tautan dari email di browser ini, lalu coba lagi.",
+    );
   };
 
   const verifyCode = async () => {
@@ -119,8 +152,23 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
           </label>
         ) : (
           <>
+            <div className="flex flex-col gap-2 rounded-control bg-primary-soft px-3 py-2 text-sm text-ink">
+              <p className="font-semibold">Cek email sekarang</p>
+              <p>
+                Staging mengirim tautan masuk. Klik tautan itu, lalu kembali ke
+                tab ini; halaman akan masuk otomatis.
+              </p>
+              <button
+                type="button"
+                disabled={busy}
+                className="self-start font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-60"
+                onClick={() => void checkSession()}
+              >
+                Saya sudah klik tautan
+              </button>
+            </div>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
-              Kode verifikasi
+              Kode verifikasi (bila ada)
               <input
                 type="text"
                 name="code"
