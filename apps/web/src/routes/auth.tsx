@@ -73,23 +73,6 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     setBusy(false);
   };
 
-  const checkSession = async () => {
-    setBusy(true);
-    setError(null);
-
-    const { data } = await supabase.auth.getSession();
-
-    if (data.session) {
-      navigate("/", { replace: true });
-      return;
-    }
-
-    setBusy(false);
-    setError(
-      "Sesi belum terdeteksi. Buka tautan dari email di browser ini, lalu coba lagi.",
-    );
-  };
-
   const verifyCode = async () => {
     const token = code.trim();
 
@@ -155,21 +138,6 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
           </label>
         ) : (
           <>
-            <div className="flex flex-col gap-2 rounded-control bg-primary-soft px-3 py-2 text-sm text-ink">
-              <p className="font-semibold">Cek email sekarang</p>
-              <p>
-                Kami mengirim kode 6 digit ke emailmu. Masukkan di bawah, atau
-                klik tautan masuk di email.
-              </p>
-              <button
-                type="button"
-                disabled={busy}
-                className="self-start font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-60"
-                onClick={() => void checkSession()}
-              >
-                Saya sudah klik tautan
-              </button>
-            </div>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
               Kode verifikasi
               <input
