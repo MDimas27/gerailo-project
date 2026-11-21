@@ -1,5 +1,11 @@
-.opencode
-.env
+.env*
+!.env.example
 .dev.vars
 node_modules
 dist
+coverage
+.wrangler
+supabase/.temp
+*.tsbuildinfo
+.opencode
+.DS_Store

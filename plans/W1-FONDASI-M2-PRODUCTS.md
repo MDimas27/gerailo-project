@@ -19,7 +19,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 ## Task berurutan (urutan beku)
 | # | Task | Jenis | File utama | Selesai |
 |---|---|---|---|---|
-| 1 | Scaffold monorepo pnpm: apps/web (Vite+React+TS strict+Tailwind+shadcn+TanStack Query+react-router+zod), apps/worker (Hono), packages/shared (money.ts+zod schemas), packages/supabase; CI GitHub Actions (lint/test/build; push main = deploy staging) | infra | pnpm-workspace.yaml, .github/workflows/ci.yml | [ ] |
+| 1 | Scaffold monorepo pnpm: apps/web (Vite+React+TS strict+Tailwind+shadcn+TanStack Query+react-router+zod), apps/worker (Hono), packages/shared (money.ts+zod schemas), packages/supabase; CI GitHub Actions (lint/test/build; push main = deploy staging) | infra | pnpm-workspace.yaml, .github/workflows/ci.yml | [x] |
 | 2 | Cloudflare: wrangler.jsonc 2 env + static assets binding (SPA); `GET /api/health` + SPA shell online di staging; secrets via `wrangler secret put` | infra | apps/worker/wrangler.jsonc | [ ] |
 | 3 | Migrasi 0001: businesses, accounts, app_settings + RLS deny-by-default + policy + RPC `create_business` (usaha+19 COA+settings, SECURITY DEFINER + guard auth.uid()) + `supabase gen types` | migrasi | packages/supabase/migrations/0001 | [ ] |
 | 4 | Test RPC `create_business` (19 akun, rollback saat gagal) + test negatif RLS (Supabase lokal `supabase start`) | test | packages/supabase/tests/ | [ ] |

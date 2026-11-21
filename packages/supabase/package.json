@@ -1,0 +1,9 @@
+{
+  "name": "@gerailo/supabase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "echo \"no TypeScript sources yet\""
+  }
+}
