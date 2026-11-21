@@ -20,7 +20,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 | # | Task | Jenis | File utama | Selesai |
 |---|---|---|---|---|
 | 1 | Scaffold monorepo pnpm: apps/web (Vite+React+TS strict+Tailwind+shadcn+TanStack Query+react-router+zod), apps/worker (Hono), packages/shared (money.ts+zod schemas), packages/supabase; CI GitHub Actions (lint/test/build; push main = deploy staging) | infra | pnpm-workspace.yaml, .github/workflows/ci.yml | [x] |
-| 2 | Cloudflare: wrangler.jsonc 2 env + static assets binding (SPA); `GET /api/health` + SPA shell online di staging; secrets via `wrangler secret put` | infra | apps/worker/wrangler.jsonc | [ ] |
+| 2 | Cloudflare: wrangler.jsonc 2 env + static assets binding (SPA); `GET /api/health` + SPA shell online di staging; secrets via `wrangler secret put` | infra | apps/worker/wrangler.jsonc | [x] |
 | 3 | Migrasi 0001: businesses, accounts, app_settings + RLS deny-by-default + policy + RPC `create_business` (usaha+19 COA+settings, SECURITY DEFINER + guard auth.uid()) + `supabase gen types` | migrasi | packages/supabase/migrations/0001 | [x] |
 | 4 | Test RPC `create_business` (19 akun, rollback saat gagal) + test negatif RLS (Supabase lokal `supabase start`) | test | packages/supabase/tests/ | [x] |
 | 5 | Auth supabase-js (register/login OTP) + wizard profil usaha memanggil RPC `create_business` + consent checkbox | kode | apps/web/src/routes/auth | [x] |
@@ -55,10 +55,10 @@ onboarding minimal (M1 parsial) jalan di staging.
 
 ## Deviasi dari plan
 - (diisi saat berjalan)
-- Task 2: `wrangler.jsonc` (2 env + aset SPA) dan `wrangler deploy --dry-run` sudah hijau. Deploy staging menunggu `wrangler login` founder.
+- Task 2: deploy staging selesai 21 Nov 2026 di `https://gerailo-staging.mdimas-jobs.workers.dev`. `/api/health` 200, `/` dan `/auth/login` 200 SPA fallback, render nyata ok. `VITE_*` dibaca dari `.env` root via `envDir`, CI deploy memakai GitHub vars.
 - Task 3 dikerjakan lebih dulu secara lokal sambil menunggu login Cloudflare (tidak butuh kredensial; memakai Supabase lokal di Docker). Selesai: `db reset` + `gen types` ter-commit.
 - Task 4: 14 test pgTAP hijau (`supabase test db`), mencakup 19 COA, 1 app_settings, rollback validasi, rollback saat seed COA gagal, RLS A/B, dan anon ditolak. CI job `db-tests` ditambahkan (migrasi + pgTAP + type drift).
-- Task 5: alur UI nyata lolos via Chrome CDP di Supabase lokal: daftar OTP (template email lokal ditambah `{{ .Token }}`) → wizard profil usaha → beranda menampilkan usaha. Rate limit email lokal dinaikkan ke 100 untuk dev. Verifikasi di staging tetap menunggu deploy Task 2.
+- Task 5: alur UI nyata lolos via Chrome CDP di Supabase lokal: daftar OTP (template email lokal ditambah `{{ .Token }}`) → wizard profil usaha → beranda menampilkan usaha. Rate limit email lokal dinaikkan ke 100 untuk dev. Staging shell sudah online; uji alur auth di staging belum dilakukan.
 
 ## BACKLOG
 - Import CSV produk (W4 jika sisa waktu)

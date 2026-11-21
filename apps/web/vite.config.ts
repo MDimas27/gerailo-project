@@ -4,6 +4,8 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  // Monorepo: VITE_* publik dibaca dari .env di root repo, bukan apps/web.
+  envDir: "../../",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

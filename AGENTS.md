@@ -100,7 +100,7 @@ staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui.
 
 ## Status proyek (perbarui tiap sesi)
 
-- Sprint aktif: W1 (19–25 Nov) — fondasi + M2
-- Modul selesai: —
-- Deploy staging terakhir: —
-- Halangan: KYC gateway (menunggu)
+- Sprint aktif: W1 (19–25 Nov) — W1a selesai 21 Nov (Task 1–5); berikutnya W1b M2 produk (Task 6–10)
+- Modul selesai: M1 parsial (auth OTP, usaha, 19 COA, settings); M2 belum
+- Deploy staging terakhir: 21 Nov 2026 — https://gerailo-staging.mdimas-jobs.workers.dev (health + SPA ok)
+- Halangan: KYC gateway; GitHub vars `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` + secret `CLOUDFLARE_API_TOKEN` untuk deploy CI; uji alur auth manual di staging/HP belum
