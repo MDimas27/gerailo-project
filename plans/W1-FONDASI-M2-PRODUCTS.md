@@ -23,7 +23,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 | 2 | Cloudflare: wrangler.jsonc 2 env + static assets binding (SPA); `GET /api/health` + SPA shell online di staging; secrets via `wrangler secret put` | infra | apps/worker/wrangler.jsonc | [ ] |
 | 3 | Migrasi 0001: businesses, accounts, app_settings + RLS deny-by-default + policy + RPC `create_business` (usaha+19 COA+settings, SECURITY DEFINER + guard auth.uid()) + `supabase gen types` | migrasi | packages/supabase/migrations/0001 | [x] |
 | 4 | Test RPC `create_business` (19 akun, rollback saat gagal) + test negatif RLS (Supabase lokal `supabase start`) | test | packages/supabase/tests/ | [x] |
-| 5 | Auth supabase-js (register/login OTP) + wizard profil usaha memanggil RPC `create_business` + consent checkbox | kode | apps/web/src/routes/auth | [ ] |
+| 5 | Auth supabase-js (register/login OTP) + wizard profil usaha memanggil RPC `create_business` + consent checkbox | kode | apps/web/src/routes/auth | [x] |
 | 6 | Migrasi 0002: products, product_variants (unique alias + trigram), stock_movements + fungsi DB kuota paket (FREE 100/STARTER 500) + RPC `record_stock_move` + gen types | migrasi | packages/supabase/migrations/0002 | [ ] |
 | 7 | Test: alias duplikat ditolak, harga BIGINT >0, produk ke-101 FREE ditolak, stok awal = movement MASUK, RLS negatif | test | packages/supabase/tests/ | [ ] |
 | 8 | UI produk (shadcn + TanStack Query): /products list+new+edit, cari instan (ilike/trigram), soft-delete, stok awal via RPC, harga tampil via money.ts | UI | apps/web/src/features/products | [ ] |
@@ -58,6 +58,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 - Task 2: `wrangler.jsonc` (2 env + aset SPA) dan `wrangler deploy --dry-run` sudah hijau. Deploy staging menunggu `wrangler login` founder.
 - Task 3 dikerjakan lebih dulu secara lokal sambil menunggu login Cloudflare (tidak butuh kredensial; memakai Supabase lokal di Docker). Selesai: `db reset` + `gen types` ter-commit.
 - Task 4: 14 test pgTAP hijau (`supabase test db`), mencakup 19 COA, 1 app_settings, rollback validasi, rollback saat seed COA gagal, RLS A/B, dan anon ditolak. CI job `db-tests` ditambahkan (migrasi + pgTAP + type drift).
+- Task 5: alur UI nyata lolos via Chrome CDP di Supabase lokal: daftar OTP (template email lokal ditambah `{{ .Token }}`) → wizard profil usaha → beranda menampilkan usaha. Rate limit email lokal dinaikkan ke 100 untuk dev. Verifikasi di staging tetap menunggu deploy Task 2.
 
 ## BACKLOG
 - Import CSV produk (W4 jika sisa waktu)

@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./types": "./types/db.ts"
+  },
   "scripts": {
     "db:start": "supabase start --workdir ..",
     "db:stop": "supabase stop --workdir ..",
