@@ -25,7 +25,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 | 4 | Test RPC `create_business` (19 akun, rollback saat gagal) + test negatif RLS (Supabase lokal `supabase start`) | test | packages/supabase/tests/ | [x] |
 | 5 | Auth supabase-js (register/login OTP) + wizard profil usaha memanggil RPC `create_business` + consent checkbox | kode | apps/web/src/routes/auth | [x] |
 | 6 | Migrasi 0002: products, product_variants, product_aliases, stock_movements + fungsi DB kuota paket (FREE 100/STARTER 500) + RPC `record_stock_move` + RPC atomik `create_product` + gen types | migrasi | packages/supabase/migrations/0002 | [x] |
-| 7 | Test: alias duplikat ditolak, harga BIGINT >0, produk ke-101 FREE ditolak, stok awal = movement MASUK, RLS negatif | test | packages/supabase/tests/ | [ ] |
+| 7 | Test: alias duplikat ditolak, harga BIGINT >0, produk ke-101 FREE ditolak, stok awal = movement MASUK, RLS negatif | test | packages/supabase/tests/ | [x] |
 | 8 | UI produk (shadcn + TanStack Query): /products list+new+edit, cari instan (ilike/trigram), soft-delete, stok awal via RPC, harga tampil via money.ts | UI | apps/web/src/features/products | [ ] |
 | 9 | UI onboarding wizard 3 langkah: profil → produk pertama → demo Smart Paste (chat Siti hardcoded) + flag `onboarding_selesai` | UI | apps/web/src/routes/onboarding | [ ] |
 | 10 | pnpm lint+test+build hijau & deploy staging; verify HP | ops | — | [ ] |
@@ -68,6 +68,10 @@ onboarding minimal (M1 parsial) jalan di staging.
   `gen types` diperbarui, 24 test pgTAP 0002 + 14 test 0001 hijau. RPC
   `create_product` dan `record_stock_move` sudah ada; docs DATA-MODEL/API-CONTRACTS
   diperbarui.
+- **Task 7 selesai 21 Nov 2026**: 24 test pgTAP 0002 hijau, termasuk alias
+  case-insensitive, soft-delete lalu produk baru lolos kuota, KELUAR ditolak,
+  penyesuaian wajib alasan, RLS A/B, plan tidak bisa diubah pemilik, dan stok
+  tidak bisa ditulis langsung.
 - **E (koreksi founder)**: create produk memakai RPC atomik `create_product`
   (produk + alias + stok awal satu transaksi), bukan beberapa query klien. Trigger
   kuota tetap jadi lapis kedua. Ini deviasi sadar dari teks Task 6 awal.
