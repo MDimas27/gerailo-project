@@ -63,9 +63,13 @@ agent boleh tahu NAMA kunci, bukan isinya.
 - Site URL + redirect URLs staging sudah di-set 21 Nov 2026 via `supabase config push`:
   `https://gerailo-staging.mdimas-jobs.workers.dev` dan `.../**`; `otp_length=6`,
   `enable_confirmations=false`.
-- Free tier Supabase **tidak mengizinkan ubah template email**. Email default berisi
-  tautan masuk (bukan kode 6 digit); UI mendukung klik tautan. Kode 6 digit baru
-  muncul setelah SMTP kustom/upgrade aktif dan `templates/magic_link.html` di-push.
+- Staging memakai **SMTP kustom Resend** sejak 21 Nov 2026 (`smtp.resend.com:465`,
+  sender `noreply@gerailo.com`). Free tier baru mengizinkan ubah template setelah
+  SMTP kustom aktif; template `magic_link.html` + subject "Kode masuk Gerailo"
+  sudah di-push. Email berisi **kode 6 digit** + tautan masuk.
+- Kredensial SMTP hanya di dashboard Supabase (secret), jangan masuk repo. Field
+  `[auth.email.smtp]` sengaja tidak dideklarasikan di `config.toml`; `config push`
+  tidak mengubah properti remote yang tidak dideklarasikan.
 - `supabase config push` mengirim seluruh config auth — selalu jalankan
   `config diff` dulu. Config lokal tetap `localhost`; jangan commit nilai staging
   ke `packages/supabase/config.toml`.

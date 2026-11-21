@@ -60,7 +60,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 - Task 4: 14 test pgTAP hijau (`supabase test db`), mencakup 19 COA, 1 app_settings, rollback validasi, rollback saat seed COA gagal, RLS A/B, dan anon ditolak. CI job `db-tests` ditambahkan (migrasi + pgTAP + type drift).
 - Task 5: alur UI nyata lolos via Chrome CDP di Supabase lokal: daftar OTP (template email lokal ditambah `{{ .Token }}`) → wizard profil usaha → beranda menampilkan usaha. Rate limit email lokal dinaikkan ke 100 untuk dev.
 - Cloud staging: migrasi `0001` di-push manual (`migration list` remote = 0001). REST `businesses`/`accounts` → 200 `[]`, RPC `create_business` oleh anon → 401 (sesuai grant). CI job `db-migrate-staging` sempat sukses lalu gagal karena host `db.<ref>` hanya IPv6; workflow diubah memakai session pooler Sydney (`aws-0-ap-southeast-2.pooler.supabase.com:5432`), tanpa secret baru.
-- Cloud auth: `supabase config push` menyetel Site URL + redirect URLs staging, `otp_length=6`, `enable_confirmations=false`. Free tier menolak ubah template email (`entitlement_required`), jadi email staging = tautan masuk default (bukan kode 6 digit); UI copy disesuaikan. Smoke test cloud 21 Nov 2026 PASS via email nyata/disposable: kirim OTP → klik tautan → onboarding → beranda "Dapur Uji Staging".
+- Cloud auth: `supabase config push` menyetel Site URL + redirect URLs staging, `otp_length=6`, `enable_confirmations=false`. SMTP kustom Resend aktif (`smtp.resend.com:465`, `noreply@gerailo.com`) dan template `magic_link.html` berisi `{{ .Token }}` sudah di-push. Smoke test 21 Nov 2026 PASS: kode 6 digit → onboarding → beranda "Dapur OTP Resend"; tautan masuk juga diarahkan ke `/auth/callback` dengan error eksplisit.
 
 ## BACKLOG
 - Import CSV produk (W4 jika sisa waktu)

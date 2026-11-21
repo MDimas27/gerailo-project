@@ -67,7 +67,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       );
     } else {
       setStage("code");
-      setNotice(`Tautan masuk dikirim ke ${trimmed}. Cek inbox (Mailpit saat lokal).`);
+      setNotice(`Kode dikirim ke ${trimmed}. Cek inbox (Mailpit saat lokal).`);
     }
 
     setBusy(false);
@@ -127,8 +127,8 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
         <h1 className="text-2xl font-semibold text-ink">{title}</h1>
         <p className="text-sm text-muted">
           {stage === "email"
-            ? "Kami mengirim tautan masuk sekali pakai ke emailmu, tanpa password."
-            : "Cek email: klik tautan masuk, atau masukkan kode 6 digit bila tercantum."}
+            ? "Kami mengirim kode 6 digit ke emailmu, tanpa password."
+            : "Masukkan kode 6 digit dari email, atau klik tautan masuk di email."}
         </p>
       </div>
 
@@ -158,8 +158,8 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
             <div className="flex flex-col gap-2 rounded-control bg-primary-soft px-3 py-2 text-sm text-ink">
               <p className="font-semibold">Cek email sekarang</p>
               <p>
-                Staging mengirim tautan masuk. Klik tautan itu, lalu kembali ke
-                tab ini; halaman akan masuk otomatis.
+                Kami mengirim kode 6 digit ke emailmu. Masukkan di bawah, atau
+                klik tautan masuk di email.
               </p>
               <button
                 type="button"
@@ -171,7 +171,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
               </button>
             </div>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
-              Kode verifikasi (bila ada)
+              Kode verifikasi
               <input
                 type="text"
                 name="code"

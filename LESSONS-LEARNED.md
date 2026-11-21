@@ -89,6 +89,14 @@ setelah SMTP kustom/upgrade. · Tindakan: ENV-SETUP §4.1 ditambahkan, copy auth
 diperbarui, smoke test cloud PASS (OTP → onboarding → beranda), status AGENTS
 diperbarui.
 
+#13 · 21 Nov 2026 · auth · Batas template free tier Supabase ternyata bisa
+dibuka dengan **SMTP kustom**, tanpa upgrade. Setelah `gerailo.com` verified di
+Resend, isi SMTP staging (`smtp.resend.com:465`, user `resend`, sender
+`noreply@gerailo.com`), lalu `config push` template `{{ .Token }}` berhasil.
+Kode 6 digit teruji end-to-end (kirim → verifikasi → onboarding → beranda);
+magic link tetap jadi fallback ke `/auth/callback`. · Tindakan: ENV-SETUP §4.1,
+copy auth jadi code-first, plan/AGENTS diperbarui.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
