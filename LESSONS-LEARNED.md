@@ -80,7 +80,10 @@ AGENTS/README diupdate; aset 10 layar + DESIGN.md di design/stitch/.
 menggantung pada semua perintah karena menunggu stdin shell agent — `git ... < nul`
 langsung normal; (b) `supabase config push` mengirim seluruh config auth, dan free
 tier menolak perubahan template email (`entitlement_required`) sehingga push harus
-tanpa blok `auth.email.template.*`. Email staging jadi tautan masuk default (bukan
+tanpa blok `auth.email.template.*`; (c) host `db.<ref>.supabase.co` hanya punya
+AAAA (IPv6) dan runner GitHub IPv4-only → migrasi CI harus lewat session pooler
+(`aws-0-ap-southeast-2.pooler.supabase.com:5432`, user `postgres.<ref>`).
+Email staging jadi tautan masuk default (bukan
 kode 6 digit), jadi UI auth wajib mendukung klik tautan; kode 6 digit baru aktif
 setelah SMTP kustom/upgrade. · Tindakan: ENV-SETUP §4.1 ditambahkan, copy auth
 diperbarui, smoke test cloud PASS (OTP → onboarding → beranda), status AGENTS
