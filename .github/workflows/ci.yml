@@ -72,6 +72,26 @@ jobs:
           supabase gen types typescript --local --workdir packages > /tmp/db.ts
           git diff --no-index --exit-code packages/supabase/types/db.ts /tmp/db.ts
 
+  db-migrate-staging:
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+
+      - name: Push migrations to staging
+        if: env.SUPABASE_DB_URL != ''
+        run: supabase db push --db-url "$SUPABASE_DB_URL" --workdir packages --yes
+
   deploy-staging:
     needs: quality
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

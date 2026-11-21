@@ -59,6 +59,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 - Task 3 dikerjakan lebih dulu secara lokal sambil menunggu login Cloudflare (tidak butuh kredensial; memakai Supabase lokal di Docker). Selesai: `db reset` + `gen types` ter-commit.
 - Task 4: 14 test pgTAP hijau (`supabase test db`), mencakup 19 COA, 1 app_settings, rollback validasi, rollback saat seed COA gagal, RLS A/B, dan anon ditolak. CI job `db-tests` ditambahkan (migrasi + pgTAP + type drift).
 - Task 5: alur UI nyata lolos via Chrome CDP di Supabase lokal: daftar OTP (template email lokal ditambah `{{ .Token }}`) → wizard profil usaha → beranda menampilkan usaha. Rate limit email lokal dinaikkan ke 100 untuk dev. Staging shell sudah online; uji alur auth di staging belum dilakukan.
+- Cloud staging: migrasi `0001` di-push manual (`migration list` remote = 0001). REST `businesses`/`accounts` → 200 `[]`, RPC `create_business` oleh anon → 401 (sesuai grant). CI job `db-migrate-staging` ditambahkan, menunggu secret `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_URL`.
 
 ## BACKLOG
 - Import CSV produk (W4 jika sisa waktu)
