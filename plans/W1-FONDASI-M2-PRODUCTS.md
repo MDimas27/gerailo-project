@@ -21,7 +21,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 |---|---|---|---|---|
 | 1 | Scaffold monorepo pnpm: apps/web (Vite+React+TS strict+Tailwind+shadcn+TanStack Query+react-router+zod), apps/worker (Hono), packages/shared (money.ts+zod schemas), packages/supabase; CI GitHub Actions (lint/test/build; push main = deploy staging) | infra | pnpm-workspace.yaml, .github/workflows/ci.yml | [x] |
 | 2 | Cloudflare: wrangler.jsonc 2 env + static assets binding (SPA); `GET /api/health` + SPA shell online di staging; secrets via `wrangler secret put` | infra | apps/worker/wrangler.jsonc | [ ] |
-| 3 | Migrasi 0001: businesses, accounts, app_settings + RLS deny-by-default + policy + RPC `create_business` (usaha+19 COA+settings, SECURITY DEFINER + guard auth.uid()) + `supabase gen types` | migrasi | packages/supabase/migrations/0001 | [ ] |
+| 3 | Migrasi 0001: businesses, accounts, app_settings + RLS deny-by-default + policy + RPC `create_business` (usaha+19 COA+settings, SECURITY DEFINER + guard auth.uid()) + `supabase gen types` | migrasi | packages/supabase/migrations/0001 | [x] |
 | 4 | Test RPC `create_business` (19 akun, rollback saat gagal) + test negatif RLS (Supabase lokal `supabase start`) | test | packages/supabase/tests/ | [ ] |
 | 5 | Auth supabase-js (register/login OTP) + wizard profil usaha memanggil RPC `create_business` + consent checkbox | kode | apps/web/src/routes/auth | [ ] |
 | 6 | Migrasi 0002: products, product_variants (unique alias + trigram), stock_movements + fungsi DB kuota paket (FREE 100/STARTER 500) + RPC `record_stock_move` + gen types | migrasi | packages/supabase/migrations/0002 | [ ] |
@@ -56,6 +56,7 @@ onboarding minimal (M1 parsial) jalan di staging.
 ## Deviasi dari plan
 - (diisi saat berjalan)
 - Task 2: `wrangler.jsonc` (2 env + aset SPA) dan `wrangler deploy --dry-run` sudah hijau. Deploy staging menunggu `wrangler login` founder.
+- Task 3 dikerjakan lebih dulu secara lokal sambil menunggu login Cloudflare (tidak butuh kredensial; memakai Supabase lokal di Docker). Selesai: `db reset` + `gen types` ter-commit.
 
 ## BACKLOG
 - Import CSV produk (W4 jika sisa waktu)

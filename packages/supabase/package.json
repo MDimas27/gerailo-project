@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "db:start": "supabase start --workdir ..",
+    "db:stop": "supabase stop --workdir ..",
+    "db:reset": "supabase db reset --workdir ..",
+    "db:test": "supabase test db --workdir ..",
+    "db:types": "supabase gen types typescript --local --workdir .. > types/db.ts",
     "typecheck": "echo \"no TypeScript sources yet\""
   }
 }

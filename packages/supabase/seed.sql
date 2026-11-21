@@ -1,0 +1,3 @@
+-- Seed lokal.
+-- COA 19 akun TIDAK di-seed di sini: selalu dibuat atomik oleh RPC create_business
+-- agar tidak ada usaha tanpa COA (docs/MODULES/M1-ONBOARDING.md).
