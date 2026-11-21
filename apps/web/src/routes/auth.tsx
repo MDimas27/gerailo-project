@@ -48,7 +48,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       );
     } else {
       setStage("code");
-      setNotice(`Kode dikirim ke ${trimmed}. Cek inbox (Mailpit saat lokal).`);
+      setNotice(`Tautan masuk dikirim ke ${trimmed}. Cek inbox (Mailpit saat lokal).`);
     }
 
     setBusy(false);
@@ -91,8 +91,8 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
         <h1 className="text-2xl font-semibold text-ink">{title}</h1>
         <p className="text-sm text-muted">
           {stage === "email"
-            ? "Kami mengirim kode sekali pakai ke emailmu, tanpa password."
-            : "Masukkan kode 6 digit yang baru saja dikirim."}
+            ? "Kami mengirim tautan masuk sekali pakai ke emailmu, tanpa password."
+            : "Cek email: klik tautan masuk, atau masukkan kode 6 digit bila tercantum."}
         </p>
       </div>
 
