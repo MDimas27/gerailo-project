@@ -57,23 +57,32 @@ export function OnboardingPage() {
   const [form2, setForm2] = useState<{
     nama: string;
     harga_jual: string;
-    stok_min: number;
+    stok_min: string;
     aliases: string;
-    stok_awal: number;
+    stok_awal: string;
     harga_beli: string;
   }>({
     nama: "",
     harga_jual: "",
-    stok_min: 0,
+    stok_min: "",
     aliases: "",
-    stok_awal: 0,
+    stok_awal: "",
     harga_beli: "",
   });
 
   const onSubmitStep2 = async (values: typeof form2) => {
-    const parsed = productFormSchema.safeParse(values);
+    const parsed = productFormSchema.safeParse({
+      ...values,
+      stok_min: values.stok_min.trim() === "" ? "0" : values.stok_min,
+      stok_awal: values.stok_awal.trim() === "" ? "0" : values.stok_awal,
+    });
     if (!parsed.success) {
-      setStepError(parsed.error.issues[0]?.message || "Periksa kembali data produk");
+      const masalah = parsed.error.issues[0]?.message ?? "";
+      setStepError(
+        masalah && !/Invalid input|Expected/i.test(masalah)
+          ? masalah
+          : "Periksa kembali data produk.",
+      );
       return;
     }
 
@@ -319,9 +328,10 @@ export function OnboardingPage() {
               inputMode="numeric"
               min={0}
               type="number"
+              placeholder="0"
               className={fieldClass}
               value={form2.stok_min}
-              onChange={(e) => setForm2({ ...form2, stok_min: Number(e.target.value) || 0 })}
+              onChange={(e) => setForm2({ ...form2, stok_min: e.target.value })}
             />
           </label>
 
@@ -341,9 +351,10 @@ export function OnboardingPage() {
               inputMode="numeric"
               min={0}
               type="number"
+              placeholder="0"
               className={fieldClass}
               value={form2.stok_awal}
-              onChange={(e) => setForm2({ ...form2, stok_awal: Number(e.target.value) || 0 })}
+              onChange={(e) => setForm2({ ...form2, stok_awal: e.target.value })}
             />
           </label>
 

@@ -93,7 +93,8 @@ export const productFormSchema = z.object({
           .refine(isOptionalRupiah, "Selisih harga tidak valid"),
       }),
     )
-    .max(20, "Maksimal 20 varian per produk"),
+    .max(20, "Maksimal 20 varian per produk")
+    .default([]),
 });
 
 export type ProductFormInput = z.infer<typeof productFormSchema>;

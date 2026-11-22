@@ -35,6 +35,15 @@ describe("productFormSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("mengisi variants kosong saat tidak dikirim (onboarding)", () => {
+    const tanpaVarian: Record<string, unknown> = validInput();
+    delete tanpaVarian.variants;
+    const result = productFormSchema.safeParse(tanpaVarian);
+
+    expect(result.success).toBe(true);
+    expect(result.success && result.data.variants).toEqual([]);
+  });
+
   it("menolak harga jual 0 atau teks", () => {
     expect(productFormSchema.safeParse(validInput({ harga_jual: "0" })).success).toBe(false);
     expect(productFormSchema.safeParse(validInput({ harga_jual: "abc" })).success).toBe(false);
