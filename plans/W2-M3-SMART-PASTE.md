@@ -3,7 +3,7 @@
 > W2-M3 · dibuat 22 Nov 2026 oleh /prep + /plan · status: MENUNGGU CEK FOUNDER
 > Eksekusi mulai 22 Nov 2026 (keputusan I2 — lebih awal dari kalender W2, 26 Nov).
 > Disetujui founder 22 Nov 2026: A1 B1 C1 D1 E1 F1 G1 H1 I2 + amandemen 1–8.
-> Status: DISETUJUI — eksekusi Task 1 dimulai 22 Nov 2026; plan ini kontrak sesi.
+> Status: DISETUJUI — eksekusi Task 3 dimulai 22 Nov 2026; plan ini kontrak sesi.
 
 ## Tujuan sesi
 Setelah sesi ini: pengguna bisa menyalin/membagikan chat WhatsApp → parser pola
@@ -44,7 +44,7 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | # | Task | Jenis | File utama | Commit | Selesai |
 |---|---|---|---|---|---|
 | 1 | Migrasi 0003: `pdpr_consent_at`, `kuota_ai_periode`, tabel `customers`/`orders`/`order_items`/`ai_usage_logs`, enum + trigger nomor&token, RLS deny-by-default, REVOKE tulis langsung, 4 RPC (lihat §Signature RPC); + `supabase gen types` satu commit | migrasi | `packages/supabase/migrations/0003_m3_smart_paste.sql`, `types/db.ts` | `M3: fondasi data + RPC confirm_draft_order & kuota AI` | [x] 22 Nov |
-| 2 | pgTAP 0003 terpisah: RLS A/B, anon ditolak, RPC confirm harga dari server & klien-dikirim-harga ditolak, kuota FREE/STARTER + reset periode + race, consent teks asli, trigger nomor/token unik, dedup customer | test | `packages/supabase/tests/0003_m3_smart_paste_test.sql` | `M3: pgTAP 0003` | [ ] |
+| 2 | pgTAP 0003 terpisah: RLS A/B, anon ditolak, RPC confirm harga dari server & klien-dikirim-harga ditolak, kuota FREE/STARTER + reset periode + race, consent teks asli, trigger nomor/token unik, dedup customer | test | `packages/supabase/tests/0003_m3_smart_paste_test.sql` | `M3: pgTAP 0003` | [x] 22 Nov |
 | 3 | 11 golden fixture parser (teks → hasil terstruktur), dijalankan **MERAH** sebelum implementasi | test | `apps/worker/tests/parser/` | `M3: fixture golden parser (merah)` | [ ] |
 | 4 | Normalisasi angka Indonesia & qty + parser pola; seluruh aturan pola di satu `rules.ts` | kode | `apps/worker/src/services/parser/{normalize,rules,index}.ts` | `M3: normalisasi + parser pola` | [ ] |
 | 5 | Matching persis→alias→trigram ≥0,8 (katalog dari F1), 2 kandidat = pilihan UI; skor 3 tingkat + penanda sumber; zod schema bersama | kode | `apps/worker/src/services/parser/{matching,confidence}.ts`, `packages/shared/src/schemas/smart-paste.ts` | `M3: matching katalog + skor keyakinan` | [ ] |
@@ -153,6 +153,9 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
 - Task 1: FK `order_items.variant_id` memakai FK sederhana ke `product_variants(id)`
   karena 0002 tidak punya unique `(id, business_id)`; M3 tidak mengirim `variant_id`,
   dan guard kepemilikan usaha tetap berada di RPC.
+- Task 2: race concurrency tidak disimulasikan dengan dua sesi paralel; pgTAP menguji
+  batas claim ke-300/ke-301 dan `claim_ai_quota` memakai `SELECT ... FOR UPDATE`,
+  sehingga serialisasi dijamin database.
 
 ## BACKLOG (temuan sesi ini di luar scope)
 - **Buyer tracking `/track/{token}`** (K1): sengaja tidak dikerjakan di M3; fondasi `share_token` sudah ada di 0003, UI publik + aturan akses token menyusul (modul resmi kit = M8/W4; label "M4" dari founder perlu disinkronkan). Jangan tandai selesai saat M3 `[x]`.
