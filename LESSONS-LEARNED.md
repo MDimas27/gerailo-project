@@ -125,10 +125,10 @@ diperbarui.
   · Tindakan: AGENTS.md status diupdate, LESSONS #16, sesi W1b **resmi selesai**.
   Next: PREP M3 Smart Paste (parser pola + fallback AI + konfirmasi).
 
-#17 · 22 Nov 2026 · m3 · M3 Smart Paste kode-complete: parser+AI via Worker, RPC `confirm_draft_order`/kuota, UI `/share`→`/paste`→`/paste/confirm`, `/admin/parser`; golden 11 + pgTAP 93 + Vitest 52 + lint/typecheck/build hijau, drift types & grep bundle bersih.
+#17 · 22 Nov 2026 · m3 · M3 Smart Paste kode-complete: parser+AI via Worker, RPC `confirm_draft_order`/kuota, UI `/share`→`/paste`→`/paste/confirm`, `/admin/parser`; golden 11 + pgTAP 93 + Vitest 55 + lint/typecheck/build hijau, drift types & grep bundle bersih.
 · Keputusan: tanpa `service_role`; kuota diklaim sebelum `complete()`; AI hanya memilih `product_id` kandidat; klien kirim BIGINT string, harga/total dari server; `/track/{token}` masuk backlog (bukan M3).
-· Deploy: staging parser pola OK (Worker `1aef692d`); AI 503 `AI_NOT_CONFIGURED`, admin 401 tanpa JWT.
-· Tindakan: jangan tandai `[x]` sebelum secrets `SUPABASE_URL`/`ANON`, `LLM_API_KEY`/`LLM_MODEL`, `ADMIN_EMAILS`, `VITE_WORKER_URL` GitHub Variable terisi dan verify HP Android/iOS lolos.
+· Deploy: staging parser pola OK (`1aef692d`), lalu config NIM `8dca929a`; AI masih 503 `AI_NOT_CONFIGURED`, admin 401 tanpa JWT.
+· Tindakan: LLM staging = NVIDIA NIM (`LLM_BASE_URL`/`LLM_MODEL` wrangler vars, `LLM_API_KEY` secret `nvapi-...`); jangan tandai `[x]` sebelum secret `LLM_API_KEY`/`ADMIN_EMAILS`, `VITE_WORKER_URL` GitHub Variable terisi dan verify HP Android/iOS lolos.
 
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
@@ -144,6 +144,9 @@ diperbarui.
 - Demo video onboarding
 - **Edit profil usaha** (ubah nama, jenis, metode_bayar) — M1 sisa
 - **Edit pengaturan usaha** (paket, notifikasi, dsb) — M1 sisa
+- **React Fast Refresh warning** di `apps/web/src/lib/auth.tsx:61` (helper diekspor
+  bareng komponen) — refactor kecil, bukan blocker M3
+
 ## Status deploy production
 
 - (belum ada — pertama di W4/release)

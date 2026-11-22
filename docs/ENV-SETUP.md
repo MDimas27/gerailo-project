@@ -16,8 +16,8 @@ sehingga agent tidak menunggu apa pun. Durasi realistis: 1–2 hari (paralel den
 - [ ] Sentry → project `gerailo` (DSN keduanya). PostHog → project + API key.
 - [ ] Midtrans DAN Xendit → daftar + kirim dokumen KYC (NIB/akta/KTP) — **hari ke-0**,
       karena aktivasi bisa >1 minggu. Keputusan final ADR-6.
-- [ ] Provider LLM (kandidat: Z.ai/GLM, OpenAI) → 1 API key untuk staging
-      (ADR-8 final minggu ke-2).
+- [x] Provider LLM = NVIDIA NIM (free) → 1 API key `nvapi-...` dari build.nvidia.com
+      untuk staging; base URL `https://integrate.api.nvidia.com/v1`.
 - [ ] Domain: DNS sudah di Cloudflare → attach custom domain staging & production
       ke Worker begitu nama final terpilih.
 
@@ -40,7 +40,8 @@ sehingga agent tidak menunggu apa pun. Durasi realistis: 1–2 hari (paralel den
 | `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_URL` | GitHub Secrets (CI) | migrasi `supabase db push` per env |
 | `SENTRY_DSN` | per env (Worker secret + Vite build) | |
 | `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` | build env CI | publik |
-| `LLM_API_KEY` + `LLM_MODEL` | wrangler secret (Worker) | dipakai `services/parser/llm.ts` |
+| `LLM_API_KEY` | wrangler secret (Worker) | kunci NVIDIA NIM `nvapi-...`, dipakai `services/parser/llm.ts` |
+| `LLM_BASE_URL` + `LLM_MODEL` | wrangler vars (Worker, bukan secret) | `https://integrate.api.nvidia.com/v1` + `nvidia/nemotron-3-ultra-550b-a55b` |
 | `MIDTRANS_SERVER_KEY` / `XENDIT_SECRET` | wrangler secret (Worker) | aktif setelah KYC lolos |
 
 Mekanisme: kunci Worker via `wrangler secret put <NAMA> --env staging|production`;

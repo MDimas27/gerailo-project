@@ -16,9 +16,10 @@ Referensi teknis: `docs/MODULES/M3-SMART-PASTE.md`.
    kolom bermasalah; rendah = minta pelengkapan. Tidak ada mode "auto-save tanpa lihat".
 6. AI fallback: panggil hanya jika (a) parser pola gagal lengkap ATAU (b) keyakinan
    rendah; HANYA dari route Worker `POST /api/smart-paste/ai` — `LLM_API_KEY` =
-   wrangler secret (tidak pernah di browser), kirim konteks katalog; output JSON
-   schema ketat; kuota per paket dihitung server (docs/PRODUCT.md §Paket); log ke
-   `ai_usage_logs` (sumber, skor, token, consent) via service_role di Worker.
+   wrangler secret (tidak pernah di browser), `LLM_BASE_URL`/`LLM_MODEL` = vars NIM;
+   kirim konteks katalog; output JSON schema ketat; kuota per paket dihitung server
+   (docs/PRODUCT.md §Paket); log ke `ai_usage_logs` (sumber, skor, token, consent)
+   via RPC JWT+RLS (TANPA `service_role`).
 7. Privacy: teks chat bisa berisi data pribadi — simpan teks asli hanya dengan
    consent usaha; tanpa consent, simpan hasil terstruktur saja.
 8. Golden test wajib (di `apps/worker/tests/parser/`): chat Siti (lengkap), chat COD

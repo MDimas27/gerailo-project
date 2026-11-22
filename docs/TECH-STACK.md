@@ -17,7 +17,7 @@
 | API | Cloudflare Workers + Hono | SATU Worker: `/api/*` + menyajikan aset statis PWA (Workers Static Assets) — tanpa CORS, satu deploy |
 | DB & Auth | Supabase Postgres + supabase-js | RLS, Auth, Storage; types otomatis via `supabase gen types` (agent tidak pernah salah nama kolom) |
 | ORM | **TIDAK ADA** (kesengajaan, bukan kelalaian) | Migrasi = SQL murni via Supabase CLI; operasi atomik = RPC Postgres. Lebih sedikit moving parts = lebih sedikit halusinasi |
-| AI | LLM murah per-token, dipanggil HANYA dari Worker | `LLM_API_KEY` = wrangler secret; kuota dihitung server-side |
+| AI | NVIDIA NIM (OpenAI-compatible), dipanggil HANYA dari Worker | `LLM_API_KEY` = wrangler secret; `LLM_BASE_URL`/`LLM_MODEL` = wrangler vars; kuota dihitung server-side |
 | Billing | Midtrans/Xendit QRIS/VA (ADR-6) | Webhook → Worker (service_role), fallback transfer manual |
 
 ## 6 penyempurnaan yang terkunci bersama stack ini

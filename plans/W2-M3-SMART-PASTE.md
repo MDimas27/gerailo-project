@@ -34,7 +34,7 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | H1+5 | `/admin/parser` diproteksi di Worker: JWT Supabase + allowlist email founder dari secret `ADMIN_EMAILS` (server-side; tidak ada email di bundle). Metrik dari `ai_usage_logs`. |
 | 6 | **Tanpa `SUPABASE_SERVICE_ROLE_KEY` di M3.** Semua baca/tulis via JWT user + RLS; logging & kuota masuk RPC SECURITY DEFINER dengan guard `auth.uid()`. Deviasi sadar dari kata "via service_role" di rules/02 §6 — dicatat di API-CONTRACTS + LESSONS saat /remember. |
 | 7 | `/share`: Web Share Target Android + tombol salin teks universal. Verify manual HP Android; jalur iOS tetap bisa. |
-| 8 | Golden test AI **mock**; CI tidak bergantung secret. Founder menjalankan `wrangler secret put LLM_API_KEY` + `LLM_MODEL` sebelum verify live. |
+| 8 | Golden test AI **mock**; CI tidak bergantung NVIDIA/secret. `LLM_BASE_URL` + `LLM_MODEL` = wrangler vars NIM; founder menjalankan `wrangler secret put LLM_API_KEY` sebelum verify live. |
 | 4 | pgTAP 0003 menjadi task tersendiri (pola W1b Task 7), commit terpisah dari migrasi+types. |
 | I2 | Eksekusi dimulai sekarang (22 Nov 2026), bukan menunggu 26 Nov. |
 | K1 | **Buyer tracking `/track/{token}` sengaja TIDAK masuk M3 (opsi b).** Trigger `share_token` di 0003 = fondasi data saja; bukan halaman pembeli. UI/akses publik dicatat di BACKLOG dan TIDAK ditandai selesai saat M3 `[x]`. Catatan: kit menempatkan halaman pembeli sebagai M8/W4; founder menyebut "M4" — sinkronkan label saat /remember. |
@@ -53,7 +53,7 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | 8 | UI `/share` (salin-tempel universal + Web Share Target Android), `/paste`, `/paste/confirm` (sumber kolom + pilihan 2 kandidat); konfirmasi memanggil RPC, bukan INSERT klien | UI | `apps/web/src/routes/{share,paste,paste-confirm}.tsx`, `apps/web/src/hooks/use-smart-paste.ts`, `apps/web/src/lib/api.ts`, `apps/web/src/main.tsx`, `apps/web/vite.config.ts`, `apps/web/package.json` | `M3: UI paste + konfirmasi draft` | [x] 22 Nov |
 | 9 | `/admin/parser` + `GET /api/admin/parser-metrics`: allowlist `ADMIN_EMAILS` di Worker, baca `ai_usage_logs` via RLS, wiring `mark_extraction_corrected` saat user mengoreksi | UI+kode | `apps/web/src/routes/admin-parser.tsx`, `apps/worker/src/routes/admin.ts` | `M3: metrik internal terproteksi` | [x] 22 Nov |
 | 10 | Samakan demo chat Siti & referensi fixture; sinkron docs API-CONTRACTS/DATA-MODEL/M3 (termasuk catatan deviasi service_role) | docs | `apps/web/src/routes/onboarding.tsx`, `docs/MODULES/M3-SMART-PASTE.md`, `docs/API-CONTRACTS.md`, `docs/DATA-MODEL.md` | `M3: sinkron fixture & kontrak` | [x] 22 Nov |
-| 11 | Verify: `pnpm lint/typecheck/test/build`, pgTAP, cek drift types, grep bundle web, deploy staging; founder isi secret LLM via wrangler; verify manual HP Android (share WA) + jalur salin-tempel | ops | — | — | [~] 22 Nov — lint/typecheck/test/build + pgTAP 93 + drift types + grep bundle lolos; deploy staging parser pola OK; **pending**: isi secrets/binding Worker, `VITE_WORKER_URL` GitHub Variable, verify manual HP |
+| 11 | Verify: `pnpm lint/typecheck/test/build`, pgTAP, cek drift types, grep bundle web, deploy staging; founder isi secret LLM via wrangler; verify manual HP Android (share WA) + jalur salin-tempel | ops | — | — | [~] 22 Nov — lint/typecheck/test/build + pgTAP 93 + drift types + grep bundle lolos; deploy staging parser pola + config NIM OK (`8dca929a`); **pending**: secret `LLM_API_KEY`/`ADMIN_EMAILS`, `VITE_WORKER_URL` GitHub Variable, verify manual HP |
 | 12 | /review + /remember: status M3 `[x]`, LESSONS entri baru, plan SELESAI | ops | `AGENTS.md`, `LESSONS-LEARNED.md`, plan ini | — | [~] 22 Nov — AGENTS/LESSONS diupdate; pending verify HP/deploy sebelum M3 `[x]` & plan SELESAI |
 
 ## Signature RPC (final — dibuat di 0003)
@@ -107,7 +107,7 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
 | Parser pola | Tidak pernah dikenakan kuota (hanya `log_parser_extraction`) |
 | Kuota habis | `AI_QUOTA_EXCEEDED` → Worker balas pesan jelas; hasil parser pola tetap dikembalikan |
 | Logging | `ai_usage_logs`: `sumber` PARSER/AI, `skor`, `token`, `model`, `simpan_teks`, `teks_asli` (NULL tanpa consent), `dikoreksi` |
-| Kredensial | `LLM_API_KEY`, `LLM_MODEL` = wrangler secret; `ADMIN_EMAILS` = wrangler secret; **tidak ada** `SUPABASE_SERVICE_ROLE_KEY`; tidak ada nilai secret di repo/bundle |
+| Kredensial | `LLM_API_KEY`, `ADMIN_EMAILS` = wrangler secret; `LLM_BASE_URL`, `LLM_MODEL` = wrangler vars NIM; **tidak ada** `SUPABASE_SERVICE_ROLE_KEY`; tidak ada nilai secret di repo/bundle |
 
 ## Daftar test (semua wajib di CI)
 - Golden 11 fixture: Siti lengkap (3×75rb + ongkir 15rb + DP 100rb); COD singkat;
@@ -174,7 +174,10 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
   dikenal. Kuota diklaim sebelum `complete()` sehingga kuota habis tidak memanggil LLM.
   Pelanggan/telepon selalu berasal dari normalisasi teks, bukan dari output AI;
   `ongkir`/`dp` AI opsional dan dianggap angka dari teks, bukan harga produk.
-  `LLM_ENDPOINT` ditambahkan sebagai env opsional (default OpenAI chat completions).
+  `LLM_BASE_URL` menggantikan `LLM_ENDPOINT`: OpenAI-compatible NIM, non-secret,
+  disimpan di wrangler vars; request mematikan thinking via
+  `chat_template_kwargs.enable_thinking=false`, `stream=false`, `max_tokens=1024`,
+  dan hanya `message.content` akhir yang diparse (`reasoning_content` dibuang).
 - Task 8: Web Share Target memakai `GET /share?text=...` (manifest terverifikasi di
   `dist/manifest.webmanifest`). Jalur iOS/umum = textarea + `navigator.clipboard.readText()`
   dengan fallback tempel manual bila izin clipboard ditolak. Draft teks/hasil disimpan
