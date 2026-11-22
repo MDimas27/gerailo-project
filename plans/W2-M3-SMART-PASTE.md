@@ -3,7 +3,7 @@
 > W2-M3 · dibuat 22 Nov 2026 oleh /prep + /plan · status: MENUNGGU CEK FOUNDER
 > Eksekusi mulai 22 Nov 2026 (keputusan I2 — lebih awal dari kalender W2, 26 Nov).
 > Disetujui founder 22 Nov 2026: A1 B1 C1 D1 E1 F1 G1 H1 I2 + amandemen 1–8.
-> Status: DISETUJUI — eksekusi Task 4 dimulai 22 Nov 2026; plan ini kontrak sesi.
+> Status: DISETUJUI — eksekusi Task 5 dimulai 22 Nov 2026; plan ini kontrak sesi.
 
 ## Tujuan sesi
 Setelah sesi ini: pengguna bisa menyalin/membagikan chat WhatsApp → parser pola
@@ -46,7 +46,7 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | 1 | Migrasi 0003: `pdpr_consent_at`, `kuota_ai_periode`, tabel `customers`/`orders`/`order_items`/`ai_usage_logs`, enum + trigger nomor&token, RLS deny-by-default, REVOKE tulis langsung, 4 RPC (lihat §Signature RPC); + `supabase gen types` satu commit | migrasi | `packages/supabase/migrations/0003_m3_smart_paste.sql`, `types/db.ts` | `M3: fondasi data + RPC confirm_draft_order & kuota AI` | [x] 22 Nov |
 | 2 | pgTAP 0003 terpisah: RLS A/B, anon ditolak, RPC confirm harga dari server & klien-dikirim-harga ditolak, kuota FREE/STARTER + reset periode + race, consent teks asli, trigger nomor/token unik, dedup customer | test | `packages/supabase/tests/0003_m3_smart_paste_test.sql` | `M3: pgTAP 0003` | [x] 22 Nov |
 | 3 | 11 golden fixture parser (teks → hasil terstruktur), dijalankan **MERAH** sebelum implementasi | test | `apps/worker/tests/parser/` | `M3: fixture golden parser (merah)` | [x] 22 Nov |
-| 4 | Normalisasi angka Indonesia & qty + parser pola; seluruh aturan pola di satu `rules.ts` | kode | `apps/worker/src/services/parser/{normalize,rules,index}.ts` | `M3: normalisasi + parser pola` | [ ] |
+| 4 | Normalisasi angka Indonesia & qty + parser pola; seluruh aturan pola di satu `rules.ts` | kode | `apps/worker/src/services/parser/{normalize,rules,index}.ts` | `M3: normalisasi + parser pola` | [x] 22 Nov |
 | 5 | Matching persis→alias→trigram ≥0,8 (katalog dari F1), 2 kandidat = pilihan UI; skor 3 tingkat + penanda sumber; zod schema bersama | kode | `apps/worker/src/services/parser/{matching,confidence}.ts`, `packages/shared/src/schemas/smart-paste.ts` | `M3: matching katalog + skor keyakinan` | [ ] |
 | 6 | `POST /api/smart-paste`: JWT + zod + katalog via JWT user, total BIGINT server, `log_parser_extraction`, TANPA menyimpan draft | kode | `apps/worker/src/routes/smart-paste.ts`, `apps/worker/src/index.ts`, `apps/worker/src/lib/supabase.ts` | `M3: route parser pola` | [ ] |
 | 7 | `POST /api/smart-paste/ai`: kandidat saja, schema ketat candidate-ID-or-null, mock di test, `claim_ai_quota`, kuota habis → pesan jelas + parser tetap jalan; tanpa service_role | kode | `apps/worker/src/services/parser/llm.ts`, `apps/worker/src/routes/smart-paste.ts` | `M3: fallback AI berkuota` | [ ] |
@@ -124,7 +124,9 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
 - **Kontrak hasil ekstraksi (dikunci Task 3, MERAH 11/11 suite):**
   - `parseSmartPaste(teks, katalog)` → `{ sumber: "POLA", confidence, pelanggan, items, ongkir, dp, metode_bayar, total, flags }`.
   - `Field<T> = { value: T | null; source: "katalog" | "teks" | "kosong" }`; uang BIGINT;
-    `total = Σ(qty × harga katalog) + ongkir`, dihitung di Worker.
+    `total = Σ(qty × harga katalog) + ongkir`, dihitung di Worker. Field uang agregat
+    (`ongkir`, `dp`) bernilai `0n` + source `kosong` bila tidak disebut; harga per item
+    yang tidak dikenal tetap `null` + source `kosong`.
   - `extractWithAi(teks, katalog, { complete, claimQuota })` → `{ extraction, logId, tokens }`;
     `parseAiResponse(json, candidateIds)` (zod) hanya menerima `product_id` dari kandidat,
     menolak `harga_satuan`/`harga` dan `pelanggan` dari AI.
