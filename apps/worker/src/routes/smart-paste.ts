@@ -23,6 +23,7 @@ export type SmartPasteDeps = {
 export type SmartPasteAiDeps = {
   verifyToken: (token: string) => Promise<SmartPasteUser | null>;
   fetchKatalog: (user: SmartPasteUser) => Promise<CatalogProduct[]>;
+  aiTersedia?: boolean;
   extractWithAi: (
     user: SmartPasteUser,
     teks: string,
@@ -115,6 +116,16 @@ export function smartPasteHandler(deps: SmartPasteDeps) {
 
 export function smartPasteAiHandler(deps: SmartPasteAiDeps) {
   return async (c: Context) => {
+    if (deps.aiTersedia === false) {
+      return c.json(
+        {
+          error: "AI_NOT_CONFIGURED",
+          pesan: "AI tidak aktif, lanjut manual.",
+        },
+        503,
+      );
+    }
+
     const header = c.req.header("Authorization") ?? "";
     const token = /^Bearer\s+(.+)$/i.exec(header)?.[1];
 

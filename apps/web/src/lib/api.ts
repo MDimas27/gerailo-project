@@ -84,6 +84,10 @@ function pesanError(kode: string): string {
     return "Teks pesanan tidak valid. Periksa lagi.";
   }
 
+  if (kode === "AI_NOT_CONFIGURED") {
+    return "AI tidak aktif, lanjut manual.";
+  }
+
   if (kode.startsWith("LLM")) {
     return "AI sedang tidak tersedia. Coba Baca pesanan dengan pola.";
   }

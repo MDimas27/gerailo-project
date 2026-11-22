@@ -43,6 +43,7 @@ app.post("/api/smart-paste/ai", (c) =>
   smartPasteAiHandler({
     verifyToken: (token) => verifyJwt(c.env, token),
     fetchKatalog: (pengguna) => fetchKatalog(c.env, pengguna.token),
+    aiTersedia: Boolean(c.env.LLM_API_KEY?.trim()),
     extractWithAi: (pengguna, teks, katalog) =>
       extractWithAi(teks, katalog, {
         model: c.env.LLM_MODEL ?? "gpt-4o-mini",

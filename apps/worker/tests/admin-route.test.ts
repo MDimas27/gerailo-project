@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describe, expect, it, vi } from "vitest";
 
 import { createAdminRoute, type AdminDeps } from "../src/routes/admin.js";
-import type { ParserMetrics } from "../src/lib/supabase.js";
+import { isAdminEmail, type ParserMetrics, type WorkerEnv } from "../src/lib/supabase.js";
 
 const metrik: ParserMetrics = {
   total: 4,
@@ -82,6 +82,15 @@ describe("GET /api/admin/parser-metrics", () => {
 });
 
 describe("allowlist admin", () => {
+  it("menolak semua email saat ADMIN_EMAILS kosong", async () => {
+    const env: WorkerEnv = {
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_ANON_KEY: "anon",
+    };
+    expect(isAdminEmail(env, "owner@gerailo.id")).toBe(false);
+    expect(isAdminEmail(env, null)).toBe(false);
+  });
+
   it("hanya menerima email yang terdaftar", async () => {
     const app = new Hono();
     app.route(

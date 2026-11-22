@@ -125,6 +125,10 @@ diperbarui.
   · Tindakan: AGENTS.md status diupdate, LESSONS #16, sesi W1b **resmi selesai**.
   Next: PREP M3 Smart Paste (parser pola + fallback AI + konfirmasi).
 
+#17 · 22 Nov 2026 · m3 · M3 Smart Paste kode-complete: parser+AI via Worker, RPC `confirm_draft_order`/kuota, UI `/share`→`/paste`→`/paste/confirm`, `/admin/parser`; golden 11 + pgTAP 93 + Vitest 52 + lint/typecheck/build hijau, drift types & grep bundle bersih.
+· Keputusan: tanpa `service_role`; kuota diklaim sebelum `complete()`; AI hanya memilih `product_id` kandidat; klien kirim BIGINT string, harga/total dari server; `/track/{token}` masuk backlog (bukan M3).
+· Tindakan: jangan tandai `[x]` sebelum secrets `SUPABASE_URL`/`ANON`, `LLM_API_KEY`/`LLM_MODEL`, `ADMIN_EMAILS`, `VITE_WORKER_URL` terisi, deploy staging, verify HP Android/iOS.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
@@ -139,9 +143,6 @@ diperbarui.
 - Demo video onboarding
 - **Edit profil usaha** (ubah nama, jenis, metode_bayar) — M1 sisa
 - **Edit pengaturan usaha** (paket, notifikasi, dsb) — M1 sisa
-- **Persist consent PDP** (`pdpr_consent_at` kolom, label compliance — gabung migrasi
-  berikutnya yg menyentuh schema, mis. edit pengaturan / M3)
-
 ## Status deploy production
 
 - (belum ada — pertama di W4/release)

@@ -67,6 +67,7 @@ export function PastePage() {
   );
   const [hasil, setHasil] = useState<HasilEkstraksi | null>(null);
   const [pesan, setPesan] = useState<string | null>(null);
+  const [aiNonaktif, setAiNonaktif] = useState(false);
 
   const jalankan = async (pakaiAi: boolean) => {
     if (!teks.trim()) {
@@ -89,11 +90,14 @@ export function PastePage() {
       }
     } catch (kesalahan) {
       setHasil(null);
-      setPesan(
+      const pesanGagal =
         kesalahan instanceof Error
           ? kesalahan.message
-          : "Gagal membaca pesanan. Coba lagi.",
-      );
+          : "Gagal membaca pesanan. Coba lagi.";
+      if (pesanGagal === "AI tidak aktif, lanjut manual.") {
+        setAiNonaktif(true);
+      }
+      setPesan(pesanGagal);
     }
   };
 
@@ -186,13 +190,13 @@ export function PastePage() {
           </Button>
           <Button
             className="flex-1"
-            disabled={smartPaste.isPending}
+            disabled={smartPaste.isPending || aiNonaktif}
             type="button"
             variant="secondary"
             onClick={() => void jalankan(true)}
           >
             <Sparkles aria-hidden="true" className="size-4" />
-            Coba AI
+            {aiNonaktif ? "AI tidak aktif" : "Coba AI"}
           </Button>
         </div>
         {pesan ? (

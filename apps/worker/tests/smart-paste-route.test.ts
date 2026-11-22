@@ -23,7 +23,10 @@ function buatApp() {
   return { app, logExtraction };
 }
 
-function buatAppAi(extractWithAi: SmartPasteAiDeps["extractWithAi"]) {
+function buatAppAi(
+  extractWithAi: SmartPasteAiDeps["extractWithAi"],
+  aiTersedia = true,
+) {
   const deps: SmartPasteDeps = {
     verifyToken: async (token) =>
       token === "valid" ? { id: "user-1", token } : null,
@@ -33,6 +36,7 @@ function buatAppAi(extractWithAi: SmartPasteAiDeps["extractWithAi"]) {
   const depsAi: SmartPasteAiDeps = {
     verifyToken: deps.verifyToken,
     fetchKatalog: deps.fetchKatalog,
+    aiTersedia,
     extractWithAi,
   };
   const app = new Hono();
@@ -109,6 +113,27 @@ describe("POST /api/smart-paste", () => {
 });
 
 describe("POST /api/smart-paste/ai", () => {
+  it("memberi 503 AI_NOT_CONFIGURED saat AI belum diisi", async () => {
+    const extractWithAi = vi.fn(async () => ({
+      extraction: parseSmartPaste("Pesan 1 sosis", katalogSiti),
+      logId: "log-1",
+      tokens: 42,
+    }));
+    const app = buatAppAi(extractWithAi, false);
+    const respons = await app.request("/api/smart-paste/ai", {
+      method: "POST",
+      headers: headerValid,
+      body: JSON.stringify({ teks: "Pesan 1 sosis" }),
+    });
+
+    expect(respons.status).toBe(503);
+    expect(await respons.json()).toEqual({
+      error: "AI_NOT_CONFIGURED",
+      pesan: "AI tidak aktif, lanjut manual.",
+    });
+    expect(extractWithAi).not.toHaveBeenCalled();
+  });
+
   it("mengembalikan ekstraksi AI, log_id, dan tokens", async () => {
     const extractWithAi = vi.fn(async () => ({
       extraction: parseSmartPaste("Pesan 1 sosis", katalogSiti),
