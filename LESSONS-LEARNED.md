@@ -127,7 +127,8 @@ diperbarui.
 
 #17 · 22 Nov 2026 · m3 · M3 Smart Paste kode-complete: parser+AI via Worker, RPC `confirm_draft_order`/kuota, UI `/share`→`/paste`→`/paste/confirm`, `/admin/parser`; golden 11 + pgTAP 93 + Vitest 52 + lint/typecheck/build hijau, drift types & grep bundle bersih.
 · Keputusan: tanpa `service_role`; kuota diklaim sebelum `complete()`; AI hanya memilih `product_id` kandidat; klien kirim BIGINT string, harga/total dari server; `/track/{token}` masuk backlog (bukan M3).
-· Tindakan: jangan tandai `[x]` sebelum secrets `SUPABASE_URL`/`ANON`, `LLM_API_KEY`/`LLM_MODEL`, `ADMIN_EMAILS`, `VITE_WORKER_URL` terisi, deploy staging, verify HP Android/iOS.
+· Deploy: staging parser pola OK (Worker `1aef692d`); AI 503 `AI_NOT_CONFIGURED`, admin 401 tanpa JWT.
+· Tindakan: jangan tandai `[x]` sebelum secrets `SUPABASE_URL`/`ANON`, `LLM_API_KEY`/`LLM_MODEL`, `ADMIN_EMAILS`, `VITE_WORKER_URL` GitHub Variable terisi dan verify HP Android/iOS lolos.
 
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
