@@ -102,8 +102,8 @@ staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui.
 
 - Sprint aktif: W1b M2 produk selesai 22 Nov; W2 M3 dimulai 22 Nov — Task 1–11 kode/gate selesai, Task 12 menunggu verify manual + deploy
 - Modul selesai: M2 (produk, varian, alias, stok, kuota paket, RPC create_product/record_stock_move)
-- M3 `[~]`: parser pola + fallback AI berkuota + UI share/paste/confirm + `/admin/parser` siap; pgTAP 93, Vitest 56, lint/typecheck/build hijau; RLS/RPC diuji. Belum `[x]` sebelum secret NVIDIA NIM/admin + verify HP.
+- M3 `[~]`: parser pola + fallback AI berkuota + UI share/paste/confirm + `/admin/parser` siap; pgTAP 93, Vitest 56, lint/typecheck/build hijau; RLS/RPC diuji. Belum `[x]` sebelum smoke AI/admin + verify HP.
 - M1 parsial: auth OTP, usaha, 19 COA, settings. **Sisa M1 (backlog)**: edit profil usaha, edit pengaturan. Kolom `pdpr_consent_at` sudah masuk migrasi 0003.
 - Deploy staging terakhir: 22 Nov 2026 — https://gerailo-staging.mdimas-jobs.workers.dev (health + SPA ok); migrasi 0001-0002 + RLS/RPC terverifikasi; smoke test auth cloud PASS (email OTP → onboarding 3 langkah → beranda). CI **hijau** (quality + db-tests + db-migrate-staging + deploy-staging).
-- Deploy M3 staging: 22 Nov 2026 — Worker `8dca929a-88e0-48d0-a9d7-6fd6070d525e` (sebelumnya `1aef692d`); `/api/health` OK, `/api/smart-paste/ai` 503 `AI_NOT_CONFIGURED`, `/api/admin/parser-metrics` 401 tanpa JWT, manifest share target `/share?text=`; AI NVIDIA NIM/admin menunggu secret.
-- Halangan: KYC gateway; `wrangler secret list --env staging` masih `[]`; `VITE_WORKER_URL` belum ada di `.env.local`/GitHub Variables (saat deploy lokal disuntik lewat env); verify manual Web Share Target Android + clipboard/iOS pending.
+- Deploy M3 staging: 22 Nov 2026 — Worker `f628860d-7e07-4afb-8289-8a5a13adabc5` (sebelumnya `8994d23e`, `1575a74f`, `8dca929a`); `/api/health` OK; `LLM_API_KEY` + `ADMIN_EMAILS` sudah terdaftar; bundle web terbukti memuat URL Worker; verify AI/admin menyusul.
+- Halangan: KYC gateway; verify manual Web Share Target Android + clipboard/iOS pending; smoke AI/admin setelah secret belum dilaporkan.
