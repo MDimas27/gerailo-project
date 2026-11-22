@@ -102,6 +102,12 @@ importers:
       '@gerailo/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@gerailo/supabase':
+        specifier: workspace:*
+        version: link:../../packages/supabase
+      '@supabase/supabase-js':
+        specifier: ^2.119.2
+        version: 2.119.2
       hono:
         specifier: ^4.13.19
         version: 4.13.19

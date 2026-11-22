@@ -18,6 +18,16 @@ export const aiResponseSchema = z.strictObject({
 
 export type AiResponse = z.infer<typeof aiResponseSchema>;
 
+export const smartPasteRequestSchema = z.strictObject({
+  teks: z
+    .string()
+    .trim()
+    .min(1, "Teks wajib diisi")
+    .max(8000, "Teks maksimal 8000 karakter"),
+});
+
+export type SmartPasteRequest = z.infer<typeof smartPasteRequestSchema>;
+
 /** AI hanya boleh memilih product_id dari kandidat yang dikirim Worker.
  * Harga produk dan data pelanggan sama sekali tidak diterima dari AI. */
 export function parseAiResponse(
