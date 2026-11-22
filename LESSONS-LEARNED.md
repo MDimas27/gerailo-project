@@ -90,12 +90,22 @@ diperbarui, smoke test cloud PASS (OTP → onboarding → beranda), status AGENT
 diperbarui.
 
 #13 · 21 Nov 2026 · auth · Batas template free tier Supabase ternyata bisa
-dibuka dengan **SMTP kustom**, tanpa upgrade. Setelah `gerailo.com` verified di
-Resend, isi SMTP staging (`smtp.resend.com:465`, user `resend`, sender
-`noreply@gerailo.com`), lalu `config push` template `{{ .Token }}` berhasil.
-Kode 6 digit teruji end-to-end (kirim → verifikasi → onboarding → beranda);
-magic link tetap jadi fallback ke `/auth/callback`. · Tindakan: ENV-SETUP §4.1,
-copy auth jadi code-first, plan/AGENTS diperbarui.
+  dibuka dengan **SMTP kustom**, tanpa upgrade. Setelah `gerailo.com` verified di
+  Resend, isi SMTP staging (`smtp.resend.com:465`, user `resend`, sender
+  `noreply@gerailo.com`), lalu `config push` template `{{ .Token }}` berhasil.
+  Kode 6 digit teruji end-to-end (kirim → verifikasi → onboarding → beranda);
+  magic link tetap jadi fallback ke `/auth/callback`. · Tindakan: ENV-SETUP §4.1,
+  copy auth jadi code-first, plan/AGENTS diperbarui.
+
+#14 · 22 Nov 2026 · produk · W1b Tasks 6–10 selesai: migrasi 0002 (products,
+  product_variants, product_aliases, stock_movements) + RPC `create_product`
+  atomik + `record_stock_move` + trigger kuota paket (FREE 100/STARTER 500) + RLS
+  deny-by-default + 24 pgTAP test hijau; UI produk (list + create/edit) mengikuti
+  Stitch `produk_stok`; onboarding wizard 3 langkah (profil → produk pertama +
+  stok awal via RPC → demo Smart Paste chat Siti hardcoded) selesai; ESLint +
+  vitest + pgTAP hijau; commit per task. Deviasi sadar: `create_product` pakai
+  RPC atomik (bukan N query klien) sesuai konvensi kit. · Tindakan: AGENTS.md
+  M1/M2 `[x]`, LESSONS #14, commit per task.
 
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 

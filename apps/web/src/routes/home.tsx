@@ -1,4 +1,4 @@
-import { Navigate } from "react-router";
+import { Link, Navigate } from "react-router";
 
 import { useBusinesses } from "@/hooks/use-businesses";
 import { useAuth } from "@/lib/auth";
@@ -66,9 +66,14 @@ export function HomePage() {
       <section className="rounded-card border border-border bg-surface p-5">
         <h2 className="text-base font-semibold text-ink">Buku usaha siap</h2>
         <p className="mt-1 text-sm text-muted">
-          19 akun COA dan pengaturan usaha sudah dibuat otomatis. Modul produk
-          menyusul di sesi W1b.
+          19 akun COA dan pengaturan usaha sudah dibuat otomatis.
         </p>
+        <Link
+          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-control bg-primary px-4 text-sm font-semibold text-white"
+          to="/products"
+        >
+          Kelola produk &amp; stok
+        </Link>
       </section>
 
       <section className="rounded-card border border-dashed border-border p-5">

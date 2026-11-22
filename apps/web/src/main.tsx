@@ -8,6 +8,8 @@ import { AuthCallbackPage } from "./routes/auth-callback.js";
 import { HomePage } from "./routes/home.js";
 import { LegalPage, NotFoundPage } from "./routes/legal.js";
 import { OnboardingPage } from "./routes/onboarding.js";
+import { ProductFormPage } from "./routes/product-form.js";
+import { ProductsPage } from "./routes/products.js";
 import { AuthProvider, RequireAuth } from "./lib/auth.js";
 import "./index.css";
 
@@ -30,6 +32,30 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <OnboardingPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/products",
+    element: (
+      <RequireAuth>
+        <ProductsPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/products/new",
+    element: (
+      <RequireAuth>
+        <ProductFormPage mode="create" />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/products/:id/edit",
+    element: (
+      <RequireAuth>
+        <ProductFormPage mode="edit" />
       </RequireAuth>
     ),
   },
