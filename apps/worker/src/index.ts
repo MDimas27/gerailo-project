@@ -43,10 +43,10 @@ app.post("/api/smart-paste/ai", (c) =>
   smartPasteAiHandler({
     verifyToken: (token) => verifyJwt(c.env, token),
     fetchKatalog: (pengguna) => fetchKatalog(c.env, pengguna.token),
-    aiTersedia: Boolean(c.env.LLM_API_KEY?.trim()),
+    aiTersedia: Boolean(c.env.LLM_API_KEY?.trim() && c.env.LLM_BASE_URL?.trim()),
     extractWithAi: (pengguna, teks, katalog) =>
       extractWithAi(teks, katalog, {
-        model: c.env.LLM_MODEL ?? "gpt-4o-mini",
+        model: c.env.LLM_MODEL ?? "nvidia/nemotron-3-ultra-550b-a55b",
         complete: createLlmCompleter(c.env),
         claimQuota: (input) => claimAiQuota(c.env, pengguna.token, input),
       }),

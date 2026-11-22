@@ -140,13 +140,16 @@ export async function extractWithAi(
 
 export function createLlmCompleter(env: WorkerEnv) {
   return async (prompt: string): Promise<string> => {
-    if (!env.LLM_API_KEY) {
+    if (!env.LLM_API_KEY?.trim()) {
       throw new Error("LLM_API_KEY_BELUM_DISET");
     }
 
-    const titikAkhir =
-      env.LLM_ENDPOINT ?? "https://api.openai.com/v1/chat/completions";
-    const model = env.LLM_MODEL ?? "gpt-4o-mini";
+    if (!env.LLM_BASE_URL?.trim()) {
+      throw new Error("LLM_BASE_URL_BELUM_DISET");
+    }
+
+    const titikAkhir = `${env.LLM_BASE_URL.replace(/\/$/, "")}/chat/completions`;
+    const model = env.LLM_MODEL ?? "nvidia/nemotron-3-ultra-550b-a55b";
     const respons = await fetch(titikAkhir, {
       method: "POST",
       headers: {
@@ -156,6 +159,9 @@ export function createLlmCompleter(env: WorkerEnv) {
       body: JSON.stringify({
         model,
         temperature: 0,
+        max_tokens: 1024,
+        stream: false,
+        chat_template_kwargs: { enable_thinking: false },
         response_format: { type: "json_object" },
         messages: [{ role: "user", content: prompt }],
       }),
@@ -166,11 +172,11 @@ export function createLlmCompleter(env: WorkerEnv) {
     }
 
     const data = (await respons.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
+      choices?: Array<{ message?: { content?: string | null } }>;
     };
     const isi = data.choices?.[0]?.message?.content;
 
-    if (!isi) {
+    if (!isi?.trim()) {
       throw new Error("LLM_OUTPUT_KOSONG");
     }
 

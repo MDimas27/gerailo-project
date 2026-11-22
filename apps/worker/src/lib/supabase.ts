@@ -9,8 +9,8 @@ export type WorkerEnv = {
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
   LLM_API_KEY?: string;
+  LLM_BASE_URL?: string;
   LLM_MODEL?: string;
-  LLM_ENDPOINT?: string;
   ADMIN_EMAILS?: string;
 };
 
