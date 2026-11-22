@@ -1,6 +1,6 @@
 import { type CreateBusinessInput, parseAliasInput, parseRupiah, productFormSchema } from "@gerailo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router";
 
