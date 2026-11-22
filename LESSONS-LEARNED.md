@@ -114,6 +114,17 @@ diperbarui.
   sebagai klarifikasi bukan deviasi. · Tindakan: AGENTS.md M1 jadi `[~] parsial`,
   backlog 3 item M1 ditambah, LESSONS #15, push 3 commit sekaligus agar CI jalan 1x.
 
+#16 · 22 Nov 2026 · ci · W1b CI **hijau sempurna** setelah fix lint/build errors:
+  - Lint: `useEffect` unused dihapus, `businessTypes`/`paymentTypes` import type-only,
+    `rows` numeric, `readOnly` camelCase, undefined checks di `businesses.data`.
+  - Build: `tsc --noEmit` + `vite build` lolos (hanya warning chunk >500 kB).
+  - Quality: ESLint + Vitest + pgTAP (24 tes) hijau.
+  - DB: migrasi 0002 diterapkan staging via `db-migrate-staging` job.
+  - Deploy: Cloudflare Workers SPA deploy berhasil.
+  Semua 4 job CI (quality, db-tests, db-migrate-staging, deploy-staging) **sukses**.
+  · Tindakan: AGENTS.md status diupdate, LESSONS #16, sesi W1b **resmi selesai**.
+  Next: PREP M3 Smart Paste (parser pola + fallback AI + konfirmasi).
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
