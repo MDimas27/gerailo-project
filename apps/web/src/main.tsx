@@ -8,8 +8,11 @@ import { AuthCallbackPage } from "./routes/auth-callback.js";
 import { HomePage } from "./routes/home.js";
 import { LegalPage, NotFoundPage } from "./routes/legal.js";
 import { OnboardingPage } from "./routes/onboarding.js";
+import { PasteConfirmPage } from "./routes/paste-confirm.js";
+import { PastePage } from "./routes/paste.js";
 import { ProductFormPage } from "./routes/product-form.js";
 import { ProductsPage } from "./routes/products.js";
+import { SharePage } from "./routes/share.js";
 import { AuthProvider, RequireAuth } from "./lib/auth.js";
 import "./index.css";
 
@@ -32,6 +35,30 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <OnboardingPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/share",
+    element: (
+      <RequireAuth>
+        <SharePage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/paste",
+    element: (
+      <RequireAuth>
+        <PastePage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/paste/confirm",
+    element: (
+      <RequireAuth>
+        <PasteConfirmPage />
       </RequireAuth>
     ),
   },

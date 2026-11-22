@@ -3,7 +3,7 @@
 > W2-M3 · dibuat 22 Nov 2026 oleh /prep + /plan · status: MENUNGGU CEK FOUNDER
 > Eksekusi mulai 22 Nov 2026 (keputusan I2 — lebih awal dari kalender W2, 26 Nov).
 > Disetujui founder 22 Nov 2026: A1 B1 C1 D1 E1 F1 G1 H1 I2 + amandemen 1–8.
-> Status: DISETUJUI — Task 7 selesai 22 Nov 2026; Task 8 berikutnya; plan ini kontrak sesi.
+> Status: DISETUJUI — Task 8 selesai 22 Nov 2026; Task 9 berikutnya; plan ini kontrak sesi.
 
 ## Tujuan sesi
 Setelah sesi ini: pengguna bisa menyalin/membagikan chat WhatsApp → parser pola
@@ -50,7 +50,7 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | 5 | Matching persis→alias→trigram ≥0,8 (katalog dari F1), 2 kandidat = pilihan UI; skor 3 tingkat + penanda sumber; zod schema bersama | kode | `apps/worker/src/services/parser/{matching,confidence}.ts`, `packages/shared/src/schemas/smart-paste.ts` | `M3: matching katalog + skor keyakinan` | [x] 22 Nov |
 | 6 | `POST /api/smart-paste`: JWT + zod + katalog via JWT user, total BIGINT server, `log_parser_extraction`, TANPA menyimpan draft | kode | `apps/worker/src/routes/smart-paste.ts`, `apps/worker/src/index.ts`, `apps/worker/src/lib/supabase.ts` | `M3: route parser pola` | [x] 22 Nov |
 | 7 | `POST /api/smart-paste/ai`: kandidat saja, schema ketat candidate-ID-or-null, mock di test, `claim_ai_quota`, kuota habis → pesan jelas + parser tetap jalan; tanpa service_role | kode | `apps/worker/src/services/parser/llm.ts`, `apps/worker/src/routes/smart-paste.ts` | `M3: fallback AI berkuota` | [x] 22 Nov |
-| 8 | UI `/share` (salin-tempel universal + Web Share Target Android), `/paste`, `/paste/confirm` (sumber kolom + pilihan 2 kandidat); konfirmasi memanggil RPC, bukan INSERT klien | UI | `apps/web/src/routes/{share,paste,paste-confirm}.tsx`, `apps/web/src/hooks/use-smart-paste.ts`, `apps/web/src/lib/api.ts`, `apps/web/src/main.tsx`, `apps/web/vite.config.ts`, `apps/web/package.json` | `M3: UI paste + konfirmasi draft` | [ ] |
+| 8 | UI `/share` (salin-tempel universal + Web Share Target Android), `/paste`, `/paste/confirm` (sumber kolom + pilihan 2 kandidat); konfirmasi memanggil RPC, bukan INSERT klien | UI | `apps/web/src/routes/{share,paste,paste-confirm}.tsx`, `apps/web/src/hooks/use-smart-paste.ts`, `apps/web/src/lib/api.ts`, `apps/web/src/main.tsx`, `apps/web/vite.config.ts`, `apps/web/package.json` | `M3: UI paste + konfirmasi draft` | [x] 22 Nov |
 | 9 | `/admin/parser` + `GET /api/admin/parser-metrics`: allowlist `ADMIN_EMAILS` di Worker, baca `ai_usage_logs` via RLS, wiring `mark_extraction_corrected` saat user mengoreksi | UI+kode | `apps/web/src/routes/admin-parser.tsx`, `apps/worker/src/routes/admin.ts` | `M3: metrik internal terproteksi` | [ ] |
 | 10 | Samakan demo chat Siti & referensi fixture; sinkron docs API-CONTRACTS/DATA-MODEL/M3 (termasuk catatan deviasi service_role) | docs | `apps/web/src/routes/onboarding.tsx`, `docs/MODULES/M3-SMART-PASTE.md`, `docs/API-CONTRACTS.md`, `docs/DATA-MODEL.md` | `M3: sinkron fixture & kontrak` | [ ] |
 | 11 | Verify: `pnpm lint/typecheck/test/build`, pgTAP, cek drift types, grep bundle web, deploy staging; founder isi secret LLM via wrangler; verify manual HP Android (share WA) + jalur salin-tempel | ops | — | — | [ ] |
@@ -153,6 +153,7 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
 | Deviasi rules/02 §6 (tanpa service_role) | RPC SECURITY DEFINER + `auth.uid()` + RLS; dicatat eksplisit di API-CONTRACTS & LESSONS |
 | Secret LLM belum ada | Golden test mock; secret diisi founder sebelum verify live; kuota habis tidak crash |
 | Worker butuh `SUPABASE_URL` + `SUPABASE_ANON_KEY` | Binding Worker (bukan secret bila anon), di-set sebelum verify; route gagal jelas `_BELUM_DISET` bila kosong; tidak ada `service_role` |
+| Web butuh `VITE_WORKER_URL` | Env publik di `.env.local`/CI; `api.ts` gagal dengan pesan jelas bila kosong; bukan secret |
 | Fixture Siti inkonsisten | E1 kanonisasi + update demo onboarding & referensi docs |
 | Web Share Target iOS tidak didukung | Tombol salin-tempel wajib di `/share` (D1/7) |
 | RLS/trigger nomor salah | pgTAP task 2 sebelum UI task 8 |
@@ -173,6 +174,12 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
   Pelanggan/telepon selalu berasal dari normalisasi teks, bukan dari output AI;
   `ongkir`/`dp` AI opsional dan dianggap angka dari teks, bukan harga produk.
   `LLM_ENDPOINT` ditambahkan sebagai env opsional (default OpenAI chat completions).
+- Task 8: Web Share Target memakai `GET /share?text=...` (manifest terverifikasi di
+  `dist/manifest.webmanifest`). Jalur iOS/umum = textarea + `navigator.clipboard.readText()`
+  dengan fallback tempel manual bila izin clipboard ditolak. Draft teks/hasil disimpan
+  di `sessionStorage`, bukan localStorage. Argumen BIGINT RPC dikirim sebagai string
+  yang di-cast ke `number` mengikuti pola `product-form.tsx` supaya supabase-js tidak
+  membulatkan. `VITE_WORKER_URL` adalah env publik baru yang wajib diisi sebelum verify.
 
 ## BACKLOG (temuan sesi ini di luar scope)
 - **Buyer tracking `/track/{token}`** (K1): sengaja tidak dikerjakan di M3; fondasi `share_token` sudah ada di 0003, UI publik + aturan akses token menyusul (modul resmi kit = M8/W4; label "M4" dari founder perlu disinkronkan). Jangan tandai selesai saat M3 `[x]`.
