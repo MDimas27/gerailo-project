@@ -8,7 +8,7 @@ export function useBusinesses() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("businesses")
-        .select("id,nama,jenis,metode_bayar")
+        .select("id,nama,jenis,metode_bayar,onboarding_selesai")
         .order("created_at", { ascending: true });
 
       if (error) {

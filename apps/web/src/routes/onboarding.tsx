@@ -1,4 +1,4 @@
-import { type CreateBusinessInput, parseAliasInput, parseRupiah, productFormSchema } from "@gerailo/shared";
+import { type CreateBusinessInput, parseAliasInput, parseRupiah, productFormSchema, type businessTypes, type paymentMethods } from "@gerailo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -84,8 +84,13 @@ export function OnboardingPage() {
       : parseRupiah(parsed.data.harga_beli);
 
     try {
+      const businessId = businesses.data?.[0]?.id;
+      if (!businessId) {
+        setStepError("Tidak ada usaha terdaftar");
+        return;
+      }
       const { error } = await supabase.rpc("create_product", {
-        p_business_id: businesses.data![0].id,
+        p_business_id: businessId,
         p_nama: parsed.data.nama,
         p_harga_jual: hargaJual.toString() as unknown as number,
         p_stok_min: parsed.data.stok_min,
@@ -138,7 +143,8 @@ export function OnboardingPage() {
 
   // Check for existing business
   if (businesses.data && businesses.data.length > 0) {
-    if (step === 1 && businesses.data[0].onboarding_selesai) {
+    const firstBusiness = businesses.data[0];
+    if (firstBusiness && step === 1 && firstBusiness.onboarding_selesai) {
       return <Navigate to="/" replace />;
     }
   }
@@ -168,8 +174,8 @@ export function OnboardingPage() {
             const formData = new FormData(event.currentTarget);
             const input: CreateBusinessInput = {
               nama: formData.get("nama") as string,
-              jenis: formData.get("jenis") as string,
-              metode_bayar: formData.get("metode_bayar") as string,
+              jenis: formData.get("jenis") as (typeof businessTypes)[number],
+              metode_bayar: formData.get("metode_bayar") as (typeof paymentMethods)[number],
               consent: formData.get("consent") === "on",
             };
             void createBusiness.mutate(input);
@@ -405,8 +411,8 @@ export function OnboardingPage() {
           <div className="bg-background rounded-lg p-4 mb-4">
             <textarea
               className="w-full bg-transparent font-body-sm text-body-sm text-on-surface focus:outline-none resize-none leading-relaxed"
-              rows="3"
-              readonly
+              rows={3}
+              readOnly
             >
 {chatSiti}
 </textarea>
