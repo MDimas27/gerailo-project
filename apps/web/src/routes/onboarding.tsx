@@ -112,7 +112,7 @@ export function OnboardingPage() {
   };
 
   // Step 3: Demo Smart Paste
-  const chatSiti = "Halo kak Rena, saya mau pesan Sambal Cumi Pedas 2 toples sama Sambal Roa 1 toples yaa. Kirim ke Jl. Melati No. 45 Kemang, Jakarta Selatan atas nama Maya Anggraini (0812-8899-7766). Pakai SiCepat Regular kak. Sudah saya transfer DP Rp100.000 ya kak.";
+  const chatSiti = "Halo kak, saya mau pesan 3 Sosis @Rp75.000 ya.\nOngkir Rp15.000.\nSudah transfer DP Rp100.000.\nNama: Siti\nTelepon: 0812-8899-7766\nAlamat: Jl. Melati No. 45";
 
   interface ParsedChat {
     products: Array<{ nama: string; harga: number; qty: number }>;
@@ -125,16 +125,13 @@ export function OnboardingPage() {
   }
 
   const parsedChat: ParsedChat = {
-    products: [
-      { nama: "Sambal Cumi Pedas", harga: 45000, qty: 2 },
-      { nama: "Sambal Roa", harga: 55000, qty: 1 },
-    ],
-    customer: "Maya Anggraini",
-    phone: "0812-8899-7766",
-    alamat: "Jl. Melati No. 45 Kemang, Jakarta Selatan",
+    products: [{ nama: "Sosis", harga: 75000, qty: 3 }],
+    customer: "Siti",
+    phone: "6281288997766",
+    alamat: "Jl. Melati No. 45",
     ongkir: 15000,
     dp: 100000,
-    total: 160000,
+    total: 240000,
   };
 
   const onSubmitStep3 = () => {
@@ -448,7 +445,7 @@ export function OnboardingPage() {
                       Item teridentifikasi
                     </span>
                     <span className="font-body-sm text-body-sm text-text-secondary">
-                      2/2 terpetakan
+                      1/1 terpetakan
                     </span>
                   </div>
                 </div>
@@ -506,12 +503,12 @@ export function OnboardingPage() {
 
           <div className="mt-6">
             <p className="text-sm text-text-secondary">
-              3 informasi cocok otomatis: nama produk, harga, dan qty. 1 butir
-              (alamat lengkap) perlu verifikasi sebelum konfirmasi.
+              Nama produk, harga, qty, ongkir, dan DP terbaca dari chat. Periksa
+              kembali sebelum konfirmasi.
             </p>
             <p className="text-xs text-text-secondary/60 mt-1">
-              Pengirim: {parsedChat?.customer || "Maya Anggraini"} |{" "}
-              {parsedChat?.phone || "0812-8899-7766"}
+              Pengirim: {parsedChat?.customer || "Siti"} |{" "}
+              {parsedChat?.phone || "6281288997766"}
             </p>
           </div>
         </div>

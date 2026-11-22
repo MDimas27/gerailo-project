@@ -6,14 +6,16 @@ konfirmasi ≤60 detik. Target kualitas: **pemeriksa, bukan pengetik ulang**.
 Akurasi final ≥90%; hit-rate parser pola ≥70% (format pilot).
 
 ## Entitas & relasi
-Input teks → log `ai_usage_logs` → draft `orders`+`order_items` (status DRAFT, insert
-via supabase-js RLS) + `customers` baru (setelah konfirmasi). Matching ke `products`.
+Input teks → log `ai_usage_logs` (via RPC) → draft `orders`+`order_items` (status
+DRAFT) + `customers` dedup, semuanya SATU transaksi via RPC `confirm_draft_order`
+(setelah konfirmasi). Matching ke `products`; klien tidak mengirim harga/total.
 
 ## Halaman & API
 - Routes: `/share` (target Web Share Target PWA), `/paste` (textarea + tombol tempel),
   `/paste/confirm` (tiap kolom menampilkan sumber & penanda).
 - Worker (Hono): `POST /api/smart-paste` (parser pola + matching — TIDAK menyimpan);
-  `POST /api/smart-paste/ai` (fallback AI — key & kuota di Worker, rules/02 §6).
+  `POST /api/smart-paste/ai` (fallback AI — key & kuota di Worker, rules/02 §6);
+  `GET /api/admin/parser-metrics` (JWT + allowlist `ADMIN_EMAILS`, tanpa `teks_asli`).
 - Fixture parser: `apps/worker/tests/parser/`.
 
 ## Alur user
@@ -21,13 +23,15 @@ via supabase-js RLS) + `customers` baru (setelah konfirmasi). Matching ke `produ
 2. Kolom menandai: dari katalog (hijau), tebakan/kosong (kuning, wajib diisi).
 3. Pengguna mengoreksi/pilih dari katalog → total & sisa dihitung ulang di Worker
    (zod dari `packages/shared`) → konfirmasi.
-4. Konfirmasi → insert order DRAFT (supabase-js, RLS) → lanjut alur M4.
+4. Konfirmasi → RPC `confirm_draft_order` menyimpan customer + order DRAFT + items
+   satu transaksi (harga dari katalog di server) → lanjut alur M4.
 Pipeline & keamanan: `rules/02-parser-safety.md` (WAJIB dibaca sebelum coding).
 
 ## Aturan khusus
 - Harga dari katalog atau kosong; perhitungan uang server-side dengan BIGINT.
 - Fallback AI hanya jika parser pola gagal/keyakinan rendah; output JSON schema ketat;
-  kuota per paket dihitung SERVER (`ai_usage_logs` via service_role di Worker).
+  kuota per paket dihitung SERVER via RPC `claim_ai_quota` dengan JWT user + RLS
+  (TANPA `service_role`); teks asli hanya disimpan bila ada consent PDP usaha.
 - Matching: persis → alias → trigram ≥0,8; dua kandidat mirip → tampilkan pilihan.
 - Format angka Indonesia: "75.000", "75rb", "75k"; qty "3 pcs", "x3", "3x".
 

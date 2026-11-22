@@ -9,14 +9,14 @@
 
 | Tabel | Fungsi | Kolom/relasi kunci |
 |---|---|---|
-| businesses | Profil usaha | id, owner_id (auth.users), nama, jenis, metode_bayar, plan, onboarding_selesai |
+| businesses | Profil usaha | id, owner_id (auth.users), nama, jenis, metode_bayar, plan, onboarding_selesai, pdpr_consent_at (izin simpan teks chat) |
 | store_profiles | Identitas toko: halaman pembeli (M8) & katalog publik (M9) | business_id unique, nama_toko, logo_path, kontak, alamat_singkat, slug (unique, katalog), katalog_aktif |
 | bank_accounts | Rekening tampil di instruksi pembayaran (M8) | id, business_id, bank, nomor_rekening, atas_nama, aktif |
 | products | Master produk (+ data katalog publik M9) | id, business_id, nama, harga_jual BIGINT, harga_promo BIGINT?, foto_paths text[] (max 3), deskripsi_singkat, kategori, tampil_katalog (default false), stok_min, aktif |
 | product_aliases | Alias nama untuk parser M3 (unik case-insensitive per usaha) | id, business_id, product_id, alias |
 | product_variants | Varian teks sederhana | id, business_id, product_id, nama, selisih_harga BIGINT, aktif |
 | customers | Pelanggan | id, business_id, nama, telepon (unique per usaha, bentuk 628…), alamat, catatan |
-| orders | Pesanan | id, business_id, customer_id, status enum, ongkir BIGINT, metode_bayar, nomor (ORD-YYYYMMDD-###, unik), share_token (hex 32, unik), kurir_nama?, nomor_resi?, due_date? (batas pelunasan DP) |
+| orders | Pesanan | id, business_id, customer_id, status enum, ongkir BIGINT, dp BIGINT (informasi dari chat, BUKAN pembayaran), metode_bayar, nomor (ORD-YYYYMMDD-###, unik), share_token (hex 32, unik), kurir_nama?, nomor_resi?, due_date? (batas pelunasan DP) |
 | order_items | Item per order | id, order_id, product_id/variant_id, qty, harga_satuan BIGINT |
 | payments | Riwayat pembayaran | id, order_id, jenis (DP/PELUNASAN/COD), jumlah BIGINT, kanal |
 | payment_reports | Laporan bayar dari buyer (M8 P1) | id, order_id, jumlah BIGINT, tanggal, catatan, url_bukti?, status (DILAPORKAN/KONFIRMASI/DITOLAK); insert HANYA via RPC by token |
@@ -26,9 +26,9 @@
 | journal_entries | Header jurnal | id, business_id, kejadian (T0..T12), tanggal, order_id?, expense_id?, reversi_dari? |
 | journal_lines | Baris debit-kredit | id, entry_id, account_id, debit BIGINT, kredit BIGINT |
 | expenses | Beban operasional manual | id, business_id, akun beban, jumlah BIGINT, tanggal |
-| ai_usage_logs | Log ekstraksi AI | id, business_id, sumber (PARSER/AI), skor, token, simpan_teks (consent) |
+| ai_usage_logs | Log ekstraksi Smart Paste | id, business_id, sumber (PARSER/AI), skor, token, model?, simpan_teks (consent), teks_asli (NULL tanpa consent), dikoreksi, created_at |
 | subscriptions | Paket & masa berlaku | id, business_id, plan, status, periode, ref_pembayaran |
-| app_settings | Pengaturan usaha | kuota AI terpakai, preferensi export, retensi log |
+| app_settings | Pengaturan usaha | kuota_ai_terpakai, kuota_ai_periode (reset bulanan lazy), preferensi export, retensi log |
 
 ## Relasi & aturan integritas
 
@@ -49,6 +49,10 @@
 |---|---|
 | `create_business(...)` | Transaksi: usaha + seed 19 akun COA + app_settings; SECURITY DEFINER + guard `auth.uid()` |
 | `create_product(...)` | Transaksi: produk + alias + stok awal (MASUK) sekaligus; kuota paket diperiksa trigger; SECURITY DEFINER + guard pemilik usaha |
+| `confirm_draft_order(...)` | Transaksi: customer dedup + order DRAFT + items; harga dari `products.harga_jual` server; klien tidak boleh kirim harga/total; tanpa jurnal/payment/stok | 
+| `claim_ai_quota(...)` | Klaim kuota + log AI atomik `FOR UPDATE`; reset periode lazy; `AI_QUOTA_EXCEEDED` bila habis; teks asli hanya dengan consent |
+| `log_parser_extraction(...)` | Log parser pola tanpa kuota; teks asli hanya dengan consent |
+| `mark_extraction_corrected(...)` | Tandai log pernah dikoreksi untuk metrik akurasi final; guard owner |
 | `record_stock_move(...)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien (menunggu RPC order M4) |
 | `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | Status DIKIRIM + T2+T3 + movement KELUAR + HPP rata-rata saat itu — satu transaksi; kurir/resi opsional; guard dari DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM |
 | `record_payment(...)` | T1/T4; tolak kelebihan bayar; dua DP parsial → UMP akumulasi |
