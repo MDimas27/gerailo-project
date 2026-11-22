@@ -3,7 +3,7 @@
 > W2-M3 · dibuat 22 Nov 2026 oleh /prep + /plan · status: MENUNGGU CEK FOUNDER
 > Eksekusi mulai 22 Nov 2026 (keputusan I2 — lebih awal dari kalender W2, 26 Nov).
 > Disetujui founder 22 Nov 2026: A1 B1 C1 D1 E1 F1 G1 H1 I2 + amandemen 1–8.
-> Status: DISETUJUI — eksekusi Task 5 dimulai 22 Nov 2026; plan ini kontrak sesi.
+> Status: DISETUJUI — eksekusi Task 6 dimulai 22 Nov 2026; plan ini kontrak sesi.
 
 ## Tujuan sesi
 Setelah sesi ini: pengguna bisa menyalin/membagikan chat WhatsApp → parser pola
@@ -47,7 +47,7 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | 2 | pgTAP 0003 terpisah: RLS A/B, anon ditolak, RPC confirm harga dari server & klien-dikirim-harga ditolak, kuota FREE/STARTER + reset periode + race, consent teks asli, trigger nomor/token unik, dedup customer | test | `packages/supabase/tests/0003_m3_smart_paste_test.sql` | `M3: pgTAP 0003` | [x] 22 Nov |
 | 3 | 11 golden fixture parser (teks → hasil terstruktur), dijalankan **MERAH** sebelum implementasi | test | `apps/worker/tests/parser/` | `M3: fixture golden parser (merah)` | [x] 22 Nov |
 | 4 | Normalisasi angka Indonesia & qty + parser pola; seluruh aturan pola di satu `rules.ts` | kode | `apps/worker/src/services/parser/{normalize,rules,index}.ts` | `M3: normalisasi + parser pola` | [x] 22 Nov |
-| 5 | Matching persis→alias→trigram ≥0,8 (katalog dari F1), 2 kandidat = pilihan UI; skor 3 tingkat + penanda sumber; zod schema bersama | kode | `apps/worker/src/services/parser/{matching,confidence}.ts`, `packages/shared/src/schemas/smart-paste.ts` | `M3: matching katalog + skor keyakinan` | [ ] |
+| 5 | Matching persis→alias→trigram ≥0,8 (katalog dari F1), 2 kandidat = pilihan UI; skor 3 tingkat + penanda sumber; zod schema bersama | kode | `apps/worker/src/services/parser/{matching,confidence}.ts`, `packages/shared/src/schemas/smart-paste.ts` | `M3: matching katalog + skor keyakinan` | [x] 22 Nov |
 | 6 | `POST /api/smart-paste`: JWT + zod + katalog via JWT user, total BIGINT server, `log_parser_extraction`, TANPA menyimpan draft | kode | `apps/worker/src/routes/smart-paste.ts`, `apps/worker/src/index.ts`, `apps/worker/src/lib/supabase.ts` | `M3: route parser pola` | [ ] |
 | 7 | `POST /api/smart-paste/ai`: kandidat saja, schema ketat candidate-ID-or-null, mock di test, `claim_ai_quota`, kuota habis → pesan jelas + parser tetap jalan; tanpa service_role | kode | `apps/worker/src/services/parser/llm.ts`, `apps/worker/src/routes/smart-paste.ts` | `M3: fallback AI berkuota` | [ ] |
 | 8 | UI `/share` (salin-tempel universal + Web Share Target Android), `/paste`, `/paste/confirm` (sumber kolom + pilihan 2 kandidat); konfirmasi memanggil RPC, bukan INSERT klien | UI | `apps/web/src/routes/{share,paste,paste-confirm}.tsx`, `apps/web/src/hooks/use-smart-paste.ts`, `apps/web/src/lib/api.ts`, `apps/web/src/main.tsx`, `apps/web/vite.config.ts`, `apps/web/package.json` | `M3: UI paste + konfirmasi draft` | [ ] |
@@ -128,8 +128,9 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
     (`ongkir`, `dp`) bernilai `0n` + source `kosong` bila tidak disebut; harga per item
     yang tidak dikenal tetap `null` + source `kosong`.
   - `extractWithAi(teks, katalog, { complete, claimQuota })` → `{ extraction, logId, tokens }`;
-    `parseAiResponse(json, candidateIds)` (zod) hanya menerima `product_id` dari kandidat,
-    menolak `harga_satuan`/`harga` dan `pelanggan` dari AI.
+    `parseAiResponse(json, candidateIds)` (zod strict) hanya menerima `product_id` dari
+    kandidat, menolak `harga_satuan`/`harga`/`total` dan `pelanggan` dari AI; `ongkir`/`dp`
+    tetap diizinkan sebagai angka dari teks (bukan harga produk).
 - Edge: JWT invalid → 401; 2 kandidat mirip → UI pilihan; `/admin/parser` email
   di luar allowlist → 403; iOS jalur salin-tempel tetap tersedia.
 - Gate: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`, `supabase test db`,

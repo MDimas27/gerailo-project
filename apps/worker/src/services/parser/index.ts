@@ -1,12 +1,13 @@
 import type {
   CatalogProduct,
-  Confidence,
   Extraction,
   Field,
   FieldSource,
   MetodeBayar,
   ParsedItem,
 } from "./types.js";
+import { hitungConfidence } from "./confidence.js";
+import { cocokkanKatalog } from "./matching.js";
 import { normalizeTelepon, parseAngka, parseQty } from "./normalize.js";
 import { cariBaris, POLA } from "./rules.js";
 
@@ -55,43 +56,6 @@ function pasanganItem(teks: string): Array<{ nama: string; qty: number }> {
   return hasil;
 }
 
-function cocokkanProduk(
-  nama: string,
-  katalog: CatalogProduct[],
-): CatalogProduct | null {
-  const target = nama.toLowerCase().replace(/\s+/g, " ").trim();
-
-  return (
-    katalog.find((produk) => {
-      if (produk.aktif === false) {
-        return false;
-      }
-
-      return (
-        produk.nama.toLowerCase().replace(/\s+/g, " ").trim() === target ||
-        (produk.aliases ?? []).some(
-          (alias) => alias.toLowerCase().replace(/\s+/g, " ").trim() === target,
-        )
-      );
-    }) ?? null
-  );
-}
-
-function tentukanKeyakinan(
-  items: ParsedItem[],
-  pelanggan: Extraction["pelanggan"],
-): Confidence {
-  if (items.length === 0) {
-    return "RENDAH";
-  }
-
-  const semuaProdukDikenal = items.every((item) => item.product_id !== null);
-  const pelangganLengkap =
-    pelanggan.nama.value !== null && pelanggan.telepon.value !== null;
-
-  return semuaProdukDikenal && pelangganLengkap ? "TINGGI" : "SEDANG";
-}
-
 export function parseSmartPaste(
   teks: string,
   katalog: CatalogProduct[],
@@ -111,9 +75,9 @@ export function parseSmartPaste(
 
   const flags: string[] = [];
   const items = pasanganItem(teks).map(({ nama, qty }): ParsedItem => {
-    const produk = cocokkanProduk(nama, katalog);
+    const hasil = cocokkanKatalog(nama, katalog);
 
-    if (!produk) {
+    if (!hasil.produk) {
       flags.push("PRODUK_TIDAK_DITEMUKAN");
 
       return {
@@ -121,16 +85,16 @@ export function parseSmartPaste(
         nama_produk: field(nama, "teks"),
         qty: field(qty, "teks"),
         harga_satuan: field<bigint>(null, "kosong"),
-        candidates: [],
+        candidates: hasil.candidates,
       };
     }
 
     return {
-      product_id: produk.id,
-      nama_produk: field(produk.nama, "katalog"),
+      product_id: hasil.produk.id,
+      nama_produk: field(hasil.produk.nama, "katalog"),
       qty: field(qty, "teks"),
-      harga_satuan: field(produk.harga_jual, "katalog"),
-      candidates: [],
+      harga_satuan: field(hasil.produk.harga_jual, "katalog"),
+      candidates: hasil.candidates,
     };
   });
 
@@ -143,7 +107,7 @@ export function parseSmartPaste(
 
   return {
     sumber: "POLA",
-    confidence: tentukanKeyakinan(items, pelanggan),
+    confidence: hitungConfidence(items, pelanggan, flags),
     pelanggan,
     items,
     ongkir,
