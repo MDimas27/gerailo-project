@@ -48,6 +48,25 @@ export type HasilEkstraksi = {
   pesan?: string;
 };
 
+export type ParserMetricsWire = {
+  total: number;
+  parser: number;
+  ai: number;
+  dikoreksi: number;
+  hitRateParser: number;
+  akurasiFinal: number;
+  tokenAi: number;
+  diambilPada: string;
+  terbaru: Array<{
+    sumber: "PARSER" | "AI";
+    skor: string | number;
+    token: number;
+    model: string | null;
+    dikoreksi: boolean;
+    created_at: string;
+  }>;
+};
+
 function sebagaiObjek(nilai: unknown): Record<string, unknown> | null {
   if (typeof nilai !== "object" || nilai === null || Array.isArray(nilai)) {
     return null;
@@ -72,21 +91,29 @@ function pesanError(kode: string): string {
   return "Gagal membaca pesanan. Coba lagi sebentar.";
 }
 
-async function kirimKeWorker(
-  jalur: string,
-  teks: string,
-): Promise<{ status: number; data: unknown }> {
-  if (!workerUrl) {
-    throw new Error("VITE_WORKER_URL belum diisi di .env.local");
-  }
-
+async function tokenWorker(): Promise<string> {
   const { data: sesi } = await supabase.auth.getSession();
   const token = sesi.session?.access_token;
 
   if (!token) {
-    throw new Error("Sesi berakhir. Masuk lagi untuk memakai Smart Paste.");
+    throw new Error("Sesi berakhir. Masuk lagi.");
   }
 
+  return token;
+}
+
+function cekWorkerUrl(): void {
+  if (!workerUrl) {
+    throw new Error("VITE_WORKER_URL belum diisi di .env.local");
+  }
+}
+
+async function kirimKeWorker(
+  jalur: string,
+  teks: string,
+): Promise<{ status: number; data: unknown }> {
+  cekWorkerUrl();
+  const token = await tokenWorker();
   const respons = await fetch(`${workerUrl}${jalur}`, {
     method: "POST",
     headers: {
@@ -139,6 +166,29 @@ export async function ekstrakChat(teks: string, pakaiAi = false): Promise<HasilE
   }
 
   return { extraction: objek as unknown as ExtractionWire };
+}
+
+export async function ambilMetrikParser(): Promise<ParserMetricsWire> {
+  cekWorkerUrl();
+  const token = await tokenWorker();
+  const respons = await fetch(`${workerUrl}/api/admin/parser-metrics`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data: unknown = await respons.json().catch(() => null);
+
+  if (!responsBerhasil(respons.status)) {
+    const objek = sebagaiObjek(data);
+
+    if (respons.status === 403) {
+      throw new Error("Akses admin ditolak.");
+    }
+
+    throw new Error(
+      pesanError(typeof objek?.error === "string" ? objek.error : "METRIK_GAGAL"),
+    );
+  }
+
+  return data as ParserMetricsWire;
 }
 
 function responsBerhasil(status: number): boolean {

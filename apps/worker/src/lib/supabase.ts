@@ -14,6 +14,27 @@ export type WorkerEnv = {
   ADMIN_EMAILS?: string;
 };
 
+export type ParserMetricRingkas = {
+  sumber: "PARSER" | "AI";
+  skor: string | number;
+  token: number;
+  model: string | null;
+  dikoreksi: boolean;
+  created_at: string;
+};
+
+export type ParserMetrics = {
+  total: number;
+  parser: number;
+  ai: number;
+  dikoreksi: number;
+  hitRateParser: number;
+  akurasiFinal: number;
+  tokenAi: number;
+  diambilPada: string;
+  terbaru: ParserMetricRingkas[];
+};
+
 type Klien = SupabaseClient<Database>;
 
 function envWajib(
@@ -147,4 +168,50 @@ export async function claimAiQuota(
   }
 
   return String(data);
+}
+
+export function isAdminEmail(env: WorkerEnv, email: string | null): boolean {
+  if (!email) {
+    return false;
+  }
+
+  const daftar = (env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((satu) => satu.trim().toLowerCase())
+    .filter(Boolean);
+
+  return daftar.includes(email.toLowerCase());
+}
+
+export async function fetchParserMetrics(
+  env: WorkerEnv,
+  token: string,
+): Promise<ParserMetrics> {
+  const { data, error } = await klienDasar(env, token)
+    .from("ai_usage_logs")
+    .select("sumber,skor,token,model,dikoreksi,created_at")
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error) {
+    throw new Error(`METRIK_GAGAL: ${error.message}`);
+  }
+
+  const logs = (data ?? []) as unknown as ParserMetricRingkas[];
+  const parser = logs.filter((satu) => satu.sumber === "PARSER").length;
+  const ai = logs.filter((satu) => satu.sumber === "AI").length;
+  const dikoreksi = logs.filter((satu) => satu.dikoreksi).length;
+  const total = logs.length;
+
+  return {
+    total,
+    parser,
+    ai,
+    dikoreksi,
+    hitRateParser: total === 0 ? 0 : parser / total,
+    akurasiFinal: total === 0 ? 0 : (total - dikoreksi) / total,
+    tokenAi: logs.reduce((jumlah, satu) => jumlah + (satu.token ?? 0), 0),
+    diambilPada: new Date().toISOString(),
+    terbaru: logs.slice(0, 20),
+  };
 }

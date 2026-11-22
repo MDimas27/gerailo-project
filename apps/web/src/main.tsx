@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router";
 
+import { AdminParserPage } from "./routes/admin-parser.js";
 import { AuthPage } from "./routes/auth.js";
 import { AuthCallbackPage } from "./routes/auth-callback.js";
 import { HomePage } from "./routes/home.js";
@@ -35,6 +36,14 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <OnboardingPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/admin/parser",
+    element: (
+      <RequireAuth>
+        <AdminParserPage />
       </RequireAuth>
     ),
   },

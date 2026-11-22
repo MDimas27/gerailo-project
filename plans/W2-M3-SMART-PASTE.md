@@ -3,7 +3,7 @@
 > W2-M3 · dibuat 22 Nov 2026 oleh /prep + /plan · status: MENUNGGU CEK FOUNDER
 > Eksekusi mulai 22 Nov 2026 (keputusan I2 — lebih awal dari kalender W2, 26 Nov).
 > Disetujui founder 22 Nov 2026: A1 B1 C1 D1 E1 F1 G1 H1 I2 + amandemen 1–8.
-> Status: DISETUJUI — Task 8 selesai 22 Nov 2026; Task 9 berikutnya; plan ini kontrak sesi.
+> Status: DISETUJUI — Task 9 selesai 22 Nov 2026; Task 10 berikutnya; plan ini kontrak sesi.
 
 ## Tujuan sesi
 Setelah sesi ini: pengguna bisa menyalin/membagikan chat WhatsApp → parser pola
@@ -51,7 +51,7 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | 6 | `POST /api/smart-paste`: JWT + zod + katalog via JWT user, total BIGINT server, `log_parser_extraction`, TANPA menyimpan draft | kode | `apps/worker/src/routes/smart-paste.ts`, `apps/worker/src/index.ts`, `apps/worker/src/lib/supabase.ts` | `M3: route parser pola` | [x] 22 Nov |
 | 7 | `POST /api/smart-paste/ai`: kandidat saja, schema ketat candidate-ID-or-null, mock di test, `claim_ai_quota`, kuota habis → pesan jelas + parser tetap jalan; tanpa service_role | kode | `apps/worker/src/services/parser/llm.ts`, `apps/worker/src/routes/smart-paste.ts` | `M3: fallback AI berkuota` | [x] 22 Nov |
 | 8 | UI `/share` (salin-tempel universal + Web Share Target Android), `/paste`, `/paste/confirm` (sumber kolom + pilihan 2 kandidat); konfirmasi memanggil RPC, bukan INSERT klien | UI | `apps/web/src/routes/{share,paste,paste-confirm}.tsx`, `apps/web/src/hooks/use-smart-paste.ts`, `apps/web/src/lib/api.ts`, `apps/web/src/main.tsx`, `apps/web/vite.config.ts`, `apps/web/package.json` | `M3: UI paste + konfirmasi draft` | [x] 22 Nov |
-| 9 | `/admin/parser` + `GET /api/admin/parser-metrics`: allowlist `ADMIN_EMAILS` di Worker, baca `ai_usage_logs` via RLS, wiring `mark_extraction_corrected` saat user mengoreksi | UI+kode | `apps/web/src/routes/admin-parser.tsx`, `apps/worker/src/routes/admin.ts` | `M3: metrik internal terproteksi` | [ ] |
+| 9 | `/admin/parser` + `GET /api/admin/parser-metrics`: allowlist `ADMIN_EMAILS` di Worker, baca `ai_usage_logs` via RLS, wiring `mark_extraction_corrected` saat user mengoreksi | UI+kode | `apps/web/src/routes/admin-parser.tsx`, `apps/worker/src/routes/admin.ts` | `M3: metrik internal terproteksi` | [x] 22 Nov |
 | 10 | Samakan demo chat Siti & referensi fixture; sinkron docs API-CONTRACTS/DATA-MODEL/M3 (termasuk catatan deviasi service_role) | docs | `apps/web/src/routes/onboarding.tsx`, `docs/MODULES/M3-SMART-PASTE.md`, `docs/API-CONTRACTS.md`, `docs/DATA-MODEL.md` | `M3: sinkron fixture & kontrak` | [ ] |
 | 11 | Verify: `pnpm lint/typecheck/test/build`, pgTAP, cek drift types, grep bundle web, deploy staging; founder isi secret LLM via wrangler; verify manual HP Android (share WA) + jalur salin-tempel | ops | — | — | [ ] |
 | 12 | /review + /remember: status M3 `[x]`, LESSONS entri baru, plan SELESAI | ops | `AGENTS.md`, `LESSONS-LEARNED.md`, plan ini | — | [ ] |
@@ -154,6 +154,7 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
 | Secret LLM belum ada | Golden test mock; secret diisi founder sebelum verify live; kuota habis tidak crash |
 | Worker butuh `SUPABASE_URL` + `SUPABASE_ANON_KEY` | Binding Worker (bukan secret bila anon), di-set sebelum verify; route gagal jelas `_BELUM_DISET` bila kosong; tidak ada `service_role` |
 | Web butuh `VITE_WORKER_URL` | Env publik di `.env.local`/CI; `api.ts` gagal dengan pesan jelas bila kosong; bukan secret |
+| Admin butuh `ADMIN_EMAILS` | Daftar email dipisah koma sebagai wrangler secret; tanpa allowlist semua request 403; tidak ada email di bundle |
 | Fixture Siti inkonsisten | E1 kanonisasi + update demo onboarding & referensi docs |
 | Web Share Target iOS tidak didukung | Tombol salin-tempel wajib di `/share` (D1/7) |
 | RLS/trigger nomor salah | pgTAP task 2 sebelum UI task 8 |
@@ -180,6 +181,13 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
   di `sessionStorage`, bukan localStorage. Argumen BIGINT RPC dikirim sebagai string
   yang di-cast ke `number` mengikuti pola `product-form.tsx` supaya supabase-js tidak
   membulatkan. `VITE_WORKER_URL` adalah env publik baru yang wajib diisi sebelum verify.
+- Task 9: metrik dibaca dengan JWT founder dan RLS `ai_usage_logs_select_own`, jadi
+  agregat hanya usaha yang dimiliki akun founder (tanpa `service_role`, tanpa lintas
+  `business_id`). Response membatasi 200 log terbaru dan tidak memilih `teks_asli`.
+  `ADMIN_EMAILS` dicek di Worker sebagai daftar email dipisah koma; tidak ada email
+  allowlist di bundle. `mark_extraction_corrected` dipanggil best-effort setelah order
+  berhasil disimpan bila pengguna mengubah field; kegagalan metrik tidak membatalkan
+  pesanan.
 
 ## BACKLOG (temuan sesi ini di luar scope)
 - **Buyer tracking `/track/{token}`** (K1): sengaja tidak dikerjakan di M3; fondasi `share_token` sudah ada di 0003, UI publik + aturan akses token menyusul (modul resmi kit = M8/W4; label "M4" dari founder perlu disinkronkan). Jangan tandai selesai saat M3 `[x]`.

@@ -3,10 +3,13 @@ import { Hono } from "hono";
 import {
   claimAiQuota,
   fetchKatalog,
+  fetchParserMetrics,
+  isAdminEmail,
   logExtraction,
   verifyJwt,
   type WorkerEnv,
 } from "./lib/supabase.js";
+import { parserMetricsHandler } from "./routes/admin.js";
 import {
   smartPasteAiHandler,
   smartPasteHandler,
@@ -18,6 +21,14 @@ type Env = { Bindings: WorkerEnv };
 const app = new Hono<Env>();
 
 app.get("/api/health", (c) => c.json({ status: "ok", service: "gerailo-worker" }));
+
+app.get("/api/admin/parser-metrics", (c) =>
+  parserMetricsHandler({
+    verifyToken: (token) => verifyJwt(c.env, token),
+    isAdmin: (pengguna) => isAdminEmail(c.env, pengguna.email),
+    fetchMetrics: (pengguna) => fetchParserMetrics(c.env, pengguna.token),
+  })(c as Parameters<ReturnType<typeof parserMetricsHandler>>[0]),
+);
 
 app.post("/api/smart-paste", (c) =>
   smartPasteHandler({

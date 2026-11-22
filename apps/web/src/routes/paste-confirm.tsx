@@ -131,6 +131,7 @@ export function PasteConfirmPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [diubah, setDiubah] = useState(false);
 
   if (!draft) {
     return <Navigate to="/paste" replace />;
@@ -154,6 +155,7 @@ export function PasteConfirmPage() {
     nilai: FormKonfirmasi[K],
   ) => {
     setForm((sebelum) => ({ ...sebelum, [kunci]: nilai }));
+    setDiubah(true);
     setError(null);
   };
 
@@ -164,6 +166,7 @@ export function PasteConfirmPage() {
         posisi === indeks ? { ...item, ...patch } : item,
       ),
     }));
+    setDiubah(true);
     setError(null);
   };
 
@@ -202,6 +205,12 @@ export function PasteConfirmPage() {
 
       setOrderId(String(data));
       hapusDraftSmartPaste();
+
+      if (draft.logId && diubah) {
+        void supabase
+          .rpc("mark_extraction_corrected", { p_log_id: draft.logId })
+          .then(() => undefined, () => undefined);
+      }
     } catch (kesalahan) {
       setError(
         kesalahan instanceof Error ? kesalahan.message : "Gagal menyimpan pesanan.",
