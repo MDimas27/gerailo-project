@@ -107,6 +107,13 @@ diperbarui.
   RPC atomik (bukan N query klien) sesuai konvensi kit. · Tindakan: AGENTS.md
   M1/M2 `[x]`, LESSONS #14, commit per task.
 
+#15 · 22 Nov 2026 · proses · Review W1b menutup: (a) Task 8 (UI produk) + Task 9
+  (onboarding wizard) digabung 1 commit `8cff38d` karena file saling ketergantungan
+  (hooks, schemas, routes dibuat bersama) — acceptable, dicatat di sini; (b) Task 10
+  (deploy + verify) tidak menghasilkan commit — verifikasi manual bukan kode, wajar
+  sebagai klarifikasi bukan deviasi. · Tindakan: AGENTS.md M1 jadi `[~] parsial`,
+  backlog 3 item M1 ditambah, LESSONS #15, push 3 commit sekaligus agar CI jalan 1x.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
@@ -119,6 +126,10 @@ diperbarui.
 - Notifikasi WhatsApp otomatis ke buyer saat status berubah (bulan ke-3 via Cloud API
   resmi — sebelum itu: template "Bagikan update" manual)
 - Demo video onboarding
+- **Edit profil usaha** (ubah nama, jenis, metode_bayar) — M1 sisa
+- **Edit pengaturan usaha** (paket, notifikasi, dsb) — M1 sisa
+- **Persist consent PDP** (`pdpr_consent_at` kolom, label compliance — gabung migrasi
+  berikutnya yg menyentuh schema, mis. edit pengaturan / M3)
 
 ## Status deploy production
 

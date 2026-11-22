@@ -26,7 +26,7 @@ Monorepo pnpm: `apps/web` · `apps/worker` · `packages/shared` · `packages/sup
 
 | # | Modul | Status |
 |---|---|---|
-| M1 | Registrasi usaha & onboarding 3 langkah | [x] |
+| M1 | Registrasi usaha & onboarding 3 langkah | [~] parsial |
 | M2 | Master produk & harga (+ varian teks, alias) | [x] |
 | M3 | Smart Paste (parser pola + fallback AI + konfirmasi) | [ ] |
 | M4 | Order & pembayaran (status, DP, COD, pelunasan) | [ ] |
@@ -101,6 +101,7 @@ staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui.
 ## Status proyek (perbarui tiap sesi)
 
 - Sprint aktif: W1 (19–25 Nov) — W1a selesai 21 Nov (Task 1–5); W1b M2 produk (Task 6–10) selesai 22 Nov
-- Modul selesai: M1 (auth OTP, usaha, 19 COA, settings, onboarding 3 langkah); M2 (produk, varian, alias, stok, kuota paket, RPC create_product/record_stock_move)
+- Modul selesai: M2 (produk, varian, alias, stok, kuota paket, RPC create_product/record_stock_move)
+- M1 parsial: auth OTP, usaha, 19 COA, settings. **Sisa M1 (backlog)**: edit profil usaha, edit pengaturan, persist consent PDP (`pdpr_consent_at` — gabung migrasi berikutnya yg menyentuh schema, label compliance)
 - Deploy staging terakhir: 21 Nov 2026 — https://gerailo-staging.mdimas-jobs.workers.dev (health + SPA ok); migrasi 0001-0002 + RLS/RPC terverifikasi; smoke test auth cloud PASS (email OTP → onboarding 3 langkah → beranda).
 - Halangan: KYC gateway; consent PDP belum dipersist ke skema.
