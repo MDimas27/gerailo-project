@@ -132,7 +132,7 @@ diperbarui.
 
 #18 · 22 Nov 2026 · onboarding · Form produk onboarding gagal dengan `expected array, received undefined` karena `productFormSchema` mewajibkan `variants` sementara form tidak mengirimnya; field stok `number` juga membuat `0` awal sulit diganti. · Tindakan: `variants.default([])` di schema bersama + stok sebagai string dengan placeholder `0`, pesan zod Inggris difallback ke bahasa Indonesia.
 
-#19 · 22 Nov 2026 · ci · GitHub Variable `VITE_WORKER_URL` saja tidak cukup: job `deploy-staging` belum meneruskannya ke env build, sehingga bundle tidak memuat URL Worker. · Tindakan: tambahkan `VITE_WORKER_URL: ${{ vars.VITE_WORKER_URL }}` di `.github/workflows/ci.yml`; CI `45082835989` hijau, Worker `f628860d`, health OK, bundle terbukti memuat URL staging.
+#19 · 22 Nov 2026 · ci · GitHub Variable `VITE_WORKER_URL` saja tidak cukup: job `deploy-staging` belum meneruskannya ke env build, sehingga bundle tidak memuat URL Worker. · Tindakan: tambahkan `VITE_WORKER_URL: ${{ vars.VITE_WORKER_URL }}` di `.github/workflows/ci.yml`; CI `45082835989` hijau, health OK, bundle terbukti memuat URL staging.
 
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
