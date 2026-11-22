@@ -1,11 +1,10 @@
-import { createBusinessSchema, type CreateBusinessInput, parseAliasInput, parseRupiah, productFormSchema } from "@gerailo/shared";
+import { type CreateBusinessInput, parseAliasInput, parseRupiah, productFormSchema } from "@gerailo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router";
 
 import { useBusinesses } from "@/hooks/use-businesses";
-import { useProducts } from "@/hooks/use-products";
 import { supabase } from "@/lib/supabase";
 
 const fieldClass =
@@ -15,7 +14,6 @@ export function OnboardingPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const businesses = useBusinesses();
-  const products = useProducts(businesses.data?.[0]?.id ?? null);
 
   // Step state
   const [step, setStep] = useState(1);
@@ -24,8 +22,6 @@ export function OnboardingPage() {
   // Step 1: Profil usaha
   const {
     register: register1,
-    handleSubmit: handleSubmit1,
-    setError: setError1,
     formState: { errors: errors1, isSubmitting: isSubmitting1 },
   } = useForm<CreateBusinessInput>({
     defaultValues: {
@@ -88,7 +84,7 @@ export function OnboardingPage() {
       : parseRupiah(parsed.data.harga_beli);
 
     try {
-      const { data: productId, error } = await supabase.rpc("create_product", {
+      const { error } = await supabase.rpc("create_product", {
         p_business_id: businesses.data![0].id,
         p_nama: parsed.data.nama,
         p_harga_jual: hargaJual.toString() as unknown as number,
@@ -105,42 +101,35 @@ export function OnboardingPage() {
 
       await queryClient.invalidateQueries({ queryKey: ["products"] });
       setStep(3);
-    } catch (e: any) {
-      setStepError(e.message || "Gagal membuat produk");
+    } catch (e) {
+      setStepError(e instanceof Error ? e.message : "Gagal membuat produk");
     }
   };
 
   // Step 3: Demo Smart Paste
   const chatSiti = "Halo kak Rena, saya mau pesan Sambal Cumi Pedas 2 toples sama Sambal Roa 1 toples yaa. Kirim ke Jl. Melati No. 45 Kemang, Jakarta Selatan atas nama Maya Anggraini (0812-8899-7766). Pakai SiCepat Regular kak. Sudah saya transfer DP Rp100.000 ya kak.";
-  const [parsedChat, setParsedChat] = useState<any>(null);
-  const [isParsing, setIsParsing] = useState(false);
 
-  useEffect(() => {
-    if (step === 3 && !parsedChat && !isParsing) {
-      parseChat();
-    }
-  }, [step, parsedChat, isParsing]);
+  interface ParsedChat {
+    products: Array<{ nama: string; harga: number; qty: number }>;
+    customer: string;
+    phone: string;
+    alamat: string;
+    ongkir: number;
+    dp: number;
+    total: number;
+  }
 
-  const parseChat = async () => {
-    setIsParsing(true);
-    try {
-      setParsedChat({
-        products: [
-          { nama: "Sambal Cumi Pedas", harga: 45000, qty: 2 },
-          { nama: "Sambal Roa", harga: 55000, qty: 1 },
-        ],
-        customer: "Maya Anggraini",
-        phone: "0812-8899-7766",
-        alamat: "Jl. Melati No. 45 Kemang, Jakarta Selatan",
-        ongkir: 15000,
-        dp: 100000,
-        total: 160000,
-      });
-    } catch (e: any) {
-      setParsedChat(null);
-    } finally {
-      setIsParsing(false);
-    }
+  const parsedChat: ParsedChat = {
+    products: [
+      { nama: "Sambal Cumi Pedas", harga: 45000, qty: 2 },
+      { nama: "Sambal Roa", harga: 55000, qty: 1 },
+    ],
+    customer: "Maya Anggraini",
+    phone: "0812-8899-7766",
+    alamat: "Jl. Melati No. 45 Kemang, Jakarta Selatan",
+    ongkir: 15000,
+    dp: 100000,
+    total: 160000,
   };
 
   const onSubmitStep3 = () => {
@@ -176,7 +165,14 @@ export function OnboardingPage() {
           className="flex flex-col gap-4 rounded-card border border-border bg-surface p-5"
           onSubmit={(event) => {
             event.preventDefault();
-            void createBusiness.mutate(form1);
+            const formData = new FormData(event.currentTarget);
+            const input: CreateBusinessInput = {
+              nama: formData.get("nama") as string,
+              jenis: formData.get("jenis") as string,
+              metode_bayar: formData.get("metode_bayar") as string,
+              consent: formData.get("consent") === "on",
+            };
+            void createBusiness.mutate(input);
           }}
         >
           <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
@@ -418,15 +414,12 @@ export function OnboardingPage() {
 
           <div className="flex gap-3 mb-4">
             <button
-              onClick={parseChat}
-              disabled={isParsing}
               className="flex items-center gap-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-lg flex items-center justify-center gap-2 py-2 shadow-sm active:bg-primary transition-all"
             >
               <span className="material-symbols-outlined">psychology</span>
               <span>Baca & Ekstraksi</span>
             </button>
             <button
-              onClick={parseChat}
               className="flex items-center gap-2 rounded-lg bg-surface hover:bg-surface-bright text-text-secondary font-label-md text-label-md flex items-center justify-center gap-2 py-2 transition-all"
             >
               <span className="material-symbols-outlined">refresh</span>
@@ -454,7 +447,7 @@ export function OnboardingPage() {
                   </div>
                 </div>
 
-                {parsedChat.products.map((p: any, idx: number) => (
+                {parsedChat.products.map((p, idx: number) => (
                   <div key={idx} className="bg-surface-bright rounded-xl p-3 flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-surface-container relative">
                       <img
@@ -483,7 +476,7 @@ export function OnboardingPage() {
                   <div className="flex justify-between items-center text-text-secondary font-body-sm">
                     <span>Subtotal Produk</span>
                     <span className="font-currency-display text-on-surface">
-                      Rp{parsedChat.products.reduce((sum: number, p: any) => sum + p.harga * p.qty, 0).toLocaleString("id-ID")}
+                      Rp{parsedChat.products.reduce((sum, p) => sum + p.harga * p.qty, 0).toLocaleString("id-ID")}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-text-secondary font-body-sm">
@@ -519,10 +512,9 @@ export function OnboardingPage() {
 
         <button
           onClick={onSubmitStep3}
-          disabled={isParsing}
           className="w-full h-12 rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-md active:bg-primary transition-all"
         >
-          {isParsing ? "Menganalisis..." : "Konfirmasi & Simpan Pesanan"}
+          Konfirmasi & Simpan Pesanan
         </button>
 
         <button
