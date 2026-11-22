@@ -3,8 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   createSmartPasteRoute,
+  type SmartPasteAiDeps,
   type SmartPasteDeps,
 } from "../src/routes/smart-paste.js";
+import { parseSmartPaste } from "../src/services/parser/index.js";
 import { katalogSiti } from "./parser/fixtures.js";
 
 function buatApp() {
@@ -19,6 +21,24 @@ function buatApp() {
   app.route("/api", createSmartPasteRoute(deps));
 
   return { app, logExtraction };
+}
+
+function buatAppAi(extractWithAi: SmartPasteAiDeps["extractWithAi"]) {
+  const deps: SmartPasteDeps = {
+    verifyToken: async (token) =>
+      token === "valid" ? { id: "user-1", token } : null,
+    fetchKatalog: async () => katalogSiti,
+    logExtraction: async () => undefined,
+  };
+  const depsAi: SmartPasteAiDeps = {
+    verifyToken: deps.verifyToken,
+    fetchKatalog: deps.fetchKatalog,
+    extractWithAi,
+  };
+  const app = new Hono();
+  app.route("/api", createSmartPasteRoute(deps, depsAi));
+
+  return app;
 }
 
 const headerValid = {
@@ -85,5 +105,55 @@ describe("POST /api/smart-paste", () => {
       0.6,
       "Pesan 1 sosis",
     );
+  });
+});
+
+describe("POST /api/smart-paste/ai", () => {
+  it("mengembalikan ekstraksi AI, log_id, dan tokens", async () => {
+    const extractWithAi = vi.fn(async () => ({
+      extraction: parseSmartPaste("Pesan 1 sosis", katalogSiti),
+      logId: "log-1",
+      tokens: 42,
+    }));
+    const app = buatAppAi(extractWithAi);
+    const respons = await app.request("/api/smart-paste/ai", {
+      method: "POST",
+      headers: headerValid,
+      body: JSON.stringify({ teks: "Pesan 1 sosis" }),
+    });
+
+    expect(respons.status).toBe(200);
+    const hasil = (await respons.json()) as {
+      extraction: { total: string };
+      log_id: string;
+      tokens: number;
+    };
+    expect(hasil.extraction.total).toBe("75000");
+    expect(hasil.log_id).toBe("log-1");
+    expect(hasil.tokens).toBe(42);
+    expect(extractWithAi).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "user-1" }),
+      "Pesan 1 sosis",
+      katalogSiti,
+    );
+  });
+
+  it("memberi fallback parser pola saat kuota habis", async () => {
+    const app = buatAppAi(async () => {
+      throw new Error("AI_QUOTA_EXCEEDED");
+    });
+    const respons = await app.request("/api/smart-paste/ai", {
+      method: "POST",
+      headers: headerValid,
+      body: JSON.stringify({ teks: "Pesan 1 sosis" }),
+    });
+
+    expect(respons.status).toBe(429);
+    const hasil = (await respons.json()) as {
+      error: string;
+      parser: { total: string };
+    };
+    expect(hasil.error).toBe("AI_QUOTA_EXCEEDED");
+    expect(hasil.parser.total).toBe("75000");
   });
 });

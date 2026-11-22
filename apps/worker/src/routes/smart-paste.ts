@@ -20,6 +20,20 @@ export type SmartPasteDeps = {
   ) => Promise<void>;
 };
 
+export type SmartPasteAiDeps = {
+  verifyToken: (token: string) => Promise<SmartPasteUser | null>;
+  fetchKatalog: (user: SmartPasteUser) => Promise<CatalogProduct[]>;
+  extractWithAi: (
+    user: SmartPasteUser,
+    teks: string,
+    katalog: CatalogProduct[],
+  ) => Promise<{
+    extraction: Extraction;
+    logId: string;
+    tokens: number;
+  }>;
+};
+
 type Json =
   | string
   | number
@@ -99,9 +113,75 @@ export function smartPasteHandler(deps: SmartPasteDeps) {
   };
 }
 
-export function createSmartPasteRoute(deps: SmartPasteDeps) {
+export function smartPasteAiHandler(deps: SmartPasteAiDeps) {
+  return async (c: Context) => {
+    const header = c.req.header("Authorization") ?? "";
+    const token = /^Bearer\s+(.+)$/i.exec(header)?.[1];
+
+    if (!token) {
+      return c.json({ error: "AUTH_REQUIRED" }, 401);
+    }
+
+    const pengguna = await deps.verifyToken(token);
+    if (!pengguna) {
+      return c.json({ error: "AUTH_INVALID" }, 401);
+    }
+
+    const tubuh: unknown = await c.req.json().catch(() => null);
+    const validasi = smartPasteRequestSchema.safeParse(tubuh);
+
+    if (!validasi.success) {
+      return c.json(
+        { error: "INPUT_TIDAK_VALID", detail: validasi.error.flatten() },
+        400,
+      );
+    }
+
+    const katalog = await deps.fetchKatalog(pengguna);
+
+    try {
+      const hasil = await deps.extractWithAi(
+        pengguna,
+        validasi.data.teks,
+        katalog,
+      );
+
+      return c.json({
+        extraction: jsonAman(hasil.extraction),
+        log_id: hasil.logId,
+        tokens: hasil.tokens,
+      });
+    } catch (kesalahan) {
+      if (
+        kesalahan instanceof Error &&
+        kesalahan.message.includes("AI_QUOTA_EXCEEDED")
+      ) {
+        return c.json(
+          {
+            error: "AI_QUOTA_EXCEEDED",
+            pesan:
+              "Kuota AI habis bulan ini. Periksa hasil parser pola berikut.",
+            parser: jsonAman(parseSmartPaste(validasi.data.teks, katalog)),
+          },
+          429,
+        );
+      }
+
+      throw kesalahan;
+    }
+  };
+}
+
+export function createSmartPasteRoute(
+  deps: SmartPasteDeps,
+  depsAi?: SmartPasteAiDeps,
+) {
   const rute = new Hono();
   rute.post("/smart-paste", smartPasteHandler(deps));
+
+  if (depsAi) {
+    rute.post("/smart-paste/ai", smartPasteAiHandler(depsAi));
+  }
 
   return rute;
 }

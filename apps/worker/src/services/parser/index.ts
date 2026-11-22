@@ -56,6 +56,17 @@ function pasanganItem(teks: string): Array<{ nama: string; qty: number }> {
   return hasil;
 }
 
+export function hitungTotal(
+  items: ParsedItem[],
+  ongkir: bigint,
+): bigint {
+  return items.reduce((jumlah, item) => {
+    const harga = item.harga_satuan.value;
+    const qty = item.qty.value;
+    return harga !== null && qty !== null ? jumlah + harga * BigInt(qty) : jumlah;
+  }, 0n) + ongkir;
+}
+
 export function parseSmartPaste(
   teks: string,
   katalog: CatalogProduct[],
@@ -99,11 +110,7 @@ export function parseSmartPaste(
   });
 
   const ongkir = field<bigint>(ongkirAngka ?? 0n, ongkirSumber);
-  const total = items.reduce((jumlah, item) => {
-    const harga = item.harga_satuan.value;
-    const qty = item.qty.value;
-    return harga !== null && qty !== null ? jumlah + harga * BigInt(qty) : jumlah;
-  }, 0n) + (ongkir.value ?? 0n);
+  const total = hitungTotal(items, ongkir.value ?? 0n);
 
   return {
     sumber: "POLA",

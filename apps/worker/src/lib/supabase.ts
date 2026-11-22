@@ -10,6 +10,7 @@ export type WorkerEnv = {
   SUPABASE_ANON_KEY: string;
   LLM_API_KEY?: string;
   LLM_MODEL?: string;
+  LLM_ENDPOINT?: string;
   ADMIN_EMAILS?: string;
 };
 
@@ -118,4 +119,32 @@ export async function logExtraction(
   if (error) {
     throw new Error(`LOG_GAGAL: ${error.message}`);
   }
+}
+
+export async function claimAiQuota(
+  env: WorkerEnv,
+  token: string,
+  input: {
+    model: string;
+    tokens: number;
+    skor: number;
+    teks: string;
+  },
+): Promise<string> {
+  const { data, error } = await klienDasar(env, token).rpc("claim_ai_quota", {
+    p_model: input.model,
+    p_tokens: input.tokens,
+    p_skor: input.skor,
+    p_teks_asli: input.teks,
+  });
+
+  if (error) {
+    if (error.message.includes("AI_QUOTA_EXCEEDED")) {
+      throw new Error("AI_QUOTA_EXCEEDED");
+    }
+
+    throw new Error(`KUOTA_GAGAL: ${error.message}`);
+  }
+
+  return String(data);
 }
