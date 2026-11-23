@@ -160,6 +160,8 @@ diperbarui.
 
 #32 · 23 Nov 2026 · verifikasi · Commit `e6b7f38`, CI `45217644347` hijau 4/4, staging bundle `index-DraCKu0H.js`. Di device USB, setelah SW di-update dan hard reload, `/paste` dan `/tes-smart-paste` keduanya mendarat di `/paste` dengan textarea `""`; `Page.getInstallabilityErrors` tetap `[]`. Catatan: SW lama menyajikan bundle lama sampai `registration.update()` + reload, jadi verifikasi UI harus hard reload setelah deploy.
 
+#33 · 23 Nov 2026 · install · Founder tidak melihat menu install di Chrome. Menu ternyata di ⋮ kanan atas browser, bukan di halaman web; label Chrome 157 adalah "Install and create shortcut", bukan selalu "Install app". Setelah uninstall WebAPK lama `org.chromium.webapk.a3555e66445317b31_v2` (authority `gerailo.com`) dan force-stop/restart Chrome, menu muncul. Pilih Install → konfirmasi "Gerailo / gerailo-staging..." → WebAPK baru `org.chromium.webapk.a31e5d83e0e7d8c17_v2` terpasang; CDP target `standalone: true`, SW aktif.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
