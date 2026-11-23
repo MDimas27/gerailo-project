@@ -152,6 +152,8 @@ diperbarui.
 
 #28 · 23 Nov 2026 · closing · M3 ditandai `[x]`. Manifest PWA awal tanpa `icons` membuat Chrome menolak install ("This app cannot be installed"); tambahkan `icon-192.png`/`icon-512.png` + deklarasi `vite.config.ts`, lalu WebAPK `org.chromium.webapk.ac1862ef08b021335_v2` berhasil di-install dan `ShareActivity`-nya menerima SEND intent → `/share?text=...` → order `f65b34da-0d89-4125-ad03-122134c8bdfc`. Jalur clipboard → `/share` → AI → konfirmasi menghasilkan `9a0d6661-1b1e-4a63-bde5-7239a58500a5`; Safari/iOS fisik tidak tersedia, dicatat sebagai catatan founder.
 
+#29 · 23 Nov 2026 · brand · Founder menyerahkan aset final di `design/stitch/logo _splash_screen_icon_favicon/`. · Tindakan: source 200×200 (favicon & PWA) dan 1200×1024 (splash) di-generated ke `favicon.png` 64, `favicon-32.png`, `icons/icon-192.png`, `icons/icon-512.png`, `icons/icon-maskable-192/512.png` (padding 10% di background `#F7F8FA`), `icons/apple-touch-icon.png` 180, dan `branding/splash.png`; manifest memisahkan purpose `any` vs `maskable`, `index.html` memuat favicon/apple touch/startup image, workbox precache 13 entri tanpa duplikat. Gate hijau: lint 0 error (1 warning lama), typecheck, Vitest 57, build.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
