@@ -156,6 +156,8 @@ diperbarui.
 
 #30 · 23 Nov 2026 · UX · Founder melaporkan /paste selalu terisi teks lama "Halo kak, pesan 2 sosiss". · Akar: `SharePage` menyimpan teks ke `sessionStorage` lalu `PastePage` membacanya terus-menerus, jadi bukan konsumsi sekali jalan. · Tindakan: hapus jalur `sessionStorage` untuk teks; `SharePage` mengirim teks via `navigate("/paste", { state: { teks } })`, `PastePage` menginisialisasi dari `location.state` atau `?teks=` (test route) dan langsung kosong untuk bukaan biasa. Kunci lama tetap dibersihkan oleh `hapusDraftSmartPaste`. Catatan install: Chrome Android tidak menampilkan popup otomatis; install lewat menu ⋮ → "Install app"/"Add to Home screen", iOS lewat Share → "Add to Home Screen".
 
+#31 · 23 Nov 2026 · device · Cek langsung via USB/CDP: tab Gerailo masih membuka `/paste?teks=Halo%20kak...`, jadi teks lama berasal dari query param route tes `/tes-smart-paste`, BUKAN sessionStorage. `sessionStorage` sudah kosong dan bundle baru aktif. `Page.getInstallabilityErrors` mengembalikan `[]` (manifest + SW valid), jadi PWA installable; Chrome 157 Android tidak memunculkan popup otomatis. · Tindakan: `/tes-smart-paste` kini redirect ke `/paste` tanpa query, dukungan `?teks=` dihapus dari `PastePage`; bukaan normal pasti blank, share/clipboard tetap mengisi via navigation state.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

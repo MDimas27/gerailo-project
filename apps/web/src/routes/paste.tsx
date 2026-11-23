@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sparkles, WandSparkles } from "lucide-react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 import { formatRupiah } from "@gerailo/shared";
 
@@ -58,13 +58,11 @@ function BarisNilai({
 export function PastePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [params] = useSearchParams();
-  const teksDariUrl = params.get("teks");
   const teksDariNavigasi = (location.state as { teks?: string } | null)?.teks;
   const smartPaste = useSmartPaste();
   const { business } = usePrimaryBusiness();
   const products = useProducts(business?.id);
-  const [teks, setTeks] = useState(() => teksDariUrl ?? teksDariNavigasi ?? "");
+  const [teks, setTeks] = useState(() => teksDariNavigasi ?? "");
   const [hasil, setHasil] = useState<HasilEkstraksi | null>(null);
   const [pesan, setPesan] = useState<string | null>(null);
   const [aiNonaktif, setAiNonaktif] = useState(false);

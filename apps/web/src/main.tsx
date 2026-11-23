@@ -19,15 +19,6 @@ import "./index.css";
 
 const queryClient = new QueryClient();
 
-const TEKS_UJI_SMART_PASTE = [
-  "Halo kak, pesan:",
-  "2 sosisss",
-  "Ongkir: Rp15.000",
-  "DP: Rp50.000",
-  "Nama: Budi",
-  "Telepon: 0812-9999-8888",
-].join("\n");
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -68,10 +59,7 @@ const router = createBrowserRouter([
     path: "/tes-smart-paste",
     element: (
       <RequireAuth>
-        <Navigate
-          to={`/paste?teks=${encodeURIComponent(TEKS_UJI_SMART_PASTE)}`}
-          replace
-        />
+        <Navigate to="/paste" replace />
       </RequireAuth>
     ),
   },
