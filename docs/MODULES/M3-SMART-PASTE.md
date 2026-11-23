@@ -57,8 +57,22 @@ Pipeline & keamanan: `rules/02-parser-safety.md` (WAJIB dibaca sebelum coding).
 
 ## DoD
 12 fixture lulus di CI; uji manual di HP dengan Web Share Target dari WhatsApp
-(WebAPK + ikon 192/512); clipboard/iOS path; hit-rate & akurasi tampil di admin
-internal; log aktif; RLS; status diperbarui.
+(WebAPK + ikon 192/512 any + maskable); clipboard/iOS path; hit-rate & akurasi tampil
+di admin internal; log aktif; RLS; status diperbarui.
+
+## Status final & verifikasi (23 Nov 2026)
+- **SELESAI `[x]`**. Parser pola, alias/fuzzy, AI fallback berkuota, konfirmasi RPC,
+  admin parser, PWA share target, branding, dan UX `/paste` blank sudah hidup di staging.
+- **Gate**: pgTAP 98, Vitest 57, lint 0 error / 1 warning lama, typecheck & build hijau,
+  CI 4/4 (`quality`, `db-tests`, `db-migrate-staging`, `deploy-staging`).
+- **Staging**: bundle `index-DraCKu0H.js`, manifest ikon any/maskable + splash +
+  `share_target`; `Page.getInstallabilityErrors` `[]`.
+- **UX**: `/paste` biasa dan `/tes-smart-paste` menghasilkan textarea kosong; teks dari
+  share/clipboard tetap masuk lewat navigation state, bukan `sessionStorage`.
+- **Android**: WebAPK staging `org.chromium.webapk.a31e5d83e0e7d8c17_v2` terpasang lewat
+  Chrome 157 ⋮ → "Install and create shortcut" → Install; CDP `standalone: true`.
+- **Rincian lengkap**: `plans/W2-M3-SMART-PASTE.md` §Laporan penutup dan
+  `LESSONS-LEARNED.md` #28–#34.
 
 ## Urutan build
 W2 (utama). Dependensi: M1, M2. Prasyarat M4.

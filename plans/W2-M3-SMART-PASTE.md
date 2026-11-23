@@ -1,9 +1,9 @@
 # W2-M3-SMART-PASTE.md — Rencana Kerja M3 Smart Paste
 
-> W2-M3 · dibuat 22 Nov 2026 oleh /prep + /plan · status: MENUNGGU CEK FOUNDER
+> W2-M3 · dibuat 22 Nov 2026 oleh /prep + /plan · status: SELESAI (23 Nov 2026)
 > Eksekusi mulai 22 Nov 2026 (keputusan I2 — lebih awal dari kalender W2, 26 Nov).
 > Disetujui founder 22 Nov 2026: A1 B1 C1 D1 E1 F1 G1 H1 I2 + amandemen 1–8.
-> Status: DISETUJUI — Task 10 selesai 22 Nov 2026; Task 11 berikutnya; plan ini kontrak sesi.
+> Status: SELESAI — 12 task [x]; gate hijau; staging terverifikasi di device USB; laporan penutup di bawah.
 
 ## Tujuan sesi
 Setelah sesi ini: pengguna bisa menyalin/membagikan chat WhatsApp → parser pola
@@ -53,8 +53,8 @@ katalog; tidak ada jurnal/pembayaran/stok; tidak ada klien yang mengirim harga.
 | 8 | UI `/share` (salin-tempel universal + Web Share Target Android), `/paste`, `/paste/confirm` (sumber kolom + pilihan 2 kandidat); konfirmasi memanggil RPC, bukan INSERT klien | UI | `apps/web/src/routes/{share,paste,paste-confirm}.tsx`, `apps/web/src/hooks/use-smart-paste.ts`, `apps/web/src/lib/api.ts`, `apps/web/src/main.tsx`, `apps/web/vite.config.ts`, `apps/web/package.json` | `M3: UI paste + konfirmasi draft` | [x] 22 Nov |
 | 9 | `/admin/parser` + `GET /api/admin/parser-metrics`: allowlist `ADMIN_EMAILS` di Worker, baca `ai_usage_logs` via RLS, wiring `mark_extraction_corrected` saat user mengoreksi | UI+kode | `apps/web/src/routes/admin-parser.tsx`, `apps/worker/src/routes/admin.ts` | `M3: metrik internal terproteksi` | [x] 22 Nov |
 | 10 | Samakan demo chat Siti & referensi fixture; sinkron docs API-CONTRACTS/DATA-MODEL/M3 (termasuk catatan deviasi service_role) | docs | `apps/web/src/routes/onboarding.tsx`, `docs/MODULES/M3-SMART-PASTE.md`, `docs/API-CONTRACTS.md`, `docs/DATA-MODEL.md` | `M3: sinkron fixture & kontrak` | [x] 22 Nov |
-| 11 | Verify: `pnpm lint/typecheck/test/build`, pgTAP, cek drift types, grep bundle web, deploy staging; founder isi secret LLM via wrangler; verify manual HP Android (share WA) + jalur salin-tempel | ops | — | — | [~] 22 Nov — lint/typecheck/test/build + pgTAP 93 + drift types + grep bundle lolos; deploy staging parser pola + config NIM OK (`8dca929a`); **pending**: secret `LLM_API_KEY`/`ADMIN_EMAILS`, `VITE_WORKER_URL` GitHub Variable, verify manual HP |
-| 12 | /review + /remember: status M3 `[x]`, LESSONS entri baru, plan SELESAI | ops | `AGENTS.md`, `LESSONS-LEARNED.md`, plan ini | — | [~] 22 Nov — AGENTS/LESSONS diupdate; pending verify HP/deploy sebelum M3 `[x]` & plan SELESAI |
+| 11 | Verify: `pnpm lint/typecheck/test/build`, pgTAP, cek drift types, grep bundle web, deploy staging; founder isi secret LLM via wrangler; verify manual HP Android (share WA) + jalur salin-tempel | ops | — | CI `45217644347`, `45224121128` | [x] 23 Nov — pgTAP 98, Vitest 57, lint 0 error, typecheck/build hijau, CI 4/4; drift types + guard bundle lolos; secrets Worker & `VITE_*` aktif; share WA, clipboard, `/paste`, `/admin/parser`, install PWA terverifikasi di device USB |
+| 12 | /review + /remember: status M3 `[x]`, LESSONS entri baru, plan SELESAI | ops | `AGENTS.md`, `LESSONS-LEARNED.md`, plan ini, `docs/MODULES/M3-SMART-PASTE.md` | `851e655` + laporan ini | [x] 23 Nov — status M3 `[x]`, LESSONS #28–#34, AGENTS & modul disinkronkan, plan SELESAI |
 
 ## Signature RPC (final — dibuat di 0003)
 ```sql
@@ -180,10 +180,13 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
   dan hanya `message.content` akhir yang diparse (`reasoning_content` dibuang).
 - Task 8: Web Share Target memakai `GET /share?text=...` (manifest terverifikasi di
   `dist/manifest.webmanifest`). Jalur iOS/umum = textarea + `navigator.clipboard.readText()`
-  dengan fallback tempel manual bila izin clipboard ditolak. Draft teks/hasil disimpan
-  di `sessionStorage`, bukan localStorage. Argumen BIGINT RPC dikirim sebagai string
-  yang di-cast ke `number` mengikuti pola `product-form.tsx` supaya supabase-js tidak
-  membulatkan. `VITE_WORKER_URL` adalah env publik baru yang wajib diisi sebelum verify.
+  dengan fallback tempel manual bila izin clipboard ditolak. Draft teks/hasil TIDAK
+  lagi disimpan di `sessionStorage`: `SharePage` mengirim teks via navigation state,
+  `PastePage` inisialisasi dari state tersebut, dan `/paste` biasa selalu blank (query
+  `?teks=` hanya dipakai route tes lama, sudah dihapus saat closing). Argumen BIGINT RPC
+  dikirim sebagai string yang di-cast ke `number` mengikuti pola `product-form.tsx`
+  supaya supabase-js tidak membulatkan. `VITE_WORKER_URL` adalah env publik baru yang
+  wajib diisi sebelum verify.
 - Task 9: metrik dibaca dengan JWT founder dan RLS `ai_usage_logs_select_own`, jadi
   agregat hanya usaha yang dimiliki akun founder (tanpa `service_role`, tanpa lintas
   `business_id`). Response membatasi 200 log terbaru dan tidak memilih `teks_asli`.
@@ -205,24 +208,44 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
 - KYC payment gateway (non-teknis, tetap paralel)
 - PWA hardening lanjutan (W4, sesuai ROADMAP); install + share target staging sudah lolos
 
-## Laporan penutup M3 (23 Nov 2026)
-- **Status**: `[x]` di `AGENTS.md`. Modul selesai: parser pola, alias/fuzzy, fallback AI
-  NVIDIA NIM berkuota, konfirmasi order via RPC, admin parser internal, PWA share target.
-- **Gate**: pgTAP `Files=4 Tests=98 PASS`, Vitest 57 lulus (termasuk golden #12),
-  `pnpm lint` 0 error, `pnpm typecheck` hijau, `pnpm build` hijau dengan `VITE_*`.
-- **Staging**: secrets Worker terdaftar; paket usaha `STARTER`; migrasi `0003` + `0004`
-  sudah di-push; bundle `index-B5h0iSQD.js`; manifest memuat ikon 192/512 + `share_target`.
+## Laporan penutup M3 (23 Nov 2026 — final)
+- **Status**: `[x]` di `AGENTS.md`; plan `SELESAI`. Modul selesai: parser pola, alias/fuzzy,
+  fallback AI NVIDIA NIM berkuota, konfirmasi order via RPC, admin parser internal,
+  PWA share target, branding final, dan UX Smart Paste blank saat dibuka biasa.
+- **Gate test**: pgTAP `Files=4 Tests=98 PASS`; Vitest `17 files / 57 tests passed`
+  (termasuk golden #12 `sosisss` → Sosis, akurasi `SEDANG`); `pnpm lint` 0 error
+  (1 warning lama `react-refresh/only-export-components` di `auth.tsx:61`, bukan blocker);
+  `pnpm typecheck` hijau; `pnpm build` hijau dengan `VITE_SUPABASE_URL`,
+  `VITE_SUPABASE_ANON_KEY`, `VITE_WORKER_URL`; drift types & guard bundle lolos.
+- **CI/deploy**: 4 job hijau (`quality`, `db-tests`, `db-migrate-staging`,
+  `deploy-staging`) pada `45161725070` (closing M3), `45217644347` (fix `/paste`), dan
+  `45224121128` (docs final). Migrasi `0003` + `0004` sudah di-push ke staging.
+- **Staging**: secrets Worker `LLM_API_KEY`, `ADMIN_EMAILS`, `SUPABASE_URL`,
+  `SUPABASE_ANON_KEY` terdaftar; paket usaha `STARTER`; bundle aktif
+  `index-DraCKu0H.js` + CSS `index-Di3n-kc0.css`; manifest memuat ikon 192/512 `any` +
+  maskable, splash, dan `share_target.action="/share"`; `Page.getInstallabilityErrors`
+  mengembalikan `[]`.
 - **Error path**: `503 AI_NOT_CONFIGURED`, `429 AI_QUOTA_EXCEEDED`, `401 AUTH_REQUIRED`,
   `403 ADMIN_FORBIDDEN`, dan `LLM_GAGAL_401` tercakup test Worker; gejala live 429/503
-  sudah hilang setelah secret + plan diperbaiki founder.
-- **Smoke UI**: `/tes-smart-paste` → AI → konfirmasi → order `9b9a5140-...`;
-  `/admin/parser` 200 dengan 6 kartu metrik + model AI; dropdown produk memakai UUID katalog.
-- **Android**: WebAPK `org.chromium.webapk.ac1862ef08b021335_v2` ter-install; SEND intent
-  WhatsApp-equivalent membuka `/share?text=...` → review → koreksi produk → order
-  `f65b34da-...` DRAFT.
+  hilang setelah secret + plan diperbaiki founder.
+- **Smoke UI**: `/tes-smart-paste` kini redirect ke `/paste` tanpa `?teks=`; `/paste`
+  biasa selalu blank, termasuk setelah reload dengan service worker terbaru; share WA,
+  clipboard, dan navigation state masih mengisi textarea sesuai sumber. Konfirmasi AI →
+  order `9b9a5140-...`; `/admin/parser` 200 dengan 6 kartu metrik + model
+  `nvidia/nemotron-3-ultra-550b-a55b`; dropdown produk memakai UUID katalog.
+- **Android/PWA**: WebAPK lama `org.chromium.webapk.a3555e66445317b31_v2` (authority
+  `gerailo.com`) di-uninstall; setelah Chrome di-restart, menu ⋮ menampilkan
+  **"Install and create shortcut"** (label Chrome 157) → Install → konfirmasi Gerailo
+  (staging). WebAPK aktif `org.chromium.webapk.a31e5d83e0e7d8c17_v2`, target CDP
+  `standalone: true`, SW aktif. SEND intent WhatsApp-equivalent membuka `/share?text=...`
+  → review → koreksi produk → order `f65b34da-...` DRAFT.
 - **Clipboard/iOS path**: clipboard API → `/share` → AI → konfirmasi → order
-  `9a0d6661-...` DRAFT. Safari fisik tidak tersedia; dicatat sebagai catatan founder.
+  `9a0d6661-...` DRAFT. Safari fisik tidak tersedia; dicatat sebagai catatan founder,
+  bukan blocker teknis.
 - **Data terverifikasi**: semua order smoke `status=DRAFT`, `ongkir=15000`, `dp=50000`,
   `harga_satuan=75000`, `qty=2`, total `165000` dihitung server dari katalog.
+- **Branding**: aset final di `design/stitch/logo _splash_screen_icon_favicon/` masuk
+  repo; favicon 32/64, ikon 192/512 any + maskable, apple-touch-icon, splash 1200×1024;
+  workbox precache 13 entri tanpa duplikat.
 - **Backlog tidak masuk M3**: buyer tracking `/track/{token}` (M8), edit profil/pengaturan
   usaha (M1 sisa), KYC gateway, PWA hardening lanjutan.
