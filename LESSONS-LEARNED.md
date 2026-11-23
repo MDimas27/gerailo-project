@@ -154,6 +154,8 @@ diperbarui.
 
 #29 · 23 Nov 2026 · brand · Founder menyerahkan aset final di `design/stitch/logo _splash_screen_icon_favicon/`. · Tindakan: source 200×200 (favicon & PWA) dan 1200×1024 (splash) di-generated ke `favicon.png` 64, `favicon-32.png`, `icons/icon-192.png`, `icons/icon-512.png`, `icons/icon-maskable-192/512.png` (padding 10% di background `#F7F8FA`), `icons/apple-touch-icon.png` 180, dan `branding/splash.png`; manifest memisahkan purpose `any` vs `maskable`, `index.html` memuat favicon/apple touch/startup image, workbox precache 13 entri tanpa duplikat. Gate hijau: lint 0 error (1 warning lama), typecheck, Vitest 57, build.
 
+#30 · 23 Nov 2026 · UX · Founder melaporkan /paste selalu terisi teks lama "Halo kak, pesan 2 sosiss". · Akar: `SharePage` menyimpan teks ke `sessionStorage` lalu `PastePage` membacanya terus-menerus, jadi bukan konsumsi sekali jalan. · Tindakan: hapus jalur `sessionStorage` untuk teks; `SharePage` mengirim teks via `navigate("/paste", { state: { teks } })`, `PastePage` menginisialisasi dari `location.state` atau `?teks=` (test route) dan langsung kosong untuk bukaan biasa. Kunci lama tetap dibersihkan oleh `hapusDraftSmartPaste`. Catatan install: Chrome Android tidak menampilkan popup otomatis; install lewat menu ⋮ → "Install app"/"Add to Home screen", iOS lewat Share → "Add to Home Screen".
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

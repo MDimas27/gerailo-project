@@ -5,7 +5,6 @@ import { useNavigate, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { simpanTeksSmartPaste } from "@/hooks/use-smart-paste";
 
 export function SharePage() {
   const navigate = useNavigate();
@@ -37,8 +36,7 @@ export function SharePage() {
       return;
     }
 
-    simpanTeksSmartPaste(teks.trim());
-    navigate("/paste");
+    navigate("/paste", { state: { teks: teks.trim() } });
   };
 
   return (
