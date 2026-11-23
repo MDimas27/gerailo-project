@@ -20,6 +20,13 @@ import {
 import type { FieldSource, MetodeBayar } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 
+const METODE_BAYAR_OPSI: Array<{ label: string; value: MetodeBayar }> = [
+  { label: "Transfer", value: "TRANSFER" },
+  { label: "COD", value: "COD" },
+  { label: "QRIS", value: "QRIS" },
+  { label: "Lainnya", value: "LAINNYA" },
+];
+
 type ItemForm = {
   product_id: string;
   qty: string;
@@ -32,7 +39,7 @@ type FormKonfirmasi = {
   items: ItemForm[];
   ongkir: string;
   dp: string;
-  metode_bayar: MetodeBayar;
+  metode_bayar: MetodeBayar[];
   catatan: string;
 };
 
@@ -44,7 +51,7 @@ function formKosong(): FormKonfirmasi {
     items: [],
     ongkir: "0",
     dp: "0",
-    metode_bayar: "TRANSFER",
+    metode_bayar: ["TRANSFER"],
     catatan: "",
   };
 }
@@ -63,7 +70,9 @@ function dariDraft(draft: DraftSmartPaste): FormKonfirmasi {
     ),
     ongkir: extraction.ongkir.value ?? "0",
     dp: extraction.dp.value ?? "0",
-    metode_bayar: extraction.metode_bayar.value ?? "TRANSFER",
+    metode_bayar: extraction.metode_bayar.value
+      ? [extraction.metode_bayar.value]
+      : ["TRANSFER"],
     catatan: "",
   };
 }
@@ -170,6 +179,13 @@ export function PasteConfirmPage() {
     setError(null);
   };
 
+  const ubahMetodeBayar = (metode: MetodeBayar) => {
+    const berikut = form.metode_bayar.includes(metode)
+      ? form.metode_bayar.filter((satu) => satu !== metode)
+      : [...form.metode_bayar, metode];
+    ubah("metode_bayar", berikut);
+  };
+
   const konfirmasi = async () => {
     if (!form.nama.trim() || !form.telepon.trim()) {
       setError("Nama dan telepon pembeli wajib diisi.");
@@ -178,6 +194,11 @@ export function PasteConfirmPage() {
 
     if (form.items.length === 0 || form.items.some((item) => !item.product_id || qtyAman(item.qty) === 0)) {
       setError("Setiap item butuh produk dan jumlah yang valid.");
+      return;
+    }
+
+    if (form.metode_bayar.length === 0) {
+      setError("Pilih minimal satu metode bayar.");
       return;
     }
 
@@ -288,22 +309,26 @@ export function PasteConfirmPage() {
             onChange={(event) => ubah("alamat", event.target.value)}
           />
         </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="metode-bayar">Metode bayar</Label>
-          <select
-            className="min-h-11 rounded-control border border-border bg-surface px-3 text-sm text-ink"
-            id="metode-bayar"
-            value={form.metode_bayar}
-            onChange={(event) =>
-              ubah("metode_bayar", event.target.value as MetodeBayar)
-            }
-          >
-            <option value="TRANSFER">Transfer</option>
-            <option value="COD">COD</option>
-            <option value="QRIS">QRIS</option>
-            <option value="LAINNYA">Lainnya</option>
-          </select>
-        </div>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-medium text-ink">Metode bayar</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {METODE_BAYAR_OPSI.map((opsi) => (
+              <label
+                className="flex min-h-11 items-center gap-2 rounded-control border border-border px-3 text-sm text-ink"
+                key={opsi.value}
+              >
+                <input
+                  checked={form.metode_bayar.includes(opsi.value)}
+                  className="size-4 accent-primary"
+                  onChange={() => ubahMetodeBayar(opsi.value)}
+                  type="checkbox"
+                />
+                {opsi.label}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-muted">Bisa pilih lebih dari satu.</p>
+        </fieldset>
       </Card>
 
       <Card className="flex flex-col gap-3">

@@ -113,10 +113,15 @@ export async function extractWithAi(
   const ongkirNilai =
     ai.ongkir !== undefined ? BigInt(ai.ongkir) : (dasar.ongkir.value ?? 0n);
   const dpNilai = ai.dp !== undefined ? BigInt(ai.dp) : (dasar.dp.value ?? 0n);
+  const produkAiLengkap =
+    items.length > 0 && items.every((item) => item.product_id !== null);
+  const flags = produkAiLengkap
+    ? dasar.flags.filter((flag) => flag !== "PRODUK_TIDAK_DITEMUKAN")
+    : dasar.flags;
 
   const extraction: Extraction = {
     sumber: "AI",
-    confidence: hitungConfidence(items, dasar.pelanggan, dasar.flags),
+    confidence: hitungConfidence(items, dasar.pelanggan, flags, "AI"),
     pelanggan: dasar.pelanggan,
     items,
     ongkir: {
@@ -132,7 +137,7 @@ export async function extractWithAi(
         ? { value: ai.metode_bayar, source: "teks" }
         : dasar.metode_bayar,
     total: hitungTotal(items, ongkirNilai),
-    flags: dasar.flags,
+    flags,
   };
 
   return { extraction, logId, tokens };

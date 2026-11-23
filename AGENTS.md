@@ -28,7 +28,7 @@ Monorepo pnpm: `apps/web` · `apps/worker` · `packages/shared` · `packages/sup
 |---|---|---|
 | M1 | Registrasi usaha & onboarding 3 langkah | [~] parsial |
 | M2 | Master produk & harga (+ varian teks, alias) | [x] |
-| M3 | Smart Paste (parser pola + fallback AI + konfirmasi) | [~] deploy staging parser pola; AI/admin nonaktif; pending verify HP |
+| M3 | Smart Paste (parser pola + fallback AI + konfirmasi) | [x] |
 | M4 | Order & pembayaran (status, DP, COD, pelunasan) | [ ] |
 | M5 | Stok sederhana (pergerakan + HPP rata-rata bergerak) | [ ] |
 | M6 | Pelanggan (data ringkas + histori otomatis) | [ ] |
@@ -100,10 +100,10 @@ staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui.
 
 ## Status proyek (perbarui tiap sesi)
 
-- Sprint aktif: W1b M2 produk selesai 22 Nov; W2 M3 dimulai 22 Nov — Task 1–11 kode/gate selesai, Task 12 menunggu verify manual + deploy
-- Modul selesai: M2 (produk, varian, alias, stok, kuota paket, RPC create_product/record_stock_move)
-- M3 `[~]`: parser pola + fallback AI berkuota + UI share/paste/confirm + `/admin/parser` siap; pgTAP 93, Vitest 56, lint/typecheck/build hijau; RLS/RPC diuji. Belum `[x]` sebelum smoke AI/admin + verify HP.
+- Sprint aktif: W2 M3 SELESAI 23 Nov; lanjut W3 M4 order & pembayaran.
+- Modul selesai: M2 (produk, varian, alias, stok, kuota paket, RPC create_product/record_stock_move); M3 (Smart Paste parser pola + fallback AI berkuota + konfirmasi order + admin parser + PWA share target).
+- M3 `[x]`: pgTAP 98, Vitest 57, lint/typecheck/build hijau; RLS/RPC diuji. Golden #12: AI menyelesaikan typo katalog & membatasi akurasi ke `SEDANG`. Admin parser 200: 6 kartu metrik + baris AI `nvidia/nemotron-3-ultra-550b-a55b`. Konfirmasi order `9b9a5140-eb0e-4e13-a5ca-d65d260fb3c9` dan share target `f65b34da-0d89-4125-ad03-122134c8bdfc` + clipboard `9a0d6661-1b1e-4a63-bde5-7239a58500a5`: DRAFT, ongkir 15000, DP 50000, total 165000, 2× Sosis @75000 dari katalog.
 - M1 parsial: auth OTP, usaha, 19 COA, settings. **Sisa M1 (backlog)**: edit profil usaha, edit pengaturan. Kolom `pdpr_consent_at` sudah masuk migrasi 0003.
-- Deploy staging terakhir: 22 Nov 2026 — https://gerailo-staging.mdimas-jobs.workers.dev (health + SPA ok); migrasi 0001-0002 + RLS/RPC terverifikasi; smoke test auth cloud PASS (email OTP → onboarding 3 langkah → beranda). CI **hijau** (quality + db-tests + db-migrate-staging + deploy-staging).
-- Deploy M3 staging: 22 Nov 2026 — deploy otomatis CI dari commit `7a70113` (versi Worker berubah tiap push); `/api/health` OK; `LLM_API_KEY` + `ADMIN_EMAILS` sudah terdaftar; bundle web terbukti memuat URL Worker; verify AI/admin menyusul.
-- Halangan: KYC gateway; verify manual Web Share Target Android + clipboard/iOS pending; smoke AI/admin setelah secret belum dilaporkan.
+- Deploy staging terakhir: 23 Nov 2026 — https://gerailo-staging.mdimas-jobs.workers.dev (health + SPA ok); manifest PWA punya ikon 192/512 + `share_target`; bundle `index-B5h0iSQD.js` memuat URL Supabase + Worker, badge `Akurasi`, 6 kartu metrik admin, dan model baris AI; route tes `/tes-smart-paste` aktif.
+- Deploy M3 staging: secrets Worker `LLM_API_KEY`, `ADMIN_EMAILS`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` terdaftar; usaha staging sudah `STARTER`. Android: WebAPK `org.chromium.webapk.ac1862ef08b021335_v2` ter-install; SEND intent ke `ShareActivity` membuka `/share?text=...`, review → koreksi produk → DRAFT. iOS: tidak ada perangkat fisik; jalur salin-tempel diverifikasi lewat clipboard API + `/share` → AI → konfirmasi → DRAFT.
+- Halangan: KYC gateway; verifikasi Safari/iOS fisik tetap dicatat sebagai catatan founder.

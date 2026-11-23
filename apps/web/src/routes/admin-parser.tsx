@@ -40,7 +40,7 @@ export function AdminParserPage() {
         </Card>
       ) : metrik.data ? (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Card className="p-3">
               <p className="text-xs text-muted">Total ekstraksi</p>
               <p className="text-xl font-semibold tabular-nums text-ink">
@@ -48,15 +48,27 @@ export function AdminParserPage() {
               </p>
             </Card>
             <Card className="p-3">
-              <p className="text-xs text-muted">Hit-rate parser</p>
-              <p className="text-xl font-semibold tabular-nums text-success">
-                {persentase(metrik.data.hitRateParser)}
+              <p className="text-xs text-muted">Parser</p>
+              <p className="text-xl font-semibold tabular-nums text-ink">
+                {metrik.data.parser}
               </p>
             </Card>
             <Card className="p-3">
-              <p className="text-xs text-muted">Akurasi final</p>
+              <p className="text-xs text-muted">AI</p>
+              <p className="text-xl font-semibold tabular-nums text-ink">
+                {metrik.data.ai}
+              </p>
+            </Card>
+            <Card className="p-3">
+              <p className="text-xs text-muted">Koreksi</p>
+              <p className="text-xl font-semibold tabular-nums text-ink">
+                {metrik.data.dikoreksi}
+              </p>
+            </Card>
+            <Card className="p-3">
+              <p className="text-xs text-muted">Hit rate</p>
               <p className="text-xl font-semibold tabular-nums text-success">
-                {persentase(metrik.data.akurasiFinal)}
+                {persentase(metrik.data.hitRateParser)}
               </p>
             </Card>
             <Card className="p-3">
@@ -69,8 +81,7 @@ export function AdminParserPage() {
 
           <Card className="flex flex-col gap-2">
             <p className="text-sm text-muted">
-              Parser pola {metrik.data.parser} · AI {metrik.data.ai} · dikoreksi{" "}
-              {metrik.data.dikoreksi}
+              Akurasi final {persentase(metrik.data.akurasiFinal)}
             </p>
             <p className="text-xs text-muted">
               Diambil {new Date(metrik.data.diambilPada).toLocaleString("id-ID")}
@@ -93,6 +104,11 @@ export function AdminParserPage() {
                       <p className="text-xs text-muted">
                         {new Date(log.created_at).toLocaleString("id-ID")} · skor{" "}
                         {persentase(Number(log.skor))}
+                      </p>
+                      <p className="break-all text-xs text-muted">
+                        {log.sumber === "AI"
+                          ? (log.model ?? "model tidak tercatat")
+                          : "parser pola"}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

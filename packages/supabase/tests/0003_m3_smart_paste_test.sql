@@ -70,7 +70,7 @@ select lives_ok(
       '0812-8899-7766',
       'Jl. Melati',
       null,
-      'TRANSFER',
+      array['TRANSFER']::text[],
       null
     )
   $$,
@@ -162,7 +162,7 @@ select lives_ok(
       '0812-8899-7766',
       null,
       null,
-      'TRANSFER',
+      array['TRANSFER']::text[],
       null
     )
   $$,

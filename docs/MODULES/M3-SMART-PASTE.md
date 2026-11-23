@@ -19,7 +19,7 @@ DRAFT) + `customers` dedup, semuanya SATU transaksi via RPC `confirm_draft_order
 - Fixture parser: `apps/worker/tests/parser/`.
 
 ## Alur user
-1. Tempel/share teks → hasil + skor keyakinan (tinggi/sedang/rendah).
+1. Tempel/share teks → hasil + badge akurasi (tinggi/sedang/rendah; field `confidence`).
 2. Kolom menandai: dari katalog (hijau), tebakan/kosong (kuning, wajib diisi).
 3. Pengguna mengoreksi/pilih dari katalog → total & sisa dihitung ulang di Worker
    (zod dari `packages/shared`) → konfirmasi.
@@ -33,6 +33,10 @@ Pipeline & keamanan: `rules/02-parser-safety.md` (WAJIB dibaca sebelum coding).
   kuota per paket dihitung SERVER via RPC `claim_ai_quota` dengan JWT user + RLS
   (TANPA `service_role`); teks asli hanya disimpan bila ada consent PDP usaha.
 - Matching: persis → alias → trigram ≥0,8; dua kandidat mirip → tampilkan pilihan.
+- Fallback AI boleh memilih `product_id` dari katalog untuk typo yang gagal dicocokkan
+  pola (mis. `sosisss` → Sosis). Bila semua item AI punya `product_id`, flag
+  `PRODUK_TIDAK_DITEMUKAN` dihapus dan keyakinan dinaikkan menjadi `SEDANG` — bukan
+  `TINGGI`, karena tetap butuh konfirmasi pengguna. Harga tetap dari katalog.
 - Format angka Indonesia: "75.000", "75rb", "75k"; qty "3 pcs", "x3", "3x".
 
 ## Golden tests
@@ -48,10 +52,13 @@ Pipeline & keamanan: `rules/02-parser-safety.md` (WAJIB dibaca sebelum coding).
 10. Kuota habis → pesan jelas, parser pola tetap jalan, tidak ada crash.
 11. Format pesan dari katalog (M9 Fase 1: produk/varian/qty terstruktur) → parse
     benar TANPA AI (fixture baru, MERAH dulu).
+12. AI menyelesaikan typo (`sosisss`) → flag `PRODUK_TIDAK_DITEMUKAN` hilang,
+    keyakinan `SEDANG`, harga dari katalog, total dihitung server.
 
 ## DoD
-11 fixture lulus di CI; uji manual di HP dengan Web Share Target dari WhatsApp;
-hit-rate & akurasi tampil di admin internal; log aktif; RLS; status diperbarui.
+12 fixture lulus di CI; uji manual di HP dengan Web Share Target dari WhatsApp
+(WebAPK + ikon 192/512); clipboard/iOS path; hit-rate & akurasi tampil di admin
+internal; log aktif; RLS; status diperbarui.
 
 ## Urutan build
 W2 (utama). Dependensi: M1, M2. Prasyarat M4.

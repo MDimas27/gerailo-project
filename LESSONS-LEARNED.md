@@ -136,6 +136,22 @@ diperbarui.
 
 #20 · 22 Nov 2026 · ux · Label "Alias untuk Smart Paste" kurang dipahami founder/user saat onboarding. · Tindakan: ganti di onboarding & form produk jadi "Nama lain yang sering dipakai pembeli (opsional)" + contoh `daster jmb, DJ bunga`; teks bantuan menegaskan cukup yang paling sering muncul, tidak semua harus diisi.
 
+#21 · 23 Nov 2026 · deploy · Semua endpoint Worker yang memakai Supabase balas 500 `SUPABASE_URL_BELUM_DISET` karena `SUPABASE_URL`/`SUPABASE_ANON_KEY` belum jadi wrangler secret; gejalanya tampak sebagai "Baca pesanan gagal" di HP. · Tindakan: daftarkan keduanya di staging via `wrangler secret put ... --env staging` dari GitHub Variables; parser pola langsung 200 dan UI menampilkan hasil deteksi. Jangan terkecoh `VITE_*` yang hanya untuk bundle web.
+
+#22 · 23 Nov 2026 · deploy · Build lokal tanpa `VITE_*` menghasilkan bundle yang memanggil Supabase lokal `127.0.0.1:54321`; PWA service worker lalu menyimpan bundle itu, sehingga login staging gagal `ERR_CONNECTION_REFUSED` walau endpoint Supabase sehat. · Tindakan: selalu set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_WORKER_URL` dari GitHub Variables sebelum build/deploy manual; setelah deploy, unregister SW + hapus cache Workbox di device bila ada bundle lama.
+
+#23 · 23 Nov 2026 · smoke · Plan/kuota dan hasil order staging bisa diverifikasi tanpa service role: baca `businesses`, `ai_usage_logs`, `orders`, `order_items`, `customers` lewat Supabase REST dengan JWT user + anon key; RLS membatasi pada `business_id` sendiri. · Tindakan lanjutan: AI kini menghapus flag `PRODUK_TIDAK_DITEMUKAN` bila semua item punya `product_id` katalog dan membatasi akurasi UI ke `SEDANG` (golden #12), bukan ikut flag parser pola.
+
+#24 · 23 Nov 2026 · model · Review founder: metode bayar order tidak boleh radio tunggal karena pembeli bisa membayar dengan lebih dari satu cara. · Tindakan: migrasi 0004 mengubah `orders.metode_bayar` jadi `text[]` unik 1–4 nilai, RPC `confirm_draft_order` menerima array, UI konfirmasi pakai checkbox; `businesses.metode_bayar` sengaja tetap tunggal sebagai metode utama onboarding.
+
+#25 · 23 Nov 2026 · UI · Label badge hasil deteksi "Keyakinan" dianggap ambigu oleh founder; field internal `confidence` tetap, tetapi badge cukup dibaca "Akurasi". · Tindakan: ganti label di `apps/web/src/routes/paste.tsx` dan sebutan alur user di `docs/MODULES/M3-SMART-PASTE.md`, lalu rebuild/deploy staging.
+
+#26 · 23 Nov 2026 · admin · Ekspektasi test `/admin/parser` tidak terpenuhi oleh UI lama: metrik Parser/AI/Koreksi hanya jadi satu baris teks dan `model` tidak dirender, padahal API sudah mengirim `terbaru[].model`. · Tindakan: enam kartu metrik ditampilkan eksplisit dan baris AI menampilkan model; verifikasi langsung dengan JWT admin: 200, total 12 (parser 8, AI 4, koreksi 1, token 595), 4 baris AI semua `nvidia/nemotron-3-ultra-550b-a55b` dengan token 169/142/142/142; tanpa token 401 `AUTH_REQUIRED`. Service worker lama perlu di-unregister sebelum bundle baru tampil.
+
+#27 · 23 Nov 2026 · smoke · Alur AI → konfirmasi → simpan terverifikasi di device: dropdown produk berisi UUID katalog (bukan teks bebas), qty 2, ongkir 15000, DP 50000, subtotal 150000, total 165000, sisa 115000; nomor tampil ternormalisasi `6281299998888` dari `0812-9999-8888`. · Order `9b9a5140-eb0e-4e13-a5ca-d65d260fb3c9` DRAFT, `harga_satuan=75000` dari katalog via RPC; diverifikasi lewat Supabase REST + JWT (RLS), bukan service role.
+
+#28 · 23 Nov 2026 · closing · M3 ditandai `[x]`. Manifest PWA awal tanpa `icons` membuat Chrome menolak install ("This app cannot be installed"); tambahkan `icon-192.png`/`icon-512.png` + deklarasi `vite.config.ts`, lalu WebAPK `org.chromium.webapk.ac1862ef08b021335_v2` berhasil di-install dan `ShareActivity`-nya menerima SEND intent → `/share?text=...` → order `f65b34da-0d89-4125-ad03-122134c8bdfc`. Jalur clipboard → `/share` → AI → konfirmasi menghasilkan `9a0d6661-1b1e-4a63-bde5-7239a58500a5`; Safari/iOS fisik tidak tersedia, dicatat sebagai catatan founder.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

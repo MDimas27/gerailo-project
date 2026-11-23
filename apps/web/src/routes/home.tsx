@@ -80,7 +80,12 @@ export function HomePage() {
         <h2 className="text-base font-semibold text-ink">Langkah berikutnya</h2>
         <ul className="mt-2 flex flex-col gap-2 text-sm text-muted">
           <li>1. Tambah produk pertama dan harga.</li>
-          <li>2. Coba Smart Paste dengan contoh chat WhatsApp.</li>
+          <li>
+            2.{" "}
+            <Link className="font-semibold text-primary underline" to="/tes-smart-paste">
+              Tes Smart Paste (Baca pesanan + Coba AI)
+            </Link>
+          </li>
           <li>3. Catat order pertama sampai laporan.</li>
         </ul>
       </section>

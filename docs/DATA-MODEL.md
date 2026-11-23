@@ -97,7 +97,7 @@ journal_lines/orders, dibuat dengan `security_invoker = on` agar mengikuti RLS.
 
 ## Enum & nilai awal penting
 
-- `metode_bayar` order: TRANSFER, COD, QRIS, LAINNYA.
+- `metode_bayar` order: array `text[]` unik, 1–4 pilihan dari TRANSFER, COD, QRIS, LAINNYA. `businesses.metode_bayar` tetap satu metode utama untuk onboarding.
 - `kanal` payments: MANUAL, QRIS, VA, E_WALLET.
 - Seed `accounts` dijalankan oleh RPC `create_business` (M1) — 19 akun dari
   docs/ACCOUNTING-RULES.md.

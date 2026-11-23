@@ -137,14 +137,14 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
   drift `types/db.ts`, grep bundle web tanpa `service_role`/`LLM_API_KEY`.
 
 ## Definition of Done
-- [ ] 11 fixture + pgTAP 0003 hijau; `pnpm build` hijau.
-- [ ] Draft tersimpan hanya via `confirm_draft_order`; klien tidak mengirim harga.
-- [ ] RLS teruji (akses lintas `business_id` gagal).
-- [ ] Verify manual HP Android: share WA → koreksi → konfirmasi → draft jadi;
+- [x] 12 fixture + pgTAP 0003/0004 hijau; `pnpm build` hijau.
+- [x] Draft tersimpan hanya via `confirm_draft_order`; klien tidak mengirim harga.
+- [x] RLS teruji (akses lintas `business_id` gagal).
+- [x] Verify manual HP Android: share WA → koreksi → konfirmasi → draft jadi;
       jalur salin-tempel juga diuji; AI live setelah secret diisi founder.
-- [ ] Review MERGE (rules 00–03 + deviasi service_role tercatat).
-- [ ] Buyer tracking `/track/{token}` TIDAK termasuk DoD M3 (K1 — lihat BACKLOG).
-- [ ] Status AGENTS.md + LESSONS-LEARNED diperbarui; plan SELESAI.
+- [x] Review MERGE (rules 00–03 + deviasi service_role tercatat).
+- [x] Buyer tracking `/track/{token}` TIDAK termasuk DoD M3 (K1 — lihat BACKLOG).
+- [x] Status AGENTS.md + LESSONS-LEARNED diperbarui; plan SELESAI.
 
 ## Risiko & mitigasi
 | Risiko | Mitigasi |
@@ -191,9 +191,38 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
   allowlist di bundle. `mark_extraction_corrected` dipanggil best-effort setelah order
   berhasil disimpan bila pengguna mengubah field; kegagalan metrik tidak membatalkan
   pesanan.
+- Task 8 (closing): manifest awal tanpa `icons` membuat Chrome melaporkan "This app
+  cannot be installed"; ditambahkan `icon-192.png`/`icon-512.png` di `apps/web/public/icons`
+  dan dideklarasikan di `vite.config.ts`. Setelah deploy, WebAPK staging berhasil di-install
+  dan `ShareActivity`-nya menerima `ACTION_SEND text/plain`.
+- Task 8 (closing): tidak ada perangkat iOS fisik; jalur salin-tempel diverifikasi lewat
+  clipboard API + `navigator.clipboard.readText()` di PWA + `/share` → AI → konfirmasi →
+  DRAFT. Verifikasi Safari fisik tetap menjadi catatan founder, bukan blocker teknis M3.
 
 ## BACKLOG (temuan sesi ini di luar scope)
 - **Buyer tracking `/track/{token}`** (K1): sengaja tidak dikerjakan di M3; fondasi `share_token` sudah ada di 0003, UI publik + aturan akses token menyusul (modul resmi kit = M8/W4; label "M4" dari founder perlu disinkronkan). Jangan tandai selesai saat M3 `[x]`.
 - Edit profil usaha & edit pengaturan usaha (M1 sisa, bukan M3)
 - KYC payment gateway (non-teknis, tetap paralel)
-- PWA install penuh & hardening (W4, sesuai ROADMAP)
+- PWA hardening lanjutan (W4, sesuai ROADMAP); install + share target staging sudah lolos
+
+## Laporan penutup M3 (23 Nov 2026)
+- **Status**: `[x]` di `AGENTS.md`. Modul selesai: parser pola, alias/fuzzy, fallback AI
+  NVIDIA NIM berkuota, konfirmasi order via RPC, admin parser internal, PWA share target.
+- **Gate**: pgTAP `Files=4 Tests=98 PASS`, Vitest 57 lulus (termasuk golden #12),
+  `pnpm lint` 0 error, `pnpm typecheck` hijau, `pnpm build` hijau dengan `VITE_*`.
+- **Staging**: secrets Worker terdaftar; paket usaha `STARTER`; migrasi `0003` + `0004`
+  sudah di-push; bundle `index-B5h0iSQD.js`; manifest memuat ikon 192/512 + `share_target`.
+- **Error path**: `503 AI_NOT_CONFIGURED`, `429 AI_QUOTA_EXCEEDED`, `401 AUTH_REQUIRED`,
+  `403 ADMIN_FORBIDDEN`, dan `LLM_GAGAL_401` tercakup test Worker; gejala live 429/503
+  sudah hilang setelah secret + plan diperbaiki founder.
+- **Smoke UI**: `/tes-smart-paste` → AI → konfirmasi → order `9b9a5140-...`;
+  `/admin/parser` 200 dengan 6 kartu metrik + model AI; dropdown produk memakai UUID katalog.
+- **Android**: WebAPK `org.chromium.webapk.ac1862ef08b021335_v2` ter-install; SEND intent
+  WhatsApp-equivalent membuka `/share?text=...` → review → koreksi produk → order
+  `f65b34da-...` DRAFT.
+- **Clipboard/iOS path**: clipboard API → `/share` → AI → konfirmasi → order
+  `9a0d6661-...` DRAFT. Safari fisik tidak tersedia; dicatat sebagai catatan founder.
+- **Data terverifikasi**: semua order smoke `status=DRAFT`, `ongkir=15000`, `dp=50000`,
+  `harga_satuan=75000`, `qty=2`, total `165000` dihitung server dari katalog.
+- **Backlog tidak masuk M3**: buyer tracking `/track/{token}` (M8), edit profil/pengaturan
+  usaha (M1 sisa), KYC gateway, PWA hardening lanjutan.

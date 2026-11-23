@@ -148,7 +148,7 @@ export function PastePage() {
   };
 
   const extraction = hasil?.extraction;
-  const keyakinan =
+  const akurasi =
     extraction?.confidence === "TINGGI"
       ? ("success" as const)
       : extraction?.confidence === "SEDANG"
@@ -211,8 +211,8 @@ export function PastePage() {
           <Card className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-base font-semibold text-ink">Hasil deteksi</h2>
-              <Badge variant={keyakinan}>
-                Keyakinan {extraction.confidence.toLowerCase()}
+              <Badge variant={akurasi}>
+                Akurasi {extraction.confidence.toLowerCase()}
               </Badge>
             </div>
             <p className="text-xs text-muted">

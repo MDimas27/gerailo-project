@@ -29,7 +29,7 @@ Web memakai `VITE_WORKER_URL` publik untuk memanggil Worker.
 |---|---|---|
 | `create_business(p_nama, p_jenis, p_metode_bayar)` | Satu transaksi: usaha + seed 19 akun COA + app_settings | alur registrasi M1 |
 | `create_product(p_business_id, p_nama, p_harga_jual, p_stok_min?, p_aliases?, p_stok_awal?, p_harga_beli?)` | Satu transaksi: produk + alias + movement MASUK stok awal; kuota paket dicek trigger; guard pemilik usaha | tambah produk M2 |
-| `confirm_draft_order(p_items, p_ongkir, p_dp, p_nama, p_telepon, p_alamat?, p_catatan?, p_metode_bayar?, p_due_date?)` | SATU transaksi: dedup customer + order DRAFT + items; harga dari katalog server; klien DILARANG kirim harga/total; tanpa jurnal/stok/pembayaran | konfirmasi Smart Paste M3 |
+| `confirm_draft_order(p_items, p_ongkir, p_dp, p_nama, p_telepon, p_alamat?, p_catatan?, p_metode_bayar[]?, p_due_date?)` | SATU transaksi: dedup customer + order DRAFT + items; harga dari katalog server; klien DILARANG kirim harga/total; `p_metode_bayar` array unik maks. 4 dari TRANSFER/COD/QRIS/LAINNYA | konfirmasi Smart Paste M3 |
 | `claim_ai_quota(p_model, p_tokens, p_skor, p_teks_asli?)` | Klaim kuota + log AI atomik; reset bulanan lazy `FOR UPDATE`; `AI_QUOTA_EXCEEDED` bila habis; teks asli hanya dengan consent | fallback AI M3 |
 | `log_parser_extraction(p_skor, p_teks_asli?)` | Log ekstraksi pola tanpa kuota; teks asli hanya dengan consent | parser pola M3 |
 | `mark_extraction_corrected(p_log_id)` | Tandai ekstraksi pernah dikoreksi user (metrik akurasi final); guard owner | koreksi Smart Paste M3 |

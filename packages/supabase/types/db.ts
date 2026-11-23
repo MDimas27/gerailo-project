@@ -157,14 +157,14 @@ isOneToOne: false
                   ]
                 },"orders": {
                   Row: {
-                    "business_id": string,"created_at": string,"customer_id": string,"dp": number,"due_date": string | null,"id": string,"kurir_nama": string | null,"metode_bayar": string,"nomor": string,"nomor_resi": string | null,"ongkir": number,"share_token": string,"status": Database["public"]['Enums']["order_status"],"updated_at": string
+                    "business_id": string,"created_at": string,"customer_id": string,"dp": number,"due_date": string | null,"id": string,"kurir_nama": string | null,"metode_bayar": (string)[],"nomor": string,"nomor_resi": string | null,"ongkir": number,"share_token": string,"status": Database["public"]['Enums']["order_status"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "business_id": string,"created_at"?: string,"customer_id": string,"dp"?: number,"due_date"?: string | null,"id"?: string,"kurir_nama"?: string | null,"metode_bayar"?: string,"nomor": string,"nomor_resi"?: string | null,"ongkir"?: number,"share_token": string,"status"?: Database["public"]['Enums']["order_status"],"updated_at"?: string
+                    "business_id": string,"created_at"?: string,"customer_id": string,"dp"?: number,"due_date"?: string | null,"id"?: string,"kurir_nama"?: string | null,"metode_bayar"?: (string)[],"nomor": string,"nomor_resi"?: string | null,"ongkir"?: number,"share_token": string,"status"?: Database["public"]['Enums']["order_status"],"updated_at"?: string
                   }
                   Update: {
-                    "business_id"?: string,"created_at"?: string,"customer_id"?: string,"dp"?: number,"due_date"?: string | null,"id"?: string,"kurir_nama"?: string | null,"metode_bayar"?: string,"nomor"?: string,"nomor_resi"?: string | null,"ongkir"?: number,"share_token"?: string,"status"?: Database["public"]['Enums']["order_status"],"updated_at"?: string
+                    "business_id"?: string,"created_at"?: string,"customer_id"?: string,"dp"?: number,"due_date"?: string | null,"id"?: string,"kurir_nama"?: string | null,"metode_bayar"?: (string)[],"nomor"?: string,"nomor_resi"?: string | null,"ongkir"?: number,"share_token"?: string,"status"?: Database["public"]['Enums']["order_status"],"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -303,7 +303,7 @@ isOneToOne: false
 { Args: { "p_model": string,"p_skor": number,"p_teks_asli"?: string,"p_tokens": number }; Returns: string
                            },
 "confirm_draft_order":
-{ Args: { "p_alamat"?: string,"p_catatan"?: string,"p_dp": number,"p_due_date"?: string,"p_items": Json,"p_metode_bayar"?: string,"p_nama": string,"p_ongkir": number,"p_telepon": string }; Returns: string
+{ Args: { "p_alamat"?: string,"p_catatan"?: string,"p_dp": number,"p_due_date"?: string,"p_items": Json,"p_metode_bayar"?: (string)[],"p_nama": string,"p_ongkir": number,"p_telepon": string }; Returns: string
                            },
 "create_business":
 { Args: { "p_jenis": string,"p_metode_bayar"?: string,"p_nama": string }; Returns: string

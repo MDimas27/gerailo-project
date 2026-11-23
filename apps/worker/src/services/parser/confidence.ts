@@ -4,6 +4,7 @@ export function hitungConfidence(
   items: ParsedItem[],
   pelanggan: Extraction["pelanggan"],
   flags: string[],
+  sumber: Extraction["sumber"] = "POLA",
 ): Confidence {
   if (items.length === 0 || flags.includes("PRODUK_TIDAK_DITEMUKAN")) {
     return "RENDAH";
@@ -13,5 +14,9 @@ export function hitungConfidence(
   const pelangganLengkap =
     pelanggan.nama.value !== null && pelanggan.telepon.value !== null;
 
-  return semuaProdukDikenal && pelangganLengkap ? "TINGGI" : "SEDANG";
+  if (!semuaProdukDikenal || !pelangganLengkap || sumber === "AI") {
+    return "SEDANG";
+  }
+
+  return "TINGGI";
 }

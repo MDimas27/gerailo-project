@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router";
+import { Navigate, RouterProvider, createBrowserRouter } from "react-router";
 
 import { AdminParserPage } from "./routes/admin-parser.js";
 import { AuthPage } from "./routes/auth.js";
@@ -18,6 +18,15 @@ import { AuthProvider, RequireAuth } from "./lib/auth.js";
 import "./index.css";
 
 const queryClient = new QueryClient();
+
+const TEKS_UJI_SMART_PASTE = [
+  "Halo kak, pesan:",
+  "2 sosisss",
+  "Ongkir: Rp15.000",
+  "DP: Rp50.000",
+  "Nama: Budi",
+  "Telepon: 0812-9999-8888",
+].join("\n");
 
 const router = createBrowserRouter([
   {
@@ -52,6 +61,17 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <SharePage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/tes-smart-paste",
+    element: (
+      <RequireAuth>
+        <Navigate
+          to={`/paste?teks=${encodeURIComponent(TEKS_UJI_SMART_PASTE)}`}
+          replace
+        />
       </RequireAuth>
     ),
   },

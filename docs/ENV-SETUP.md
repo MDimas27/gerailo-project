@@ -36,6 +36,7 @@ sehingga agent tidak menunggu apa pun. Durasi realistis: 1–2 hari (paralel den
 | Kunci | Lokasi | Catatan |
 |---|---|---|
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | build env CI + `.env.local` | **publik** (masuk bundle); anon key + RLS |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | wrangler secret (Worker, staging + production) | runtime supabase-js di Worker; anon key + RLS, bukan `service_role` |
 | `SUPABASE_SERVICE_ROLE_KEY` | wrangler secret (Worker) | **hanya Worker** — webhook & cron |
 | `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_URL` | GitHub Secrets (CI) | migrasi `supabase db push` per env |
 | `SENTRY_DSN` | per env (Worker secret + Vite build) | |
@@ -46,7 +47,9 @@ sehingga agent tidak menunggu apa pun. Durasi realistis: 1–2 hari (paralel den
 
 Mekanisme: kunci Worker via `wrangler secret put <NAMA> --env staging|production`;
 `VITE_*` bersifat build-time — set sebagai environment di workflow CI (bukan secret
-runtime). CI grep bundle `apps/web`: `service_role`/`LLM_API_KEY` ditemukan = gagal.
+runtime). Untuk build/deploy manual, ekspor ketiga `VITE_*` dari GitHub Variables
+dulu; bundle tanpa `VITE_*` bisa memanggil Supabase lokal dan tersimpan di cache PWA.
+CI grep bundle `apps/web`: `service_role`/`LLM_API_KEY` ditemukan = gagal.
 Aturan: kredensial TIDAK PERNAH lewat prompt agent / chat / log (rules/00 §7);
 agent boleh tahu NAMA kunci, bukan isinya.
 
