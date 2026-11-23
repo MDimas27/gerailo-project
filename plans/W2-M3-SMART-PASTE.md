@@ -218,8 +218,8 @@ INSERT `orders` + `order_items`. Tidak ada INSERT ke `payments`/`journal_*`/
   `pnpm typecheck` hijau; `pnpm build` hijau dengan `VITE_SUPABASE_URL`,
   `VITE_SUPABASE_ANON_KEY`, `VITE_WORKER_URL`; drift types & guard bundle lolos.
 - **CI/deploy**: 4 job hijau (`quality`, `db-tests`, `db-migrate-staging`,
-  `deploy-staging`) pada `45161725070` (closing M3), `45217644347` (fix `/paste`), dan
-  `45224121128` (docs final). Migrasi `0003` + `0004` sudah di-push ke staging.
+  `deploy-staging`) pada seluruh run closing M3, fix `/paste`, dan docs final; rincian
+  run ID di GitHub Actions. Migrasi `0003` + `0004` sudah di-push ke staging.
 - **Staging**: secrets Worker `LLM_API_KEY`, `ADMIN_EMAILS`, `SUPABASE_URL`,
   `SUPABASE_ANON_KEY` terdaftar; paket usaha `STARTER`; bundle aktif
   `index-DraCKu0H.js` + CSS `index-Di3n-kc0.css`; manifest memuat ikon 192/512 `any` +

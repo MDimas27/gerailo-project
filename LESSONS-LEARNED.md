@@ -162,7 +162,7 @@ diperbarui.
 
 #33 · 23 Nov 2026 · install · Founder tidak melihat menu install di Chrome. Menu ternyata di ⋮ kanan atas browser, bukan di halaman web; label Chrome 157 adalah "Install and create shortcut", bukan selalu "Install app". Setelah uninstall WebAPK lama `org.chromium.webapk.a3555e66445317b31_v2` (authority `gerailo.com`) dan force-stop/restart Chrome, menu muncul. Pilih Install → konfirmasi "Gerailo / gerailo-staging..." → WebAPK baru `org.chromium.webapk.a31e5d83e0e7d8c17_v2` terpasang; CDP target `standalone: true`, SW aktif.
 
-#34 · 23 Nov 2026 · closing · Laporan penutup final disinkronkan ke `plans/W2-M3-SMART-PASTE.md` (status SELESAI, 12 task [x]) dan `docs/MODULES/M3-SMART-PASTE.md` (Status final & verifikasi). Gate akhir: pgTAP 98, Vitest 57, lint 0 error / 1 warning lama, typecheck + build hijau, CI 4/4 terakhir `45224121128`. Staging bundle `index-DraCKu0H.js`; `/paste` blank; WebAPK staging `a31e5d83e0e7d8c17_v2` standalone. Backlog tetap M8, sisa M1, KYC, PWA hardening.
+#34 · 23 Nov 2026 · closing · Laporan penutup final disinkronkan ke `plans/W2-M3-SMART-PASTE.md` (status SELESAI, 12 task [x]) dan `docs/MODULES/M3-SMART-PASTE.md` (Status final & verifikasi). Gate akhir: pgTAP 98, Vitest 57, lint 0 error / 1 warning lama, typecheck + build hijau, CI 4/4 hijau pada seluruh run closing. Staging bundle `index-DraCKu0H.js`; `/paste` blank; WebAPK staging `a31e5d83e0e7d8c17_v2` standalone. Backlog tetap M8, sisa M1, KYC, PWA hardening.
 
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
