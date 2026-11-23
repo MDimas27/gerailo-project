@@ -158,6 +158,8 @@ diperbarui.
 
 #31 · 23 Nov 2026 · device · Cek langsung via USB/CDP: tab Gerailo masih membuka `/paste?teks=Halo%20kak...`, jadi teks lama berasal dari query param route tes `/tes-smart-paste`, BUKAN sessionStorage. `sessionStorage` sudah kosong dan bundle baru aktif. `Page.getInstallabilityErrors` mengembalikan `[]` (manifest + SW valid), jadi PWA installable; Chrome 157 Android tidak memunculkan popup otomatis. · Tindakan: `/tes-smart-paste` kini redirect ke `/paste` tanpa query, dukungan `?teks=` dihapus dari `PastePage`; bukaan normal pasti blank, share/clipboard tetap mengisi via navigation state.
 
+#32 · 23 Nov 2026 · verifikasi · Commit `e6b7f38`, CI `45217644347` hijau 4/4, staging bundle `index-DraCKu0H.js`. Di device USB, setelah SW di-update dan hard reload, `/paste` dan `/tes-smart-paste` keduanya mendarat di `/paste` dengan textarea `""`; `Page.getInstallabilityErrors` tetap `[]`. Catatan: SW lama menyajikan bundle lama sampai `registration.update()` + reload, jadi verifikasi UI harus hard reload setelah deploy.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
