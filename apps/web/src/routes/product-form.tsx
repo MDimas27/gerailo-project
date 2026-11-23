@@ -444,11 +444,12 @@ export function ProductFormPage({ mode }: { mode: "create" | "edit" }) {
           </Label>
 
           <Label>
-            Alias untuk Smart Paste (pisahkan dengan koma)
-            <Input
-              placeholder="daster jmb, DJ motif"
-              {...register("aliases")}
-            />
+            Nama lain yang sering dipakai pembeli (opsional)
+            <Input placeholder="daster jmb, DJ bunga" {...register("aliases")} />
+            <p className="text-xs font-normal text-muted">
+              Isi yang paling sering muncul saja, tidak harus semua. Contoh: daster jmb, DJ
+              bunga. Pisahkan dengan koma.
+            </p>
             <FieldError>{errors.aliases?.message}</FieldError>
           </Label>
 

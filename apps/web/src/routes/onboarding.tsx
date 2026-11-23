@@ -336,13 +336,17 @@ export function OnboardingPage() {
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
-            Alias untuk Smart Paste (pisahkan dengan koma)
+            Nama lain yang sering dipakai pembeli (opsional)
             <input
-              placeholder="daster jmb, DJ motif"
+              placeholder="daster jmb, DJ bunga"
               className={fieldClass}
               value={form2.aliases}
               onChange={(e) => setForm2({ ...form2, aliases: e.target.value })}
             />
+            <p className="text-xs font-normal text-muted">
+              Isi yang paling sering muncul saja, tidak harus semua. Contoh: daster jmb, DJ
+              bunga. Pisahkan dengan koma.
+            </p>
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">

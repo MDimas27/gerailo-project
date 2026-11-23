@@ -134,6 +134,8 @@ diperbarui.
 
 #19 · 22 Nov 2026 · ci · GitHub Variable `VITE_WORKER_URL` saja tidak cukup: job `deploy-staging` belum meneruskannya ke env build, sehingga bundle tidak memuat URL Worker. · Tindakan: tambahkan `VITE_WORKER_URL: ${{ vars.VITE_WORKER_URL }}` di `.github/workflows/ci.yml`; CI `45082835989` hijau, health OK, bundle terbukti memuat URL staging.
 
+#20 · 22 Nov 2026 · ux · Label "Alias untuk Smart Paste" kurang dipahami founder/user saat onboarding. · Tindakan: ganti di onboarding & form produk jadi "Nama lain yang sering dipakai pembeli (opsional)" + contoh `daster jmb, DJ bunga`; teks bantuan menegaskan cukup yang paling sering muncul, tidak semua harus diisi.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
