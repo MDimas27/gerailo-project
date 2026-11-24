@@ -329,6 +329,10 @@ select is(
   'event expire menghasilkan IGNORED'
 );
 
+set local role authenticated;
+set local request.jwt.claims =
+  '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}';
+
 select is(
   (
     select status::text
@@ -349,6 +353,9 @@ select is(
   'event expire tidak membuat pembayaran'
 );
 
+set local role service_role;
+set local request.jwt.claims = '{"role":"service_role"}';
+
 select is(
   public.apply_payment_event(
     'evt-success-001',
@@ -358,6 +365,10 @@ select is(
   'POSTED',
   'event settlement sukses diposting lewat _post_payment'
 );
+
+set local role authenticated;
+set local request.jwt.claims =
+  '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}';
 
 select is(
   (
@@ -379,6 +390,9 @@ select is(
   'intent sukses berstatus PAID'
 );
 
+set local role service_role;
+set local request.jwt.claims = '{"role":"service_role"}';
+
 select is(
   public.apply_payment_event(
     'evt-success-001',
@@ -388,6 +402,10 @@ select is(
   'POSTED',
   'replay event sukses mengembalikan outcome POSTED tanpa efek'
 );
+
+set local role authenticated;
+set local request.jwt.claims =
+  '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}';
 
 select is(
   (
@@ -399,6 +417,8 @@ select is(
   'replay tidak membuat pembayaran ganda'
 );
 
+set local role postgres;
+
 select is(
   (
     select count(*)::bigint
@@ -408,6 +428,9 @@ select is(
   1::bigint,
   'outcome append-only hanya satu baris per event'
 );
+
+set local role service_role;
+set local request.jwt.claims = '{"role":"service_role"}';
 
 select throws_ok(
   $$

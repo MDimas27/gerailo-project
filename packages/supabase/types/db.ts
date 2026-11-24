@@ -181,6 +181,78 @@ isOneToOne: false
       referencedColumns: ["id","business_id"]
     }
                   ]
+                },"payment_event_outcomes": {
+                  Row: {
+                    "business_id": string,"created_at": string,"detail": string | null,"event_id": string,"id": string,"order_id": string,"outcome": string,"payment_id": string | null,"provider": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"detail"?: string | null,"event_id": string,"id"?: string,"order_id": string,"outcome": string,"payment_id"?: string | null,"provider": string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"detail"?: string | null,"event_id"?: string,"id"?: string,"order_id"?: string,"outcome"?: string,"payment_id"?: string | null,"provider"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "payment_event_outcomes_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payment_event_outcomes_order_fkey"
+      columns: ["order_id","business_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "payment_event_outcomes_payment_fkey"
+      columns: ["payment_id","business_id"]
+isOneToOne: false
+      referencedRelation: "payments"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"payment_events": {
+                  Row: {
+                    "event_id": string,"id": string,"payload": NonNullable<Json>,"provider": string,"received_at": string,"signature_status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "event_id": string,"id"?: string,"payload": NonNullable<Json>,"provider": string,"received_at"?: string,"signature_status": string
+                  }
+                  Update: {
+                    "event_id"?: string,"id"?: string,"payload"?: NonNullable<Json>,"provider"?: string,"received_at"?: string,"signature_status"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"payment_intents": {
+                  Row: {
+                    "amount": number,"business_id": string,"created_at": string,"expiry": string,"id": string,"jenis": string,"order_id": string,"provider": string,"provider_order_id": string,"status": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"business_id": string,"created_at"?: string,"expiry": string,"id"?: string,"jenis": string,"order_id": string,"provider": string,"provider_order_id": string,"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "amount"?: number,"business_id"?: string,"created_at"?: string,"expiry"?: string,"id"?: string,"jenis"?: string,"order_id"?: string,"provider"?: string,"provider_order_id"?: string,"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "payment_intents_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payment_intents_order_fkey"
+      columns: ["order_id","business_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
                 },"payments": {
                   Row: {
                     "bukti_path": string | null,"business_id": string,"catatan": string | null,"created_at": string,"id": string,"jenis": string,"jumlah": number,"kanal": string,"order_id": string,"updated_at": string
@@ -334,6 +406,9 @@ isOneToOne: false
 "_post_payment":
 { Args: { "p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
                            },
+"apply_payment_event":
+{ Args: { "p_event_id": string,"p_fraud_status"?: string,"p_gross_amount": number,"p_provider_order_id": string,"p_status_code": string,"p_transaction_status": string }; Returns: string
+                           },
 "cancel_order":
 { Args: { "p_order_id": string }; Returns: undefined
                            },
@@ -355,11 +430,17 @@ isOneToOne: false
 "create_manual_order":
 { Args: { "p_alamat"?: string,"p_catatan"?: string,"p_dp": number,"p_due_date"?: string,"p_items": Json,"p_metode_bayar"?: (string)[],"p_nama": string,"p_ongkir": number,"p_telepon": string }; Returns: string
                            },
+"create_payment_intent":
+{ Args: { "p_expiry_minutes"?: number,"p_jenis"?: string,"p_order_id": string }; Returns: Json
+                           },
 "create_product":
 { Args: { "p_aliases"?: (string)[],"p_business_id": string,"p_harga_beli"?: number,"p_harga_jual": number,"p_nama": string,"p_stok_awal"?: number,"p_stok_min"?: number }; Returns: string
                            },
 "log_parser_extraction":
 { Args: { "p_skor": number,"p_teks_asli"?: string }; Returns: string
+                           },
+"log_payment_event":
+{ Args: { "p_event_id": string,"p_payload": Json,"p_provider": string,"p_signature_status": string }; Returns: string
                            },
 "mark_extraction_corrected":
 { Args: { "p_log_id": string }; Returns: undefined
