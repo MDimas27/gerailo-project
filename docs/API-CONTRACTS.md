@@ -34,9 +34,11 @@ Web memakai `VITE_WORKER_URL` publik untuk memanggil Worker.
 | `log_parser_extraction(p_skor, p_teks_asli?)` | Log ekstraksi pola tanpa kuota; teks asli hanya dengan consent | parser pola M3 |
 | `mark_extraction_corrected(p_log_id)` | Tandai ekstraksi pernah dikoreksi user (metrik akurasi final); guard owner | koreksi Smart Paste M3 |
 | `record_stock_move(p_product_id, p_type, p_qty, p_unit_price, p_reason, p_order_id?)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR dari klien = DITOLAK (HPP rata-rata menyusul W3) | stok awal & pembelian M5 |
-| `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | Status DIKIRIM + jurnal T2+T3 + movement KELUAR + HPP — satu transaksi; kurir/resi opsional; guard dari DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM | aksi "kirim" M4 |
-| `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal)` | T1 (DP) / T4 (pelunasan); COD diproses complete_order (T5/T6); tolak kelebihan bayar | pembayaran M4 |
-| `cancel_order(p_order_id)` | Reversi jurnal (T11) + stok kembali; status BATAL | batal M4 |
+| `create_manual_order(p_items, p_ongkir, p_dp, p_nama, p_telepon, p_alamat?, p_catatan?, p_metode_bayar[]?, p_due_date?)` | SATU transaksi: customer dedup + order DRAFT + items; `p_items` wajib `product_id, qty, harga_satuan` — harga manual HANYA lewat form `/orders/new`; product_id harus milik usaha; tanpa jurnal/payment/stok | order manual M4 |
+| `confirm_order(p_order_id)` | DRAFT → DIKONFIRMASI; guard owner; tanpa jurnal | konfirmasi order M4 |
+| `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only sementara (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM + kurir/resi opsional. Target slice 3: jurnal T2+T3 + movement KELUAR + HPP satu transaksi | aksi "kirim" M4 |
+| `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?)` | Catat DP/PELUNASAN/COD ke `payments`, hitung sisa di server, tolak overpay/transisi ilegal, update status (DP_DITERIMA/SELESAI). **Belum memposting jurnal T1/T4/T12** sampai slice 3 | pembayaran M4 |
+| `cancel_order(p_order_id)` | **Status-only sementara (slice 1):** pra-kirim/kirim → BATAL. Target slice 3: reversi jurnal (T11) + stok kembali | batal M4 |
 | `set_shipping(p_order_id, p_kurir, p_resi)` | Perbarui kurir/resi setelah kirim — tanpa jurnal | update resi M8 |
 | `get_public_order(p_token)` | SECURITY DEFINER: hanya kolom aman (masking PII, tanpa HPP); token salah = kosong | halaman publik M8 |
 | `rotate_share_token(p_order_id)` | Token baru → link lama 404 | pencabutan akses M8 |
@@ -61,6 +63,9 @@ Tambah RPC = migrasi baru + update daftar ini + golden test.
   langsung). Untuk produk + alias + stok awal, pakai RPC `create_product` (atomik).
 - DRAFT Smart Paste: TIDAK ada INSERT langsung ke customers/orders/order_items dari
   klien — semua lewat RPC `confirm_draft_order` (REVOKE tulis langsung di 0003).
+- Order manual `/orders/new`: TIDAK ada INSERT langsung; semua lewat RPC
+  `create_manual_order` (0006) karena GRANT tabel hanya SELECT. Bedanya dengan
+  `confirm_draft_order`: `harga_satuan` dikirim klien HANYA di form manual ini.
 - UPDATE/DELETE langsung pada `orders`, `payments`, `journal_*` = DILARANG —
   hanya lewat RPC (REVOKE di migrasi). Laporan = SQL views `security_invoker`
   (`v_rekap_harian`, `v_pnl_bulan`, `v_arus_kas`, `v_piutang_ump`).

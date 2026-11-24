@@ -18,7 +18,7 @@
 | customers | Pelanggan | id, business_id, nama, telepon (unique per usaha, bentuk 628…), alamat, catatan |
 | orders | Pesanan | id, business_id, customer_id, status enum, ongkir BIGINT, dp BIGINT (informasi dari chat, BUKAN pembayaran), metode_bayar, nomor (ORD-YYYYMMDD-###, unik), share_token (hex 32, unik), kurir_nama?, nomor_resi?, due_date? (batas pelunasan DP) |
 | order_items | Item per order | id, order_id, product_id/variant_id, qty, harga_satuan BIGINT |
-| payments | Riwayat pembayaran | id, order_id, jenis (DP/PELUNASAN/COD), jumlah BIGINT, kanal |
+| payments | Riwayat pembayaran (append-only) | id, business_id, order_id, jenis (DP/PELUNASAN/COD), jumlah BIGINT, kanal (MANUAL/COD/QRIS/VA/E_WALLET/MIDTRANS/LAINNYA), bukti_path? (bucket privat `bukti-pembayaran`), catatan? |
 | payment_reports | Laporan bayar dari buyer (M8 P1) | id, order_id, jumlah BIGINT, tanggal, catatan, url_bukti?, status (DILAPORKAN/KONFIRMASI/DITOLAK); insert HANYA via RPC by token |
 | order_leads | Pesanan masuk dari katalog publik (M9 Fase 2) | id, business_id, slug, items jsonb, nama, telepon, alamat?, catatan?, status (BARU/DIKONVERSI/DITOLAK); insert HANYA via RPC by slug; TIDAK pernah otomatis jadi orders |
 | stock_movements | Pergerakan stok | id, business_id, product_id, jenis (MASUK/KELUAR/PENYESUAIAN), qty, harga_beli BIGINT?, alasan, order_id? |
@@ -50,13 +50,14 @@
 | `create_business(...)` | Transaksi: usaha + seed 19 akun COA + app_settings; SECURITY DEFINER + guard `auth.uid()` |
 | `create_product(...)` | Transaksi: produk + alias + stok awal (MASUK) sekaligus; kuota paket diperiksa trigger; SECURITY DEFINER + guard pemilik usaha |
 | `confirm_draft_order(...)` | Transaksi: customer dedup + order DRAFT + items; harga dari `products.harga_jual` server; klien tidak boleh kirim harga/total; tanpa jurnal/payment/stok | 
+| `create_manual_order(...)` | Transaksi: customer dedup + order DRAFT + items; `harga_satuan` dari klien HANYA untuk form manual; product_id wajib milik usaha; tanpa jurnal/payment/stok (0006) |
 | `claim_ai_quota(...)` | Klaim kuota + log AI atomik `FOR UPDATE`; reset periode lazy; `AI_QUOTA_EXCEEDED` bila habis; teks asli hanya dengan consent |
 | `log_parser_extraction(...)` | Log parser pola tanpa kuota; teks asli hanya dengan consent |
 | `mark_extraction_corrected(...)` | Tandai log pernah dikoreksi untuk metrik akurasi final; guard owner |
 | `record_stock_move(...)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien (menunggu RPC order M4) |
-| `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | Status DIKIRIM + T2+T3 + movement KELUAR + HPP rata-rata saat itu — satu transaksi; kurir/resi opsional; guard dari DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM |
-| `record_payment(...)` | T1/T4; tolak kelebihan bayar; dua DP parsial → UMP akumulasi |
-| `cancel_order(p_order_id)` | Reversi T2+T3/pembayaran + stok masuk kembali; status BATAL |
+| `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM; kurir/resi opsional. Target slice 3: T2+T3 + KELUAR + HPP satu transaksi |
+| `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?)` | Tulis `payments` + hitung sisa di server + tolak overpay + update status. **Belum T1/T4/T12** sampai slice 3; dua DP parsial tetap akumulasi benar |
+| `cancel_order(p_order_id)` | **Status-only (slice 1):** status BATAL. Target slice 3: reversi T2+T3/pembayaran + stok masuk kembali |
 | `set_shipping(p_order_id, p_kurir, p_resi)` | Perbarui kurir/resi setelah kirim — TANPA menyentuh jurnal | halaman pembeli M8 |
 | `get_public_order(p_token)` | SECURITY DEFINER: lookup by token, kembalikan HANYA kolom aman (masking telepon/alamat, tanpa HPP); token salah = kosong | halaman publik M8 |
 | `rotate_share_token(p_order_id)` | Token baru → link lama mati (404) | pencabutan akses M8 |
@@ -98,6 +99,8 @@ journal_lines/orders, dibuat dengan `security_invoker = on` agar mengikuti RLS.
 ## Enum & nilai awal penting
 
 - `metode_bayar` order: array `text[]` unik, 1–4 pilihan dari TRANSFER, COD, QRIS, LAINNYA. `businesses.metode_bayar` tetap satu metode utama untuk onboarding.
-- `kanal` payments: MANUAL, QRIS, VA, E_WALLET.
+- `kanal` payments: MANUAL, COD, QRIS, VA, E_WALLET, MIDTRANS, LAINNYA.
+- `payments.bukti_path` adalah path object di bucket Storage privat `bukti-pembayaran`;
+  policy hanya mengizinkan prefix `business_id/` milik owner.
 - Seed `accounts` dijalankan oleh RPC `create_business` (M1) — 19 akun dari
   docs/ACCOUNTING-RULES.md.
