@@ -2,7 +2,7 @@
 
 > W3-M4 · dibuat 24 Nov 2026 oleh /prep + /plan · status: DRAFT — SUB-SLICE 2 DIEKSEKUSI
 > Gate founder: **1 – 1 – 1** (Midtrans; M4 + jurnal + HPP dalam 3 sub-slice; service_role khusus webhook).
-> Gate #1 sudah dijalankan dan disetujui founder 24 Nov 2026; Gate #2 menunggu review founder (CI hijau 4/4, deploy staging 24 Nov).
+> Gate #1 sudah dijalankan dan disetujui founder 24 Nov 2026; Gate #2 menunggu review founder (CI terakhir `45351527629` hijau 4/4, deploy staging 24 Nov, termasuk `ship_order`/`receive_order`/cancel DIKIRIM ditolak).
 
 ## Tujuan sesi
 Setelah ketiga sub-slice selesai: order DRAFT dari Smart Paste bisa diproses sampai
