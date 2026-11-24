@@ -16,7 +16,7 @@ MASUK berharga (T8) DI DALAM RPC.
   `/stock/adjust` (penyesuaian wajib alasan), `/stock/history/:productId`.
 - Data: pembelian & penyesuaian & stok awal via RPC `record_stock_move`
   (MASUK + harga + bayar/utang → T8 + rata-rata baru, satu transaksi); KELUAR
-  ditolak dari klien — hanya `complete_order` (M4); riwayat & saldo = query
+  ditolak dari klien — hanya `ship_order` (M4); riwayat & saldo = query
   view/movements (RLS).
 
 ## Alur user
@@ -34,7 +34,7 @@ opname → penyesuaian dengan alasan.
 ## Golden tests (RPC)
 - Pembelian mengubah rata-rata: 10 pcs @10.000 + 10 pcs @12.000 → rata 11.000;
   kirim 5 → HPP 55.000.
-- Kirim 3 pcs (via complete_order) → movement KELUAR + HPP sesuai rata-rata saat itu.
+- Kirim 3 pcs (via ship_order) → movement KELUAR + HPP sesuai rata-rata saat itu.
 - Batal setelah kirim → movement MASUK otomatis.
 - Penyesuaian tanpa alasan ditolak; saldo konsisten = SUM(movements).
 

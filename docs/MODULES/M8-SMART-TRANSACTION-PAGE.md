@@ -56,9 +56,9 @@ opsional SIAP_DIKIRIM ditambahkan — TANPA jurnal/stok, mesin jurnal tetap beku
 | DP_DITERIMA / lunas | 3 Pembayaran dikonfirmasi; DP → panel sisa + jatuh tempo ("Menunggu pelunasan") | `record_payment` |
 | DIKONFIRMASI/DP_DITERIMA (sudah bayar) | Sedang diproses — barang disiapkan | — |
 | SIAP_DIKIRIM | Siap dikirim — diserahkan ke kurir | `mark_ready` |
-| DIKIRIM (+kurir/resi) | Dalam pengiriman — kurir & resi (P1: resi = link tracking) | `complete_order`/`set_shipping` |
-| SELESAI | Terkirim · Pesanan selesai | kebijakan operasional |
-| BATAL | Pesanan dibatalkan | `cancel_order` |
+| DIKIRIM (+kurir/resi) | Dalam pengiriman — kurir & resi (P1: resi = link tracking) | `ship_order`/`set_shipping` |
+| SELESAI | Terkirim · Pesanan selesai | `receive_order` (DIKIRIM lunas; tanpa uang baru) |
+| BATAL | Pesanan dibatalkan | `cancel_order` (pra-kirim saja) |
 
 ## Aturan khusus
 - `nomor` & `share_token` dibuat trigger BEFORE INSERT pada `orders` (di DB, bukan app).
@@ -68,7 +68,9 @@ opsional SIAP_DIKIRIM ditambahkan — TANPA jurnal/stok, mesin jurnal tetap beku
   buyer = DILAPORKAN dan tidak pernah mengubah status transaksi; write transaksi dari
   link = DILARANG.
 - `mark_ready` hanya dari DIKONFIRMASI/DP_DITERIMA → SIAP_DIKIRIM (tanpa jurnal/stok);
-  `complete_order` menerima dari DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM.
+  `ship_order` menerima dari DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM;
+  `receive_order` hanya DIKIRIM + lunas → SELESAI, sisa > 0 ditolak, tanpa payment/jurnal.
+  Eksekusi tetap seller/owner; pembeli hanya lapor bayar (DILAPORKAN).
 - Rotasi token → link lama mati (404).
 - Footer "Halaman transaksi diterbitkan melalui Gerailo." konstan (nama final menunggu
   keputusan merek).

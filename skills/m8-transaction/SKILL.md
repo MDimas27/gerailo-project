@@ -21,12 +21,15 @@ description: >
    ORD-YYYYMMDD-### per usaha + token `gen_random_bytes(16)`); RPC `get_public_order`
    (SECURITY DEFINER, hanya kolom aman + masking), `rotate_share_token`, `set_shipping`,
    `mark_ready`, `add_payment_report` (publik by token → DILAPORKAN),
-   `resolve_payment_report`; `complete_order` + params kurir/resi + guard
-   SIAP_DIKIRIM. `supabase gen types` + commit types.
+    `resolve_payment_report`; `ship_order` + params kurir/resi + guard
+    SIAP_DIKIRIM; `receive_order` (DIKIRIM lunas → SELESAI, tanpa payment/jurnal,
+    guard owner). `supabase gen types` + commit types.
 2. Test dulu (Supabase lokal, MERAH): nomor & token unik; token salah → 404; masking
    telepon/alamat; lintas usaha bocor = gagal; rotasi mematikan token lama;
    `add_payment_report` TIDAK menulis payments/jurnal/orders.status; `mark_ready`
-   tanpa jurnal; `complete_order` dari SIAP_DIKIRIM jalan; SELESAI→DIKIRIM tetap ditolak.
+    tanpa jurnal; `ship_order` dari SIAP_DIKIRIM jalan; `receive_order` lunas jalan,
+    sisa > 0/COD belum bayar/SIAP_DIKIRIM/lintas usaha/dobel ditolak; cancel di
+    DIKIRIM ditolak; SELESAI→DIKIRIM tetap ditolak.
 3. Worker: `GET /api/public/order/:token` + (P1) `POST .../payment-report` —
    rate-limited, tanpa JWT, panggil RPC; respons hanya kolom publik; token tidak
    di-log penuh.

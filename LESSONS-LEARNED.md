@@ -176,6 +176,8 @@ diperbarui.
 
 #40 · 24 Nov 2026 · deploy · Service worker PWA bisa menyajikan bundle lama setelah deploy staging, sehingga UI verifikasi device tampak belum berubah walau HTML/JS server sudah baru. · Tindakan: saat smoke test pasca-deploy buka URL dengan cache-bust `?v=<stamp>` (atau unregister SW) sebelum menilai; verifikasi hash bundle lewat HTML + cek string di asset, jangan hanya percaya tampilan URL polos.
 
+#41 · 24 Nov 2026 · M4 · Nama RPC yang bohong mahal: `complete_order` ternyata hanya "kirim", menyesatkan founder saat smoke test. · Tindakan: rename ke `ship_order` (migrasi 0009, nama lama di-drop) sebelum production; transisi akhir `DIKIRIM→SELESAI` punya RPC eksplisit `receive_order`, wajib owner + lunas (sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"), tanpa payment/jurnal baru; cancel diblokir di DIKIRIM oleh DB dan UI; M8 nanti memanggil RPC yang sama. Melengkapi #38/#39.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

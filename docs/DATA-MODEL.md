@@ -59,13 +59,14 @@
 | `log_parser_extraction(...)` | Log parser pola tanpa kuota; teks asli hanya dengan consent |
 | `mark_extraction_corrected(...)` | Tandai log pernah dikoreksi untuk metrik akurasi final; guard owner |
 | `record_stock_move(...)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien (menunggu RPC order M4) |
-| `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM; kurir/resi opsional. Target slice 3: T2+T3 + KELUAR + HPP satu transaksi |
+| `ship_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM; kurir/resi opsional. Target slice 3: T2+T3 + KELUAR + HPP satu transaksi |
+| `receive_order(p_order_id)` | **Status-only:** DIKIRIM lunas → SELESAI; sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"; tanpa payment/jurnal baru; guard owner |
 | `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?)` | Tulis `payments` + hitung sisa di server + tolak overpay + update status. **Belum T1/T4/T12** sampai slice 3; dua DP parsial tetap akumulasi benar |
 | `create_payment_intent(p_order_id, p_jenis?, p_expiry_minutes?)` | Amount Snap dihitung server-side; satu PENDING per order; JWT seller |
 | `log_payment_event(...)` | Worker/service_role only; raw notification append-only + replay guard |
 | `mark_payment_event_verified(...)` | Worker/service_role only; tulis VERIFIED/INVALID ke tabel verifikasi append-only |
 | `apply_payment_event(...)` | Worker/service_role only; cek verifikasi + amount + status + idempotensi; sukses via `_post_payment` |
-| `cancel_order(p_order_id)` | **Status-only (slice 1):** status BATAL. Target slice 3: reversi T2+T3/pembayaran + stok masuk kembali |
+| `cancel_order(p_order_id)` | **Status-only:** DRAFT/DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → BATAL; DIKIRIM/SELESAI/BATAL ditolak. Target slice 3: reversi T2+T3/pembayaran + stok masuk kembali |
 | `set_shipping(p_order_id, p_kurir, p_resi)` | Perbarui kurir/resi setelah kirim — TANPA menyentuh jurnal | halaman pembeli M8 |
 | `get_public_order(p_token)` | SECURITY DEFINER: lookup by token, kembalikan HANYA kolom aman (masking telepon/alamat, tanpa HPP); token salah = kosong | halaman publik M8 |
 | `rotate_share_token(p_order_id)` | Token baru → link lama mati (404) | pencabutan akses M8 |
@@ -86,7 +87,7 @@
   `payments`, `payment_intents`, `payment_events`,
   `payment_event_verifications`, `payment_event_outcomes` dari
   anon/authenticated/service_role — hanya RPC yang boleh menulis.
-- `stock_movements` KELUAR hanya dibuat oleh `complete_order` (guard di RPC).
+- `stock_movements` KELUAR hanya dibuat oleh `ship_order` (guard di RPC).
 
 ## Nomor pesanan & halaman pembeli publik (M8)
 

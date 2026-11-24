@@ -26,7 +26,7 @@ description: >
 
 ## Review check khusus M5
 - Tidak ada jalur edit saldo langsung (grep diff UI/API/RPC).
-- PENYESUAIAN tanpa alasan ditolak RPC; KELUAR hanya dari complete_order.
+- PENYESUAIAN tanpa alasan ditolak RPC; KELUAR hanya dari ship_order.
 - Batal setelah kirim → movement MASUK otomatis (test T11 + stok).
 - Pembulatan rata-rata integer terdokumentasi di `packages/shared/src/money.ts`.
 

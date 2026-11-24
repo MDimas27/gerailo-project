@@ -13,12 +13,12 @@ Referensi teknis: `docs/ACCOUNTING-RULES.md` + `docs/DATA-MODEL.md` + `docs/API-
    baru/perubahan = ubah fixture golden + alasan dicatat di LESSONS-LEARNED.
 4. Reversi: entry baru dengan `reversi_dari_id`, baris dibalik debit↔kredit, nilai sama.
    Tidak ada UPDATE/DELETE jurnal — di REVOKE juga di DB.
-5. Pengakuan pendapatan HANYA di event `DIKIRIM` (T2/T3 via `complete_order`);
-   DP = T1 ke UMP (via `record_payment`); COD = T5/T6 di `complete_order`.
-6. Stok: movement KELUAR dibuat `complete_order` dalam transaksi yang sama dengan T3.
+5. Pengakuan pendapatan HANYA di event `DIKIRIM` (T2/T3 via `ship_order`);
+   DP = T1 ke UMP (via `record_payment`); COD = T5/T6 di `ship_order`.
+6. Stok: movement KELUAR dibuat `ship_order` dalam transaksi yang sama dengan T3.
    `record_stock_move` menolak KELUAR dari klien.
 7. HPP rata-rata bergerak dihitung DI DALAM RPC (`record_stock_move` MASUK memperbarui
-   rata-rata; `complete_order` membaca rata-rata saat kirim). Larang FIFO/LIFO/manuel
+   rata-rata; `ship_order` membaca rata-rata saat kirim). Larang FIFO/LIFO/manuel
    tanpa ADR.
 8. Uang = BIGINT rupiah. Nominal masuk RPC via parameter/jsonb → cast `::bigint`.
    Di TypeScript: parse/format HANYA via `packages/shared/src/money.ts`

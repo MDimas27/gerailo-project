@@ -29,8 +29,8 @@
    `POST /api/smart-paste/ai`; kuota & logging di server (`ai_usage_logs`);
    key tidak pernah masuk bundle browser (CI grep menolak).
 3. **Tanpa ORM** — browser: supabase-js + RLS (anon key); operasi atomik: RPC Postgres
-   (`create_business`, `record_stock_move`, `complete_order`, `record_payment`,
-   `cancel_order`; `post_journal` internal). Lihat `docs/DATA-MODEL.md` §RPC.
+   (`create_business`, `record_stock_move`, `ship_order`, `receive_order`,
+   `record_payment`, `cancel_order`; `post_journal` internal). Lihat `docs/DATA-MODEL.md` §RPC.
 4. **Uang = BIGINT rupiah integer** — invariant debit=kredit dijaga GANDA:
    assertion di RPC `post_journal` + constraint trigger DEFERRED di database
    (`rules/01-accounting-safety.md`). Bug klien tidak bisa menyimpan jurnal timpang.

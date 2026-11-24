@@ -20,8 +20,9 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
 - Data: order manual DRAFT + order_items WAJIB via RPC `create_manual_order` (harga
   manual boleh beda dari katalog HANYA di form ini); Smart Paste tetap via
   `confirm_draft_order`; aksi status/pembayaran/batal WAJIB via RPC:
-  `record_payment` (T1/T4), `complete_order` (DIKIRIM: T2+T3+stok+kurir/resi opsional;
-  COD T5/T6), `set_shipping` (update resi), `cancel_order` (reversi). UPDATE langsung
+  `record_payment` (T1/T4), `ship_order` (DIKIRIM: T2+T3+stok+kurir/resi opsional;
+  COD T5/T6), `receive_order` (DIKIRIM lunas → SELESAI; tanpa uang baru),
+  `set_shipping` (update resi), `cancel_order` (reversi). UPDATE langsung
   `orders`/`payments` di-REVOKE di DB.
 - Aksi share (M8): "Lihat halaman pembeli", "Share WhatsApp" (wa.me + template terisi),
   "Salin link", "Rotasi/cabut link" — kontrak penuh di
@@ -32,10 +33,12 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
   order & tampil di halaman pembeli.
 
 ## Deviasi sementara sub-slice 1 (belum rilis)
-- `confirm_order`, `record_payment`, `mark_ready`, `complete_order`, `set_shipping`,
-  `cancel_order` sudah mengubah status/rLS dan `payments` saja.
-- `complete_order` BELUM menulis jurnal T2/T3, `stock_movements` KELUAR, atau HPP.
-- `cancel_order` BELUM membuat entri reversi; `record_payment` BELUM T1/T4/T12.
+- `confirm_order`, `record_payment`, `mark_ready`, `ship_order`, `receive_order`,
+  `set_shipping`, `cancel_order` sudah mengubah status/rLS dan `payments` saja.
+- `ship_order` BELUM menulis jurnal T2/T3, `stock_movements` KELUAR, atau HPP.
+- `receive_order` HANYA DIKIRIM + lunas; sisa > 0 ditolak, tanpa payment/jurnal baru.
+- `cancel_order` DITOLAK di DIKIRIM/SELESAI/BATAL; reversi T2+T3 masuk slice 3.
+  `record_payment` BELUM T1/T4/T12.
 - Bukti pembayaran masuk bucket privat `bukti-pembayaran` dengan prefix `business_id/`;
   detail order wajib menampilkan tautan/pratinjau lewat signed URL 10 menit (RLS owner),
   bukan `bukti_path` mentah.
@@ -53,14 +56,15 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
 
 ## Status & aksi (perpindahan via aksi eksplisit)
 DRAFT → DIKONFIRMASI → (DP diterima: T1) → [opsional: SIAP_DIKIRIM via `mark_ready` —
-tanpa jurnal/stok] → DIKIRIM (T2+T3, stok keluar) → SELESAI (lunas/COD: T4/T5/T6) ·
-BATAL (reversi, stok kembali).
+tanpa jurnal/stok] → DIKIRIM (T2+T3, stok keluar) → SELESAI (via `receive_order` bila
+sudah lunas tanpa uang baru, atau otomatis saat pelunasan/COD T4/T5/T6) ·
+BATAL (pra-kirim; reversi + stok kembali masuk slice 3).
 COD dengan DP = T6. Ongkir ditagih = pendapatan ongkir; ditanggung penjual = T7.
 
 ## Aturan khusus
 - Pembayaran melebihi sisa → RPC menolak dengan pesan (bukan silently).
-- Batal sebelum kirim = reversi pembayaran saja; setelah kirim = reversi T2+T3+stok
-  (rules/01 §4–6).
+- Batal hanya DRAFT–SIAP_DIKIRIM; di DIKIRIM/SELESAI/BATAL ditolak DB dan UI.
+  Reversi T2+T3+stok setelah kirim masuk slice 3 (rules/01 §4–6).
 - Tanpa ORM: kontrak RPC = `docs/API-CONTRACTS.md` §B; perubahan RPC = migrasi baru
   + gen types + golden test.
 
@@ -72,7 +76,9 @@ COD dengan DP = T6. Ongkir ditagih = pendapatan ongkir; ditanggung penjual = T7.
   ditolak trigger (rules/01 §2).
 - `set_shipping` mengubah kurir/resi TANPA menyentuh jurnal; nomor pesanan
   ORD-YYYYMMDD-### & share_token unik dari trigger (docs/UI-UX.md §8.3).
-- `mark_ready` TANPA jurnal; `complete_order` dari SIAP_DIKIRIM jalan;
+- `mark_ready` TANPA jurnal; `ship_order` dari SIAP_DIKIRIM jalan;
+  `receive_order` 0009: lunas→SELESAI, SIAP_DIKIRIM/sisa>0/COD belum bayar/
+  lintas tenant/dobel ditolak, cancel di DIKIRIM ditolak; tanpa payment/jurnal baru.
   `add_payment_report` tidak pernah menulis payments/jurnal/orders.status.
 
 ## DoD

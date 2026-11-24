@@ -18,7 +18,7 @@ description: >
    (+ index laporan) + REVOKE INSERT/UPDATE langsung pada orders/payments/journal_*
    dari anon/authenticated + constraint trigger DEFERRED debit=kredit +
    RPC `post_journal` (internal, REVOKE eksekusi dari klien) + RPC
-   `record_payment`, `complete_order`, `cancel_order`. `supabase gen types`.
+   `record_payment`, `ship_order`, `cancel_order`. `supabase gen types`.
 2. Tulis fixture golden accounting (test RPC di Supabase lokal): T1–T4 (Siti),
    T5 COD, T6 COD+DP, T7 ongkir penjual, T11 batal-kirim, T12 fee, T10 prive,
    insert jurnal timpang langsung ke DB DITOLAK trigger. Jalankan: MERAH.
