@@ -63,6 +63,12 @@ Sumber: `https://docs.midtrans.com/docs/access-keys` (diambil 24 Nov 2026).
 > Use the Server Key to authorize API requests.
 > Use the Signature Secret Key to verify the `signature_key` in notifications.
 
+Sumber kedua: `https://docs.midtrans.com/docs/https-notification-webhooks` (diambil 24 Nov 2026).
+
+> Implement notification handling in an idempotent way. In extremely rare cases, we may send multiple notifications for the same transaction event. ... use order_id as the key to track the entries.
+> Check the following three fields when confirming success transactions: `status_code`: 200; `fraud_status`: ACCEPT if exists; `transaction_status`: settlement or capture.
+> To confirm that you received the notification, your notification URL or backend must respond with HTTP status code 200.
+
 Sumber pendukung: `https://docs.midtrans.com/docs/https-notification-webhooks` —
 verifikasi `status_code=200`, `fraud_status=ACCEPT` bila ada,
 `transaction_status=capture|settlement`, respons 2xx, dan handler idempoten memakai
@@ -108,13 +114,13 @@ Status: `[x]` dieksekusi (CI lokal hijau 24 Nov 2026). Gate keluar: menunggu **r
 ---
 
 ## SUB-SLICE 2 — Midtrans Snap + webhook
-Status: `[ ]` belum dieksekusi. Gate keluar: CI hijau + **review founder #2**.
+Status: `[~]` dieksekusi 24 Nov 2026. Gate keluar: CI hijau + **review founder #2**.
 
 ### Task berurutan
 | # | Task | Jenis | File utama | Gate |
 |---|---|---|---|---|
 | 2.1 | Tulis pgTAP MERAH untuk `payment_events` append-only, replay `(provider,event_id)`, amount mismatch, signature-status belum VERIFIED, transisi ilegal | test | `packages/supabase/tests/0007_m4_midtrans_events_test.sql` | merah dulu |
-| 2.2 | Migrasi 0006: `payment_intents` (provider_order_id UNIQUE global, amount BIGINT server-side, jenis, status, expiry), `payment_events` gateway-agnostic (provider, event_id, payload jsonb, signature_status, received_at), `payment_event_outcomes` append-only dengan `UNIQUE(order_id,event_id)`; REVOKE tabel dari service_role, GRANT EXECUTE hanya RPC allowlist | migrasi | `packages/supabase/migrations/0007_m4_midtrans_events.sql` | hijau |
+| 2.2 | Migrasi 0007: `payment_intents` (provider_order_id UNIQUE global, amount BIGINT server-side, jenis, status, expiry), `payment_events` gateway-agnostic (provider, event_id, payload jsonb, signature_status, received_at), `payment_event_outcomes` append-only dengan `UNIQUE(order_id,event_id)`; REVOKE tabel dari service_role, GRANT EXECUTE hanya RPC allowlist | migrasi | `packages/supabase/migrations/0007_m4_midtrans_events.sql` | hijau |
 | 2.3 | RPC allowlist `log_payment_event(p_provider,p_event_id,p_payload,p_signature_status)` + `apply_payment_event(p_event_id,p_provider_order_id,p_gross_amount,p_transaction_status,p_status_code,p_fraud_status)`; validasi: raw event VERIFIED, amount server-side, status success, legal transition, idempoten. **JANGAN panggil `record_payment` langsung** (`apply_payment_event` tanpa JWT user; guard `auth.uid()` akan gagal, dilarang melonggarkan guard global). Pecah core privat `_post_payment(...)` SECURITY DEFINER yang dipakai dua jalur; `apply_payment_event` memvalidasi `order_id`/`business_id` sendiri sebelum memanggil core; tanpa query bebas | RPC | `0007_m4_midtrans_events.sql` | hijau |
 | 2.4 | `parseGatewayAmount` di `money.ts`: terima `"165000.00"`/`"165000"`, tolak `"165000.5"`; golden test; Worker & RPC pakai BIGINT identik | kode | `packages/shared/src/money.ts`, `money.test.ts` | hijau |
 | 2.5 | `src/lib/midtrans.ts`: Snap server-side via `MIDTRANS_SERVER_KEY` (Basic auth) ke endpoint Snap resmi; buat `provider_order_id` unik; return token/redirect URL; tidak kirim Secret Key ke browser | kode | `apps/worker/src/lib/midtrans.ts` | mock test hijau |
@@ -128,7 +134,7 @@ Status: `[ ]` belum dieksekusi. Gate keluar: CI hijau + **review founder #2**.
 - Vitest: signature valid/invalid, duplicate event, RPC error, amount desimal ditolak.
 - CI assert: bundle web bebas `service_role|SUPABASE_SERVICE_ROLE_KEY|MIDTRANS_SERVER_KEY|MIDTRANS_SIGNATURE_SECRET_KEY`.
 - Event non-sukses (`expire`/`deny`/`cancel`) wajib menghasilkan `payment_event_outcomes` berstatus `IGNORED`, bukan silent drop; refund masuk BACKLOG.
-- **Catatan verifikasi founder:** formula `SHA512(order_id+status_code+gross_amount+MIDTRANS_SIGNATURE_SECRET_KEY)` sudah dikutip dari docs di plan, namun founder belum bisa verifikasi independen (docs timeout). Saat slice 2, catat di LESSONS: sumber formula + URL docs + hasil verifikasi sandbox. Jika sandbox menunjukkan formula beda, **hentikan dan laporkan** sebelum lanjut.
+- **Catatan verifikasi founder:** formula `SHA512(order_id+status_code+gross_amount+MIDTRANS_SIGNATURE_SECRET_KEY)` sudah dikutip ulang dari docs resmi `access-keys` (update 3 Nov 2026): sejak 28 Okt 2026 verifikasi notifikasi memakai Signature Secret Key, bukan Server Key. Founder belum bisa verifikasi independen saat perencanaan (docs timeout); verifikasi sandbox mandiri masih menunggu kredensial/KYC. Saat slice 2, catat di LESSONS: sumber formula + URL docs + hasil verifikasi sandbox. Jika sandbox menunjukkan formula beda, **hentikan dan laporkan** sebelum lanjut.
 
 ### Gate keluar 2
 `pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build` + pgTAP + drift types + grep bundle hijau; founder approve sebelum slice 3.
