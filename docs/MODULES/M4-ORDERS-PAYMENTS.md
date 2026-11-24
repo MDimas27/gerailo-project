@@ -1,8 +1,8 @@
 # M4 — Order & Pembayaran
 
-> Status implementasi 24 Nov 2026: **SUB-SLICE 1 (status machine + pembayaran manual)
-> selesai, gate #1 menunggu review founder.** Jurnal, HPP, stok KELUAR, Midtrans Snap,
-> dan webhook masih target sub-slice 2–3. Baris di bawah adalah kontrak akhir modul;
+> Status implementasi 24 Nov 2026: **SUB-SLICE 1 APPROVED founder (#1)**;
+> **SUB-SLICE 2 (Midtrans Snap + webhook) dieksekusi, menunggu Gate #2**. Jurnal, HPP,
+> dan stok KELUAR masih target sub-slice 3. Baris di bawah adalah kontrak akhir modul;
 > bagian "Deviasi sementara" memuat batas yang benar-benar aktif sekarang.
 
 ## Tujuan & nilai
@@ -36,9 +36,20 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
   `cancel_order` sudah mengubah status/rLS dan `payments` saja.
 - `complete_order` BELUM menulis jurnal T2/T3, `stock_movements` KELUAR, atau HPP.
 - `cancel_order` BELUM membuat entri reversi; `record_payment` BELUM T1/T4/T12.
-- Bukti pembayaran masuk bucket privat `bukti-pembayaran` dengan prefix `business_id/`.
+- Bukti pembayaran masuk bucket privat `bukti-pembayaran` dengan prefix `business_id/`;
+  detail order wajib menampilkan tautan/pratinjau lewat signed URL 10 menit (RLS owner),
+  bukan `bukti_path` mentah.
 - Label UI detail: "Status belum memposting jurnal sampai sub-slice 3 selesai."
-- Gateway Midtrans tidak dipakai dulu; kanal tersedia untuk pembayaran manual = MANUAL/COD.
+- Pembayaran manual = MANUAL/COD. Midtrans sudah tersedia sebagai kanal `MIDTRANS`,
+  tetapi masih status-only: webhook menulis `payments` lewat `_post_payment`, belum
+  jurnal T1/T4/T12 (slice 3).
+- Snap token dibuat Worker dari RPC `create_payment_intent`; nominal dihitung server,
+  browser menerima token Snap + client key publik saja.
+- Webhook mencatat raw event UNVERIFIED → verifikasi SHA512 dengan Signature Secret
+  Key → tulis verifikasi append-only → apply idempoten. Redirect browser tidak pernah
+  dijadikan bukti pembayaran.
+- Sandbox Midtrans belum terverifikasi karena kredensial/KYC menunggu founder; formula
+  sudah dikutip dari docs resmi. Jika sandbox berbeda, stop dan lapor.
 
 ## Status & aksi (perpindahan via aksi eksplisit)
 DRAFT → DIKONFIRMASI → (DP diterima: T1) → [opsional: SIAP_DIKIRIM via `mark_ready` —

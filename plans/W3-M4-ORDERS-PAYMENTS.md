@@ -1,8 +1,8 @@
 # W3-M4-ORDERS-PAYMENTS.md — Rencana Kerja M4 Order & Pembayaran
 
-> W3-M4 · dibuat 24 Nov 2026 oleh /prep + /plan · status: DRAFT — MENUNGGU REVIEW FOUNDER
+> W3-M4 · dibuat 24 Nov 2026 oleh /prep + /plan · status: DRAFT — SUB-SLICE 2 DIEKSEKUSI
 > Gate founder: **1 – 1 – 1** (Midtrans; M4 + jurnal + HPP dalam 3 sub-slice; service_role khusus webhook).
-> **EXECUTE DILARANG** sebelum founder menyetujui plan ini.
+> Gate #1 sudah dijalankan dan disetujui founder 24 Nov 2026; Gate #2 menunggu CI + review founder.
 
 ## Tujuan sesi
 Setelah ketiga sub-slice selesai: order DRAFT dari Smart Paste bisa diproses sampai
@@ -31,7 +31,7 @@ langsung dari `journal_lines` (bukan agregat paralel).
 |---|---|
 | G1 | Gateway = **Midtrans**, Snap server-side di Worker + webhook terverifikasi SHA512. Transfer/COD manual (konfirmasi penjual, bukti opsional) tetap didukung tanpa gateway. `payment_events` dibuat **gateway-agnostic** (`provider` + `event_id`) supaya Xendit bisa ditambah tanpa migrasi ulang. |
 | G2 | Scope = **M4 + mesin jurnal + HPP**, dipecah 3 sub-slice: (1) status machine + pembayaran manual, (2) Midtrans Snap + webhook, (3) jurnal T0–T12 + stok KELUAR/HPP + rekap harian minimal. **Tiap sub-slice punya gate sendiri: CI hijau + review founder sebelum lanjut.** |
-| G3 | `SUPABASE_SERVICE_ROLE_KEY` = exception **scoped webhook saja**. Key hanya di `wrangler secret` Worker, tidak di frontend/git; CI assert bundle web bebas `service_role` dan secret gateway. Worker hanya boleh memanggil RPC allowlist `log_payment_event` + `apply_payment_event`, bukan query bebas. RPC memvalidasi signature-status, `gross_amount == total server-side`, transisi legal, dan idempotensi `(order_id, event_id)` via unique constraint. Raw webhook di-log append-only sebelum diproses. LESSONS mencatat exception ini tidak otomatis berlaku di milestone berikutnya. |
+| G3 | `SUPABASE_SERVICE_ROLE_KEY` = exception **scoped webhook saja**. Key hanya di `wrangler secret` Worker, tidak di frontend/git; CI assert bundle web bebas `service_role` dan secret gateway. Worker hanya boleh memanggil RPC allowlist `log_payment_event`, `mark_payment_event_verified`, + `apply_payment_event`, bukan query bebas. RPC memvalidasi signature-status, `gross_amount == total server-side`, transisi legal, dan idempotensi `(order_id, event_id)` via unique constraint. Raw webhook di-log append-only ke `payment_events` dengan status `UNVERIFIED`; hasil verifikasi ditulis terpisah ke `payment_event_verifications` (append-only) sebelum apply. LESSONS mencatat exception ini tidak otomatis berlaku di milestone berikutnya. |
 | G4 | Metode HPP diputuskan: **rata-rata bergerak (weighted average)**. Nilai desimal dibulatkan ke rupiah terdekat via `round()` dan disimpan BIGINT; aturan + golden T8 ditulis di PLAN dan tidak boleh diubah tanpa ADR. |
 | G5 | Jurnal immutable: `journal_entries`/`journal_lines` tidak pernah UPDATE/DELETE; koreksi/batal = entri reversi baru dengan `reversi_dari_id`, baris debit↔kredit dibalik. Semua nominal BIGINT; konversi/format di TS hanya via `packages/shared/src/money.ts`. |
 | G6 | pgTAP wajib menguji aturan posting **dan** adversarial: amount mismatch, transisi ilegal, replay webhook, duplicate payment, insert jurnal timpang, RLS lintas `business_id`. Satu merah = gate gagal. |
@@ -88,7 +88,7 @@ request Snap server-side.**
 ---
 
 ## SUB-SLICE 1 — Order status machine + pembayaran manual
-Status: `[x]` dieksekusi (CI lokal hijau 24 Nov 2026). Gate keluar: menunggu **review founder #1** sebelum slice 2.
+Status: `[x]` dieksekusi (CI hijau 24 Nov 2026). Gate keluar: **APPROVED oleh founder #1**; slice 2 dilanjutkan.
 > Development-only: sub-slice 1 **tidak boleh dianggap rilis/production** sebelum
 > sub-slice 3 hijau, karena jurnal belum dipasang.
 
@@ -106,7 +106,7 @@ Status: `[x]` dieksekusi (CI lokal hijau 24 Nov 2026). Gate keluar: menunggu **r
 ### Test wajib slice 1
 - pgTAP: `DRAFT→DIKONFIRMASI→DP_DITERIMA→SIAP_DIKIRIM→DIKIRIM→SELESAI`; **`DP_DITERIMA` skippable** untuk COD tanpa DP (`DIKONFIRMASI→SIAP_DIKIRIM`); **pelunasan penuh sekali bayar**; `SELESAI→DIKIRIM` ditolak; overpay ditolak; dua DP parsial akumulasi benar; `set_shipping` tanpa perubahan uang; cross-`business_id` gagal; anon/direct UPDATE gagal; `create_manual_order` memakai harga manual, menolak field tambahan/DP berlebih, dan dedup pelanggan.
 - Vitest: schema payment menolak desimal dan nominal negatif; format via `formatRupiah`.
-- Manual HP 5 menit: konfirmasi draft → DP transfer manual + bukti → pelunasan → status.
+- Manual HP 5 menit: konfirmasi draft → DP transfer manual + bukti → buka lagi bukti dari detail order → pelunasan → status.
 
 ### Gate keluar 1
 `pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build` + `supabase test db` + drift types hijau; diff reviewed; founder approve sebelum slice 2.
@@ -115,24 +115,29 @@ Status: `[x]` dieksekusi (CI lokal hijau 24 Nov 2026). Gate keluar: menunggu **r
 
 ## SUB-SLICE 2 — Midtrans Snap + webhook
 Status: `[~]` dieksekusi 24 Nov 2026. Gate keluar: CI hijau + **review founder #2**.
+Progres lokal Gate #2: pgTAP 229 hijau (tambah 0008 verifikasi append-only), Vitest 89 hijau
+(Shared + Worker), lint/typecheck/build/worker bundle/guard/browser types drift hijau,
+UI Snap token terpasang; task 2.9 (sandbox secrets + verifikasi founder) masih menunggu
+kredensial/KYC.
 
 ### Task berurutan
 | # | Task | Jenis | File utama | Gate |
 |---|---|---|---|---|
 | 2.1 | Tulis pgTAP MERAH untuk `payment_events` append-only, replay `(provider,event_id)`, amount mismatch, signature-status belum VERIFIED, transisi ilegal | test | `packages/supabase/tests/0007_m4_midtrans_events_test.sql` | merah dulu |
 | 2.2 | Migrasi 0007: `payment_intents` (provider_order_id UNIQUE global, amount BIGINT server-side, jenis, status, expiry), `payment_events` gateway-agnostic (provider, event_id, payload jsonb, signature_status, received_at), `payment_event_outcomes` append-only dengan `UNIQUE(order_id,event_id)`; REVOKE tabel dari service_role, GRANT EXECUTE hanya RPC allowlist | migrasi | `packages/supabase/migrations/0007_m4_midtrans_events.sql` | hijau |
-| 2.3 | RPC allowlist `log_payment_event(p_provider,p_event_id,p_payload,p_signature_status)` + `apply_payment_event(p_event_id,p_provider_order_id,p_gross_amount,p_transaction_status,p_status_code,p_fraud_status)`; validasi: raw event VERIFIED, amount server-side, status success, legal transition, idempoten. **JANGAN panggil `record_payment` langsung** (`apply_payment_event` tanpa JWT user; guard `auth.uid()` akan gagal, dilarang melonggarkan guard global). Pecah core privat `_post_payment(...)` SECURITY DEFINER yang dipakai dua jalur; `apply_payment_event` memvalidasi `order_id`/`business_id` sendiri sebelum memanggil core; tanpa query bebas | RPC | `0007_m4_midtrans_events.sql` | hijau |
+| 2.2a | Migrasi 0008: `payment_event_verifications` append-only + RPC `mark_payment_event_verified`; `apply_payment_event` membaca status verifikasi terakhir (fallback kompatibel untuk raw lama) tanpa mengubah payload `payment_events` | migrasi | `packages/supabase/migrations/0008_m4_midtrans_verifications.sql`, `0008_m4_midtrans_verifications_test.sql` | hijau |
+| 2.3 | RPC allowlist `log_payment_event(p_provider,p_event_id,p_payload,p_signature_status)` + `mark_payment_event_verified(p_event_id,p_signature_status)` + `apply_payment_event(p_event_id,p_provider_order_id,p_gross_amount,p_transaction_status,p_status_code,p_fraud_status)`; validasi: raw event UNVERIFIED → verifikasi → amount server-side, status success, legal transition, idempoten. **JANGAN panggil `record_payment` langsung** (`apply_payment_event` tanpa JWT user; guard `auth.uid()` akan gagal, dilarang melonggarkan guard global). Satu core privat `_post_payment(...)` SECURITY DEFINER dipakai manual dan webhook; `apply_payment_event` memvalidasi `order_id`/`business_id` sendiri sebelum memanggil core; tanpa query bebas | RPC | `0007_m4_midtrans_events.sql`, `0008_m4_midtrans_verifications.sql` | hijau |
 | 2.4 | `parseGatewayAmount` di `money.ts`: terima `"165000.00"`/`"165000"`, tolak `"165000.5"`; golden test; Worker & RPC pakai BIGINT identik | kode | `packages/shared/src/money.ts`, `money.test.ts` | hijau |
 | 2.5 | `src/lib/midtrans.ts`: Snap server-side via `MIDTRANS_SERVER_KEY` (Basic auth) ke endpoint Snap resmi; buat `provider_order_id` unik; return token/redirect URL; tidak kirim Secret Key ke browser | kode | `apps/worker/src/lib/midtrans.ts` | mock test hijau |
-| 2.6 | `POST /api/webhooks/payments/midtrans`: zod body, verifikasi `SHA512(order_id+status_code+gross_amount+SignatureSecretKey)` dengan Web Crypto + perbandingan constant-time, `log_payment_event` dulu, lalu `apply_payment_event` via service_role; invalid=401, mismatch=422, RPC gagal=500 retry, duplicate=200 no-op | kode | `apps/worker/src/routes/payments-webhook.ts`, `src/index.ts` | hijau |
-| 2.7 | Vitest route: stub `fetch`, secret fixture, replay, bad signature, mismatch, RPC failure; CI grep secret di `apps/web/dist` | test/CI | `apps/worker/tests/payments-webhook.test.ts`, `.github/workflows/ci.yml` | mock tanpa secret nyata |
+| 2.6 | `POST /api/webhooks/payments/midtrans`: zod body, `log_payment_event(...,'UNVERIFIED')` paling awal, verifikasi `SHA512(order_id+status_code+gross_amount+SignatureSecretKey)` dengan Web Crypto + constant-time, `mark_payment_event_verified`, lalu `apply_payment_event` via service_role; invalid=401, mismatch=422, RPC gagal=500 retry, duplicate raw=200 no-op | kode | `apps/worker/src/routes/payments.ts`, `src/index.ts` | hijau |
+| 2.7 | Vitest route: stub `fetch`, secret fixture, replay, bad signature, mismatch, RPC failure; CI grep secret di `apps/web/dist` termasuk `MIDTRANS_*` | test/CI | `apps/worker/tests/payments-route.test.ts`, `.github/workflows/ci.yml` | mock tanpa secret nyata |
 | 2.8 | UI: tombol "Bayar via Midtrans" di `/orders/:id` memanggil Worker dengan JWT user; status menunggu dibaca via TanStack Query | UI | `apps/web/src/routes/orders-detail.tsx`, `src/lib/api.ts` | build hijau |
 | 2.9 | Founder isi sandbox secrets via `wrangler secret put`: `MIDTRANS_SERVER_KEY`, `MIDTRANS_SIGNATURE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`; verifikasi sandbox manual | ops | Worker staging | gate founder |
 
 ### Test wajib slice 2
-- pgTAP adversarial: amount mismatch, replay webhook, event tanpa `signature_status=VERIFIED`, transisi ilegal, order BATAL, intent expired, service_role mencoba SELECT tabel langsung = ditolak.
-- Vitest: signature valid/invalid, duplicate event, RPC error, amount desimal ditolak.
-- CI assert: bundle web bebas `service_role|SUPABASE_SERVICE_ROLE_KEY|MIDTRANS_SERVER_KEY|MIDTRANS_SIGNATURE_SECRET_KEY`.
+- pgTAP adversarial: amount mismatch, replay webhook, event UNVERIFIED/INVALID, raw payload tidak bisa diubah, verifikasi append-only idempoten, transisi ilegal, order BATAL, intent expired, service_role mencoba SELECT tabel langsung = ditolak.
+- Vitest: signature valid/invalid + rotasi kunci, duplicate event, RPC error, amount desimal ditolak, urutan `log → verify → mark → apply`.
+- CI assert: bundle web bebas `service_role|SUPABASE_SERVICE_ROLE|LLM_API_KEY|MIDTRANS_(SERVER_KEY|SIGNATURE_SECRET_KEY|PREVIOUS_SIGNATURE_SECRET_KEY|SECRET|API_KEY)`.
 - Event non-sukses (`expire`/`deny`/`cancel`) wajib menghasilkan `payment_event_outcomes` berstatus `IGNORED`, bukan silent drop; refund masuk BACKLOG.
 - **Catatan verifikasi founder:** formula `SHA512(order_id+status_code+gross_amount+MIDTRANS_SIGNATURE_SECRET_KEY)` sudah dikutip ulang dari docs resmi `access-keys` (update 3 Nov 2026): sejak 28 Okt 2026 verifikasi notifikasi memakai Signature Secret Key, bukan Server Key. Founder belum bisa verifikasi independen saat perencanaan (docs timeout); verifikasi sandbox mandiri masih menunggu kredensial/KYC. Saat slice 2, catat di LESSONS: sumber formula + URL docs + hasil verifikasi sandbox. Jika sandbox menunjukkan formula beda, **hentikan dan laporkan** sebelum lanjut.
 

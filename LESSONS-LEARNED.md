@@ -170,6 +170,10 @@ diperbarui.
 
 #37 · 24 Nov 2026 · arsitektur · Satu core posting `_post_payment` (0005) dipakai `record_payment` (manual) DAN wajib dipakai `apply_payment_event` (webhook Midtrans). Ini mencegah dua aturan status/jurnal saat slice 3. · Tindakan: webhook hanya menulis `payment_events` raw → verifikasi → idempotency → panggil core yang sama; jangan pernah membuat jalur posting kedua di Worker.
 
+#38 · 24 Nov 2026 · M4 · Raw webhook Midtrans wajib tetap append-only: `log_payment_event(...,'UNVERIFIED')` terjadi paling awal, hasil verifikasi ditulis terpisah di `payment_event_verifications` (0008), lalu `apply_payment_event` memakai status verifikasi terakhir. · Tindakan: jangan UPDATE payload `payment_events`; urutan Worker `log → verify → mark → apply`; replay duplikat tetap 200; verifikasi sandbox belum possible tanpa kredensial/KYC — jika formula beda, stop & lapor.
+
+#39 · 24 Nov 2026 · M4 · Smoke test founder: bukti transfer tersimpan, tetapi detail order hanya menampilkan `bukti_path` (terlihat seperti id) dan tidak bisa dibuka. Bucket `bukti-pembayaran` sengaja privat, jadi jangan pakai public URL / jangan simpan URL publik. · Tindakan: detail order wajib membuat signed URL 10 menit via `supabase.storage.from(...).createSignedUrl(...)` dengan RLS owner; tampilkan tautan "Lihat bukti" + thumbnail gambar; status saja tidak cukup untuk DoD smoke test.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

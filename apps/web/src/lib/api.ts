@@ -1,3 +1,5 @@
+import { snapTokenRequestSchema, type SnapTokenRequest } from "@gerailo/shared";
+
 import { supabase } from "@/lib/supabase";
 
 const workerUrl = import.meta.env.VITE_WORKER_URL?.replace(/\/$/, "") ?? "";
@@ -46,6 +48,17 @@ export type HasilEkstraksi = {
   logId?: string;
   tokens?: number;
   pesan?: string;
+};
+
+export type SnapTokenWire = {
+  token: string;
+  redirect_url: string;
+  client_key: string;
+  provider_order_id: string;
+  amount: string;
+  order_id: string;
+  jenis: SnapTokenRequest["jenis"];
+  environment: "sandbox" | "production";
 };
 
 export type ParserMetricsWire = {
@@ -193,6 +206,78 @@ export async function ambilMetrikParser(): Promise<ParserMetricsWire> {
   }
 
   return data as ParserMetricsWire;
+}
+
+function pesanErrorMidtrans(kode: string): string {
+  if (kode === "AUTH_REQUIRED" || kode === "AUTH_INVALID") {
+    return "Sesi berakhir. Masuk lagi untuk membuat pembayaran.";
+  }
+
+  if (kode === "MIDTRANS_BELUM_DISET") {
+    return "Pembayaran online belum aktif. Hubungi admin.";
+  }
+
+  if (kode === "INPUT_TIDAK_VALID") {
+    return "Data pembayaran tidak valid. Periksa pesanan.";
+  }
+
+  if (kode.includes("TRANSISI")) {
+    return "Status pesanan tidak memungkinkan pembayaran online.";
+  }
+
+  if (kode === "ORDER_SUDAH_LUNAS") {
+    return "Pesanan sudah lunas.";
+  }
+
+  if (kode === "SNAP_GAGAL") {
+    return "Midtrans sedang tidak tersedia. Coba lagi sebentar.";
+  }
+
+  return "Gagal membuat pembayaran online. Coba lagi.";
+}
+
+export async function ambilSnapToken(input: {
+  orderId: string;
+  jenis: SnapTokenRequest["jenis"];
+}): Promise<SnapTokenWire> {
+  cekWorkerUrl();
+  const token = await tokenWorker();
+  const validasi = snapTokenRequestSchema.parse({
+    order_id: input.orderId,
+    jenis: input.jenis,
+  });
+  const respons = await fetch(`${workerUrl}/api/payments/midtrans/token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(validasi),
+  });
+  const data: unknown = await respons.json().catch(() => null);
+  const objek = sebagaiObjek(data);
+
+  if (!responsBerhasil(respons.status)) {
+    throw new Error(
+      pesanErrorMidtrans(typeof objek?.error === "string" ? objek.error : "TOKEN_GAGAL"),
+    );
+  }
+
+  if (
+    !objek
+    || typeof objek.token !== "string"
+    || typeof objek.redirect_url !== "string"
+    || typeof objek.client_key !== "string"
+    || typeof objek.provider_order_id !== "string"
+    || typeof objek.amount !== "string"
+    || typeof objek.order_id !== "string"
+    || (objek.jenis !== "DP" && objek.jenis !== "PELUNASAN")
+    || (objek.environment !== "sandbox" && objek.environment !== "production")
+  ) {
+    throw new Error("Respons pembayaran tidak valid. Coba lagi.");
+  }
+
+  return objek as unknown as SnapTokenWire;
 }
 
 function responsBerhasil(status: number): boolean {

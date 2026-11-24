@@ -141,6 +141,29 @@ function assemble(
   });
 }
 
+export function usePaymentProofUrl(path: string | null | undefined) {
+  return useQuery({
+    queryKey: ["payment-proof", path ?? null],
+    enabled: Boolean(path),
+    staleTime: 9 * 60 * 1000,
+    queryFn: async () => {
+      if (!path) {
+        return null;
+      }
+
+      const { data, error } = await supabase.storage
+        .from("bukti-pembayaran")
+        .createSignedUrl(path, 10 * 60);
+
+      if (error) {
+        throw error;
+      }
+
+      return data.signedUrl;
+    },
+  });
+}
+
 type UseOrdersOptions = {
   status?: OrderStatus | "SEMUA";
   orderId?: string;

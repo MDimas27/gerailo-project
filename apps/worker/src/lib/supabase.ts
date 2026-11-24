@@ -1,5 +1,5 @@
 import type { Database } from "@gerailo/supabase/types";
-import { parseRupiah } from "@gerailo/shared";
+import { parseRupiah, toRpcAmount } from "@gerailo/shared";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import type { CatalogProduct } from "../services/parser/types.js";
@@ -8,11 +8,38 @@ export type WorkerEnv = {
   APP_ENV?: string;
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
   LLM_API_KEY?: string;
   LLM_BASE_URL?: string;
   LLM_MODEL?: string;
   ADMIN_EMAILS?: string;
+  MIDTRANS_SERVER_KEY?: string;
+  MIDTRANS_CLIENT_KEY?: string;
+  MIDTRANS_SIGNATURE_SECRET_KEY?: string;
+  MIDTRANS_PREVIOUS_SIGNATURE_SECRET_KEY?: string;
+  MIDTRANS_ENVIRONMENT?: string;
 };
+
+export type SnapUser = {
+  id: string;
+  email?: string | null;
+  token: string;
+};
+
+export type PaymentIntent = {
+  providerOrderId: string;
+  amount: bigint;
+  orderId: string;
+  jenis: "DP" | "PELUNASAN";
+};
+
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | Json[]
+  | { [kunci: string]: Json };
 
 export type ParserMetricRingkas = {
   sumber: "PARSER" | "AI";
@@ -214,4 +241,117 @@ export async function fetchParserMetrics(
     diambilPada: new Date().toISOString(),
     terbaru: logs.slice(0, 20),
   };
+}
+
+function klienServiceRole(env: WorkerEnv): Klien {
+  const kunci = env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+  if (!kunci) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY_BELUM_DISET");
+  }
+
+  return createClient<Database>(envWajib(env, "SUPABASE_URL"), kunci, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+export async function createPaymentIntent(
+  env: WorkerEnv,
+  pengguna: SnapUser,
+  input: { orderId: string; jenis: "DP" | "PELUNASAN" },
+): Promise<PaymentIntent> {
+  const { data, error } = await klienDasar(env, pengguna.token).rpc(
+    "create_payment_intent",
+    {
+      p_order_id: input.orderId,
+      p_jenis: input.jenis,
+      p_expiry_minutes: 30,
+    },
+  );
+
+  if (error || !data) {
+    throw new Error(`INTENT_GAGAL: ${error?.message ?? "RESPON_KOSONG"}`);
+  }
+
+  const objek = data as unknown as Record<string, unknown>;
+
+  if (
+    typeof objek.provider_order_id !== "string"
+    || typeof objek.amount !== "string"
+    || typeof objek.order_id !== "string"
+    || typeof objek.jenis !== "string"
+  ) {
+    throw new Error("INTENT_RESPON_TIDAK_VALID");
+  }
+
+  return {
+    providerOrderId: objek.provider_order_id,
+    amount: parseRupiah(objek.amount),
+    orderId: objek.order_id,
+    jenis: objek.jenis === "DP" ? "DP" : "PELUNASAN",
+  };
+}
+
+export async function logPaymentEvent(
+  env: WorkerEnv,
+  input: {
+    eventId: string;
+    payload: Json;
+    signatureStatus: "UNVERIFIED" | "VERIFIED" | "INVALID";
+  },
+): Promise<void> {
+  const { error } = await klienServiceRole(env).rpc("log_payment_event", {
+    p_provider: "MIDTRANS",
+    p_event_id: input.eventId,
+    p_payload: input.payload,
+    p_signature_status: input.signatureStatus,
+  });
+
+  if (error) {
+    throw new Error(`LOG_EVENT_GAGAL: ${error.message}`);
+  }
+}
+
+export async function markPaymentEventVerified(
+  env: WorkerEnv,
+  input: { eventId: string; signatureStatus: "VERIFIED" | "INVALID" },
+): Promise<void> {
+  const { error } = await klienServiceRole(env).rpc(
+    "mark_payment_event_verified",
+    {
+      p_event_id: input.eventId,
+      p_signature_status: input.signatureStatus,
+    },
+  );
+
+  if (error) {
+    throw new Error(`MARK_VERIFIED_GAGAL: ${error.message}`);
+  }
+}
+
+export async function applyPaymentEvent(
+  env: WorkerEnv,
+  input: {
+    eventId: string;
+    providerOrderId: string;
+    grossAmount: bigint;
+    transactionStatus: string;
+    statusCode: string;
+    fraudStatus?: string | null;
+  },
+): Promise<string> {
+  const { data, error } = await klienServiceRole(env).rpc("apply_payment_event", {
+    p_event_id: input.eventId,
+    p_provider_order_id: input.providerOrderId,
+    p_gross_amount: toRpcAmount(input.grossAmount) as unknown as number,
+    p_transaction_status: input.transactionStatus,
+    p_status_code: input.statusCode,
+    p_fraud_status: input.fraudStatus ?? undefined,
+  });
+
+  if (error || typeof data !== "string") {
+    throw new Error(`APPLY_GAGAL: ${error?.message ?? "RESPON_KOSONG"}`);
+  }
+
+  return data;
 }

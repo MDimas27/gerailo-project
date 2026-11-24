@@ -42,7 +42,7 @@ jobs:
 
       - name: Guard browser bundle
         run: |
-          if grep -rE "service_role|LLM_API_KEY|SUPABASE_SERVICE_ROLE" apps/web/dist; then
+          if grep -rE "service_role|LLM_API_KEY|SUPABASE_SERVICE_ROLE|MIDTRANS_(SERVER_KEY|SIGNATURE_SECRET_KEY|PREVIOUS_SIGNATURE_SECRET_KEY|SECRET|API_KEY)" apps/web/dist; then
             echo "Kredensial server terdeteksi di bundle browser"
             exit 1
           fi

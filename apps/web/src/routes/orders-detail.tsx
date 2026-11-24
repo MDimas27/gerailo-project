@@ -9,6 +9,7 @@ import {
   parseRupiah,
   recordPaymentSchema,
   setShippingSchema,
+  type IntentJenis,
   type PaymentKanal,
   type PaymentJenis,
 } from "@gerailo/shared";
@@ -18,9 +19,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { useOrders, type OrderStatus } from "@/hooks/use-orders";
+import {
+  useOrders,
+  usePaymentProofUrl,
+  type OrderStatus,
+} from "@/hooks/use-orders";
 import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
+import { ambilSnapToken } from "@/lib/api";
 import { rpcAmount } from "@/lib/rpc-amount";
 import { supabase } from "@/lib/supabase";
 
@@ -64,11 +70,88 @@ function formBayarAwal(): FormBayar {
   return { jenis: "DP", kanal: "MANUAL", jumlah: "", bukti: null };
 }
 
+type SnapPembayaran = {
+  pay: (
+    token: string,
+    opsi: {
+      onSuccess: (hasil: unknown) => void;
+      onPending: (hasil: unknown) => void;
+      onError: (hasil: unknown) => void;
+    },
+  ) => void;
+};
+
+function jendelaSnap(): { snap?: SnapPembayaran } {
+  return window as unknown as { snap?: SnapPembayaran };
+}
+
+function muatSnap(clientKey: string, environment: "sandbox" | "production"): Promise<SnapPembayaran> {
+  const existing = jendelaSnap().snap;
+  if (existing) {
+    return Promise.resolve(existing);
+  }
+
+  return new Promise((resolve, reject) => {
+    const skrip = document.createElement("script");
+    skrip.src = environment === "production"
+      ? "https://app.midtrans.com/snap/snap.js"
+      : "https://app.sandbox.midtrans.com/snap/snap.js";
+    skrip.async = true;
+    skrip.setAttribute("data-client-key", clientKey);
+    skrip.onload = () => {
+      const snap = jendelaSnap().snap;
+      if (snap) {
+        resolve(snap);
+      } else {
+        reject(new Error("Snap Midtrans gagal dimuat."));
+      }
+    };
+    skrip.onerror = () => reject(new Error("Snap Midtrans gagal dimuat."));
+    document.head.appendChild(skrip);
+  });
+}
+
 function pesanError(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
   return "Aksi gagal. Coba lagi.";
+}
+
+function BuktiPembayaran({ path }: { path: string }) {
+  const bukti = usePaymentProofUrl(path);
+
+  if (bukti.isPending) {
+    return <p className="mt-1 text-xs text-muted">Menyiapkan bukti...</p>;
+  }
+
+  if (bukti.isError || !bukti.data) {
+    return <p className="mt-1 text-xs text-danger">Bukti tidak bisa dibuka.</p>;
+  }
+
+  const gambar = /\.(png|jpe?g|webp|gif)$/i.test(path);
+
+  return (
+    <div className="mt-1 flex items-center gap-2">
+      <a
+        href={bukti.data}
+        target="_blank"
+        rel="noreferrer"
+        className="text-xs font-semibold text-primary underline"
+      >
+        Lihat bukti
+      </a>
+      {gambar ? (
+        <a href={bukti.data} target="_blank" rel="noreferrer">
+          <img
+            src={bukti.data}
+            alt="Bukti pembayaran"
+            className="h-12 w-12 rounded border border-border object-cover"
+          />
+        </a>
+      ) : null}
+    </div>
+  );
 }
 
 type RpcResult = { error: { message: string } | null };
@@ -80,6 +163,7 @@ export function OrderDetailPage() {
   const orders = useOrders(business?.id, { orderId: id });
   const products = useProducts(business?.id);
   const [formBayar, setFormBayar] = useState<FormBayar>(formBayarAwal);
+  const [jenisOnline, setJenisOnline] = useState<IntentJenis>("PELUNASAN");
   const [kirim, setKirim] = useState({ kurir_nama: "", nomor_resi: "" });
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState("");
@@ -134,6 +218,7 @@ export function OrderDetailPage() {
   const bisaKirim = ["DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
   const bisaSiap = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status);
   const bisaBatal = !["SELESAI", "BATAL"].includes(order.status);
+  const bisaBayarOnline = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status);
 
   async function jalankan(aksi: () => PromiseLike<RpcResult>, pesan: string) {
     setBusy(true);
@@ -147,6 +232,41 @@ export function OrderDetailPage() {
       }
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
       setInfo(pesan);
+    } catch (error) {
+      setGalat(pesanError(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function bayarOnline() {
+    setBusy(true);
+    setInfo("");
+    setGalat("");
+
+    try {
+      const hasil = await ambilSnapToken({
+        orderId: order.id,
+        jenis: jenisOnline,
+      });
+
+      try {
+        const snap = await muatSnap(hasil.client_key, hasil.environment);
+        snap.pay(hasil.token, {
+          onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ["orders"] });
+            setInfo("Pembayaran dikirim. Menunggu konfirmasi Midtrans.");
+          },
+          onPending: () => {
+            setInfo("Pembayaran masih diproses Midtrans.");
+          },
+          onError: (hasilBayar) => {
+            setGalat(pesanError(hasilBayar));
+          },
+        });
+      } catch {
+        window.location.assign(hasil.redirect_url);
+      }
     } catch (error) {
       setGalat(pesanError(error));
     } finally {
@@ -341,11 +461,33 @@ export function OrderDetailPage() {
               {payment.kanal} · {new Date(payment.created_at).toLocaleString("id-ID")}
             </p>
             {payment.bukti_path ? (
-              <p className="truncate text-xs text-muted">Bukti: {payment.bukti_path}</p>
+              <BuktiPembayaran path={payment.bukti_path} />
             ) : null}
           </div>
         ))}
       </Card>
+
+      {bisaBayarOnline ? (
+        <Card className="flex flex-col gap-3 p-4">
+          <p className="text-sm font-semibold text-ink">Bayar online</p>
+          <p className="text-xs text-muted">
+            Nominal dihitung otomatis dari pesanan. Sisa saat ini: {formatRupiah(sisa)}.
+          </p>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold text-muted">Jenis pembayaran</span>
+            <Select
+              value={jenisOnline}
+              onChange={(event) => setJenisOnline(event.target.value as IntentJenis)}
+            >
+              <option value="PELUNASAN">Pelunasan</option>
+              <option value="DP">DP</option>
+            </Select>
+          </label>
+          <Button type="button" disabled={busy} onClick={() => void bayarOnline()}>
+            Buat pembayaran QRIS/VA
+          </Button>
+        </Card>
+      ) : null}
 
       {bisaBayar ? (
         <Card className="flex flex-col gap-3 p-4">

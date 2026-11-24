@@ -213,6 +213,26 @@ isOneToOne: false
       referencedColumns: ["id","business_id"]
     }
                   ]
+                },"payment_event_verifications": {
+                  Row: {
+                    "diverifikasi_pada": string,"event_id": string,"id": string,"signature_status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "diverifikasi_pada"?: string,"event_id": string,"id"?: string,"signature_status": string
+                  }
+                  Update: {
+                    "diverifikasi_pada"?: string,"event_id"?: string,"id"?: string,"signature_status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "payment_event_verifications_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "payment_events"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"payment_events": {
                   Row: {
                     "event_id": string,"id": string,"payload": NonNullable<Json>,"provider": string,"received_at": string,"signature_status": string
@@ -444,6 +464,9 @@ isOneToOne: false
                            },
 "mark_extraction_corrected":
 { Args: { "p_log_id": string }; Returns: undefined
+                           },
+"mark_payment_event_verified":
+{ Args: { "p_event_id": string,"p_signature_status": string }; Returns: undefined
                            },
 "mark_ready":
 { Args: { "p_order_id": string }; Returns: undefined

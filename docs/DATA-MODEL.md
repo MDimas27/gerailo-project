@@ -19,6 +19,10 @@
 | orders | Pesanan | id, business_id, customer_id, status enum, ongkir BIGINT, dp BIGINT (informasi dari chat, BUKAN pembayaran), metode_bayar, nomor (ORD-YYYYMMDD-###, unik), share_token (hex 32, unik), kurir_nama?, nomor_resi?, due_date? (batas pelunasan DP) |
 | order_items | Item per order | id, order_id, product_id/variant_id, qty, harga_satuan BIGINT |
 | payments | Riwayat pembayaran (append-only) | id, business_id, order_id, jenis (DP/PELUNASAN/COD), jumlah BIGINT, kanal (MANUAL/COD/QRIS/VA/E_WALLET/MIDTRANS/LAINNYA), bukti_path? (bucket privat `bukti-pembayaran`), catatan? |
+| payment_intents | Intent Snap server-side M4 | id, business_id, order_id, provider (`MIDTRANS`), provider_order_id UNIQUE, amount BIGINT server-side, jenis (DP/PELUNASAN), status (PENDING/PAID/EXPIRED/CANCELLED), expiry; satu PENDING per order |
+| payment_events | Raw notification gateway (append-only) | id, provider (`MIDTRANS`), event_id (`transactionId:status:statusCode`) UNIQUE per provider, payload jsonb, signature_status awal `UNVERIFIED`, received_at; payload tidak pernah diubah |
+| payment_event_verifications | Hasil verifikasi tanda tangan (append-only) | id, event_id → payment_events, signature_status (VERIFIED/INVALID), diverifikasi_pada; `apply_payment_event` memakai status terakhir |
+| payment_event_outcomes | Hasil pemrosesan webhook (append-only) | id, business_id, order_id, provider, event_id, outcome (POSTED/IGNORED/REJECTED), payment_id?, detail; UNIQUE(order_id,event_id) + UNIQUE(provider,event_id) |
 | payment_reports | Laporan bayar dari buyer (M8 P1) | id, order_id, jumlah BIGINT, tanggal, catatan, url_bukti?, status (DILAPORKAN/KONFIRMASI/DITOLAK); insert HANYA via RPC by token |
 | order_leads | Pesanan masuk dari katalog publik (M9 Fase 2) | id, business_id, slug, items jsonb, nama, telepon, alamat?, catatan?, status (BARU/DIKONVERSI/DITOLAK); insert HANYA via RPC by slug; TIDAK pernah otomatis jadi orders |
 | stock_movements | Pergerakan stok | id, business_id, product_id, jenis (MASUK/KELUAR/PENYESUAIAN), qty, harga_beli BIGINT?, alasan, order_id? |
@@ -57,6 +61,10 @@
 | `record_stock_move(...)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien (menunggu RPC order M4) |
 | `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM; kurir/resi opsional. Target slice 3: T2+T3 + KELUAR + HPP satu transaksi |
 | `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?)` | Tulis `payments` + hitung sisa di server + tolak overpay + update status. **Belum T1/T4/T12** sampai slice 3; dua DP parsial tetap akumulasi benar |
+| `create_payment_intent(p_order_id, p_jenis?, p_expiry_minutes?)` | Amount Snap dihitung server-side; satu PENDING per order; JWT seller |
+| `log_payment_event(...)` | Worker/service_role only; raw notification append-only + replay guard |
+| `mark_payment_event_verified(...)` | Worker/service_role only; tulis VERIFIED/INVALID ke tabel verifikasi append-only |
+| `apply_payment_event(...)` | Worker/service_role only; cek verifikasi + amount + status + idempotensi; sukses via `_post_payment` |
 | `cancel_order(p_order_id)` | **Status-only (slice 1):** status BATAL. Target slice 3: reversi T2+T3/pembayaran + stok masuk kembali |
 | `set_shipping(p_order_id, p_kurir, p_resi)` | Perbarui kurir/resi setelah kirim — TANPA menyentuh jurnal | halaman pembeli M8 |
 | `get_public_order(p_token)` | SECURITY DEFINER: lookup by token, kembalikan HANYA kolom aman (masking telepon/alamat, tanpa HPP); token salah = kosong | halaman publik M8 |
@@ -75,7 +83,9 @@
   saat commit, SUM(debit) = SUM(kredit) per entry — pelanggaran = rollback, SEKALIPUN
   penyebabnya bug aplikasi/lupa assertion.
 - REVOKE INSERT/UPDATE/DELETE langsung pada `journal_entries`, `journal_lines`,
-  `payments` dari anon/authenticated — hanya RPC yang boleh menulis.
+  `payments`, `payment_intents`, `payment_events`,
+  `payment_event_verifications`, `payment_event_outcomes` dari
+  anon/authenticated/service_role — hanya RPC yang boleh menulis.
 - `stock_movements` KELUAR hanya dibuat oleh `complete_order` (guard di RPC).
 
 ## Nomor pesanan & halaman pembeli publik (M8)

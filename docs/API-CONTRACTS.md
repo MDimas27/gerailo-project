@@ -16,6 +16,8 @@
 | `POST /api/smart-paste` | Parser pola + matching katalog → hasil ekstraksi (TIDAK menyimpan) | JWT Supabase (Bearer) | verifikasi JWT via `supabase.auth.getUser()`; kuota parser pola tidak dibatasi |
 | `POST /api/smart-paste/ai` | Fallback AI untuk kasus ambigu | JWT Supabase | NVIDIA NIM OpenAI-compatible: `LLM_API_KEY` = secret, `LLM_BASE_URL`/`LLM_MODEL` = vars; kuota + log via RPC `claim_ai_quota`/`log_parser_extraction` dengan JWT user + RLS (TANPA `service_role`); keluaran = JSON schema ketat (zod); 503 `AI_NOT_CONFIGURED` bila key/base kosong |
 | `GET /api/admin/parser-metrics` | Metrik internal Smart Paste | JWT Supabase + allowlist `ADMIN_EMAILS` di Worker | agregat `ai_usage_logs` milik usaha founder via RLS; tanpa `teks_asli`; 403 bila email di luar allowlist atau `ADMIN_EMAILS` kosong |
+| `POST /api/payments/midtrans/token` | Buat intent server-side + Snap token untuk order seller | JWT Supabase (Bearer) | `snapTokenRequestSchema`; nominal dari RPC `create_payment_intent`; `MIDTRANS_SERVER_KEY` hanya di Worker; respons memuat `token`, `redirect_url`, `client_key` publik, `provider_order_id`, `amount` string, `jenis`, `environment` |
+| `POST /api/webhooks/payments/midtrans` | Webhook pembayaran Midtrans M4 | signature gateway (SHA512) | urutan wajib: log raw `UNVERIFIED` → verifikasi `MIDTRANS_SIGNATURE_SECRET_KEY` → `mark_payment_event_verified` → `apply_payment_event` via service_role; idempoten `(order_id,event_id)`; invalid=401, mismatch=422, duplikat=200; tidak percaya redirect browser |
 | `POST /api/webhooks/payments` | Webhook Midtrans/Xendit (status pembayaran langganan) | signature gateway | verifikasi signature dulu; update `subscriptions` via service_role; idempotent (unique ref) |
 | Cron (wrangler) `billing-daily` | Cek langganan expired → downgrade FREE | internal | service_role; log ke Sentry |
 
@@ -38,6 +40,10 @@ Web memakai `VITE_WORKER_URL` publik untuk memanggil Worker.
 | `confirm_order(p_order_id)` | DRAFT → DIKONFIRMASI; guard owner; tanpa jurnal | konfirmasi order M4 |
 | `complete_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only sementara (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM + kurir/resi opsional. Target slice 3: jurnal T2+T3 + movement KELUAR + HPP satu transaksi | aksi "kirim" M4 |
 | `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?)` | Catat DP/PELUNASAN/COD ke `payments`, hitung sisa di server, tolak overpay/transisi ilegal, update status (DP_DITERIMA/SELESAI). **Belum memposting jurnal T1/T4/T12** sampai slice 3 | pembayaran M4 |
+| `create_payment_intent(p_order_id, p_jenis?, p_expiry_minutes?)` | JWT seller; hitung `amount` BIGINT dari total server-side dikurangi payments (DP dibatasi `orders.dp`); satu intent PENDING per order; `provider_order_id` dibuat server | Snap token M4 |
+| `log_payment_event(p_provider, p_event_id, p_payload, p_signature_status)` | **Worker/service_role only**; append-only raw notification dengan `provider + event_id` unik; duplikat = replay | webhook M4 |
+| `mark_payment_event_verified(p_event_id, p_signature_status)` | **Worker/service_role only**; tulis hasil verifikasi ke `payment_event_verifications` append-only; tidak mengubah payload raw | webhook M4 |
+| `apply_payment_event(p_event_id, p_provider_order_id, p_gross_amount, p_transaction_status, p_status_code, p_fraud_status?)` | **Worker/service_role only**; cek verifikasi, amount == intent server, status sukses, legal transition, idempotensi; sukses memanggil `_post_payment` (bukan `record_payment`) | webhook M4 |
 | `cancel_order(p_order_id)` | **Status-only sementara (slice 1):** pra-kirim/kirim → BATAL. Target slice 3: reversi jurnal (T11) + stok kembali | batal M4 |
 | `set_shipping(p_order_id, p_kurir, p_resi)` | Perbarui kurir/resi setelah kirim — tanpa jurnal | update resi M8 |
 | `get_public_order(p_token)` | SECURITY DEFINER: hanya kolom aman (masking PII, tanpa HPP); token salah = kosong | halaman publik M8 |
@@ -51,7 +57,11 @@ Web memakai `VITE_WORKER_URL` publik untuk memanggil Worker.
 | `post_journal(...)` | **INTERNAL** — REVOKE dari anon/authenticated; dipanggil RPC lain; assertion debit=kredit | mesin jurnal |
 
 Aturan: operasi multi-tabel/atomik WAJIB jadi RPC baru (bukan N query dari klien).
-Tambah RPC = migrasi baru + update daftar ini + golden test.
+Tambah RPC = migrasi baru + update daftar ini + golden test. RPC
+`log_payment_event`, `mark_payment_event_verified`, dan `apply_payment_event`
+hanya diizinkan untuk `service_role` di Worker; tabel `payment_intents`,
+`payment_events`, `payment_event_verifications`, dan `payment_event_outcomes`
+ditutup dari akses langsung (termasuk `service_role`).
 
 ## C. Akses tabel langsung dari browser (supabase-js, RLS)
 

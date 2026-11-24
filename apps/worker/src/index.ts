@@ -1,15 +1,24 @@
 import { Hono } from "hono";
 
 import {
+  applyPaymentEvent,
   claimAiQuota,
+  createPaymentIntent,
   fetchKatalog,
   fetchParserMetrics,
   isAdminEmail,
   logExtraction,
+  logPaymentEvent,
+  markPaymentEventVerified,
   verifyJwt,
   type WorkerEnv,
 } from "./lib/supabase.js";
+import { createSnapToken, verifyMidtransSignature, type SnapEnvironment } from "./lib/midtrans.js";
 import { parserMetricsHandler } from "./routes/admin.js";
+import {
+  midtransWebhookHandler,
+  snapTokenHandler,
+} from "./routes/payments.js";
 import {
   smartPasteAiHandler,
   smartPasteHandler,
@@ -51,6 +60,55 @@ app.post("/api/smart-paste/ai", (c) =>
         claimQuota: (input) => claimAiQuota(c.env, pengguna.token, input),
       }),
   })(c as Parameters<ReturnType<typeof smartPasteAiHandler>>[0]),
+);
+
+function snapEnvironment(env: WorkerEnv): SnapEnvironment {
+  return env.MIDTRANS_ENVIRONMENT?.trim().toLowerCase() === "production"
+    ? "production"
+    : "sandbox";
+}
+
+function paymentDeps(env: WorkerEnv) {
+  return {
+    verifyToken: (token: string) => verifyJwt(env, token),
+    createIntent: (
+      pengguna: Parameters<typeof createPaymentIntent>[1],
+      input: Parameters<typeof createPaymentIntent>[2],
+    ) => createPaymentIntent(env, pengguna, input),
+    createSnapToken,
+    serverKey: env.MIDTRANS_SERVER_KEY,
+    clientKey: env.MIDTRANS_CLIENT_KEY,
+    environment: snapEnvironment(env),
+    verifySignature: (input: {
+      orderId: string;
+      statusCode: string;
+      grossAmount: string;
+      signatureKey: string;
+    }) =>
+      verifyMidtransSignature({
+        ...input,
+        signatureSecretKey: env.MIDTRANS_SIGNATURE_SECRET_KEY,
+        previousSignatureSecretKey: env.MIDTRANS_PREVIOUS_SIGNATURE_SECRET_KEY,
+      }),
+    logEvent: (input: Parameters<typeof logPaymentEvent>[1]) =>
+      logPaymentEvent(env, input),
+    markVerified: (input: Parameters<typeof markPaymentEventVerified>[1]) =>
+      markPaymentEventVerified(env, input),
+    applyEvent: (input: Parameters<typeof applyPaymentEvent>[1]) =>
+      applyPaymentEvent(env, input),
+  };
+}
+
+app.post("/api/payments/midtrans/token", (c) =>
+  snapTokenHandler(paymentDeps(c.env))(
+    c as Parameters<ReturnType<typeof snapTokenHandler>>[0],
+  ),
+);
+
+app.post("/api/webhooks/payments/midtrans", (c) =>
+  midtransWebhookHandler(paymentDeps(c.env))(
+    c as Parameters<ReturnType<typeof midtransWebhookHandler>>[0],
+  ),
 );
 
 export default app;
