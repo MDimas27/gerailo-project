@@ -248,14 +248,14 @@ select is(
 );
 
 select lives_ok(
-  $$ select public.complete_order((select id from test_ids where key = 'order_siti'), 'JNE', null) $$,
-  'complete_order status-only ke DIKIRIM'
+  $$ select public.ship_order((select id from test_ids where key = 'order_siti'), 'JNE', null) $$,
+  'ship_order status-only ke DIKIRIM'
 );
 
 select is(
   (select status from public.orders where id = (select id from test_ids where key = 'order_siti')),
   'DIKIRIM'::order_status,
-  'status DIKIRIM setelah complete_order slice 1'
+  'status DIKIRIM setelah ship_order slice 1'
 );
 
 select lives_ok(
@@ -475,7 +475,7 @@ set local request.jwt.claims =
   '{"sub":"88888888-8888-8888-8888-888888888888","role":"authenticated"}';
 
 select throws_ok(
-  $$ select public.complete_order((select id from test_ids where key = 'order_illegal')) $$,
+  $$ select public.ship_order((select id from test_ids where key = 'order_illegal')) $$,
   '22023',
   'TRANSISI_TIDAK_VALID',
   'SELESAI ke DIKIRIM ditolak'
@@ -490,7 +490,7 @@ set local request.jwt.claims =
   '{"sub":"88888888-8888-8888-8888-888888888888","role":"authenticated"}';
 
 select throws_ok(
-  $$ select public.complete_order((select id from test_ids where key = 'order_illegal')) $$,
+  $$ select public.ship_order((select id from test_ids where key = 'order_illegal')) $$,
   '22023',
   'TRANSISI_TIDAK_VALID',
   'DRAFT tidak bisa lompat langsung ke pengiriman'

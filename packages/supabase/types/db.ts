@@ -435,9 +435,6 @@ isOneToOne: false
 "claim_ai_quota":
 { Args: { "p_model": string,"p_skor": number,"p_teks_asli"?: string,"p_tokens": number }; Returns: string
                            },
-"complete_order":
-{ Args: { "p_kurir_nama"?: string,"p_nomor_resi"?: string,"p_order_id": string }; Returns: undefined
-                           },
 "confirm_draft_order":
 { Args: { "p_alamat"?: string,"p_catatan"?: string,"p_dp": number,"p_due_date"?: string,"p_items": Json,"p_metode_bayar"?: (string)[],"p_nama": string,"p_ongkir": number,"p_telepon": string }; Returns: string
                            },
@@ -474,6 +471,9 @@ isOneToOne: false
 "normalize_telepon":
 { Args: { "p_telepon": string }; Returns: string
                            },
+"receive_order":
+{ Args: { "p_order_id": string }; Returns: undefined
+                           },
 "record_payment":
 { Args: { "p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
                            },
@@ -482,6 +482,9 @@ isOneToOne: false
                            },
 "set_shipping":
 { Args: { "p_kurir": string,"p_order_id": string,"p_resi": string }; Returns: undefined
+                           },
+"ship_order":
+{ Args: { "p_kurir_nama"?: string,"p_nomor_resi"?: string,"p_order_id": string }; Returns: undefined
                            }
           }
           Enums: {
