@@ -181,6 +181,32 @@ isOneToOne: false
       referencedColumns: ["id","business_id"]
     }
                   ]
+                },"payments": {
+                  Row: {
+                    "bukti_path": string | null,"business_id": string,"catatan": string | null,"created_at": string,"id": string,"jenis": string,"jumlah": number,"kanal": string,"order_id": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "bukti_path"?: string | null,"business_id": string,"catatan"?: string | null,"created_at"?: string,"id"?: string,"jenis": string,"jumlah": number,"kanal": string,"order_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "bukti_path"?: string | null,"business_id"?: string,"catatan"?: string | null,"created_at"?: string,"id"?: string,"jenis"?: string,"jumlah"?: number,"kanal"?: string,"order_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "payments_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payments_order_fkey"
+      columns: ["order_id","business_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
                 },"product_aliases": {
                   Row: {
                     "alias": string,"business_id": string,"created_at": string,"id": string,"product_id": string
@@ -299,11 +325,29 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "claim_ai_quota":
+            "_assert_order_owner":
+{ Args: { "p_order_id": string }; Returns: string
+                           },
+"_order_total":
+{ Args: { "p_order_id": string }; Returns: number
+                           },
+"_post_payment":
+{ Args: { "p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
+                           },
+"cancel_order":
+{ Args: { "p_order_id": string }; Returns: undefined
+                           },
+"claim_ai_quota":
 { Args: { "p_model": string,"p_skor": number,"p_teks_asli"?: string,"p_tokens": number }; Returns: string
+                           },
+"complete_order":
+{ Args: { "p_kurir_nama"?: string,"p_nomor_resi"?: string,"p_order_id": string }; Returns: undefined
                            },
 "confirm_draft_order":
 { Args: { "p_alamat"?: string,"p_catatan"?: string,"p_dp": number,"p_due_date"?: string,"p_items": Json,"p_metode_bayar"?: (string)[],"p_nama": string,"p_ongkir": number,"p_telepon": string }; Returns: string
+                           },
+"confirm_order":
+{ Args: { "p_order_id": string }; Returns: string
                            },
 "create_business":
 { Args: { "p_jenis": string,"p_metode_bayar"?: string,"p_nama": string }; Returns: string
@@ -317,11 +361,20 @@ isOneToOne: false
 "mark_extraction_corrected":
 { Args: { "p_log_id": string }; Returns: undefined
                            },
+"mark_ready":
+{ Args: { "p_order_id": string }; Returns: undefined
+                           },
 "normalize_telepon":
 { Args: { "p_telepon": string }; Returns: string
                            },
+"record_payment":
+{ Args: { "p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
+                           },
 "record_stock_move":
 { Args: { "p_order_id"?: string,"p_product_id": string,"p_qty": number,"p_reason"?: string,"p_type": string,"p_unit_price"?: number }; Returns: string
+                           },
+"set_shipping":
+{ Args: { "p_kurir": string,"p_order_id": string,"p_resi": string }; Returns: undefined
                            }
           }
           Enums: {

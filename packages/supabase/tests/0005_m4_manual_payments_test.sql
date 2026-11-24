@@ -442,7 +442,7 @@ select throws_ok(
     )
   $$,
   '42501',
-  'AUTH_REQUIRED',
+  'permission denied for function record_payment',
   'anon tidak bisa mencatat pembayaran'
 );
 
