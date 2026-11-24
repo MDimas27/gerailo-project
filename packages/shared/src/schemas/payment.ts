@@ -124,9 +124,36 @@ export const setShippingSchema = orderActionSchema.extend({
   resi: z.string().trim().min(1, "Nomor resi wajib diisi").max(80, "Nomor resi maksimal 80 karakter"),
 });
 
+export const intentJenisSchema = z.enum(["DP", "PELUNASAN"]);
+
+export const snapTokenRequestSchema = z.object({
+  order_id: z.uuid("Order tidak valid"),
+  jenis: intentJenisSchema.default("PELUNASAN"),
+});
+
+export const midtransNotificationSchema = z
+  .object({
+    transaction_time: z.string().optional(),
+    transaction_status: z.string().trim().min(1),
+    transaction_id: z.string().trim().min(1),
+    status_message: z.string().optional(),
+    status_code: z.string().trim().min(1),
+    signature_key: z.string().trim().length(128),
+    payment_type: z.string().optional(),
+    order_id: z.string().trim().min(1).max(50),
+    merchant_id: z.string().optional(),
+    gross_amount: z.string().trim().min(1),
+    fraud_status: z.string().nullable().optional(),
+    currency: z.string().optional(),
+  })
+  .passthrough();
+
 export type PaymentJenis = z.infer<typeof paymentJenisSchema>;
 export type PaymentKanal = z.infer<typeof paymentKanalSchema>;
 export type MetodeBayar = z.infer<typeof metodeBayarSchema>;
 export type CreateManualOrderInput = z.infer<typeof createManualOrderSchema>;
 export type ManualOrderItemInput = z.infer<typeof manualOrderItemSchema>;
 export type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;
+export type IntentJenis = z.infer<typeof intentJenisSchema>;
+export type SnapTokenRequest = z.infer<typeof snapTokenRequestSchema>;
+export type MidtransNotification = z.infer<typeof midtransNotificationSchema>;

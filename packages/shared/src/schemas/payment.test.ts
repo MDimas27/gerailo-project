@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { formatRupiah } from "../money.js";
 import {
   createManualOrderSchema,
+  midtransNotificationSchema,
   recordPaymentSchema,
+  snapTokenRequestSchema,
 } from "./payment.js";
 
 const productId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -53,5 +55,31 @@ describe("createManualOrderSchema", () => {
         metode_bayar: ["TRANSFER", "TRANSFER"],
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("schema Midtrans", () => {
+  it("menerima permintaan token dengan jenis default", () => {
+    const parsed = snapTokenRequestSchema.parse({ order_id: orderId });
+
+    expect(parsed.jenis).toBe("PELUNASAN");
+  });
+
+  it("menolak notifikasi tanpa signature 128 hex", () => {
+    const dasar = {
+      transaction_status: "settlement",
+      transaction_id: "trx-1",
+      status_code: "200",
+      order_id: "GR-123",
+      gross_amount: "30000.00",
+    };
+
+    expect(
+      midtransNotificationSchema.safeParse({ ...dasar, signature_key: "abc" }).success,
+    ).toBe(false);
+    expect(
+      midtransNotificationSchema.safeParse({ ...dasar, signature_key: "a".repeat(128) })
+        .success,
+    ).toBe(true);
   });
 });

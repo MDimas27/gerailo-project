@@ -5,7 +5,9 @@ import {
   moneyAdd,
   moneyMultiply,
   moneySubtract,
+  parseGatewayAmount,
   parseRupiah,
+  toGatewayAmount,
   toRpcAmount,
 } from "./money.js";
 
@@ -84,5 +86,29 @@ describe("toRpcAmount", () => {
 
   it("menolak pecahan", () => {
     expect(() => toRpcAmount(1_500.5)).toThrow();
+  });
+});
+
+describe("parseGatewayAmount", () => {
+  it("menerima format gateway Midtrans", () => {
+    expect(parseGatewayAmount("165000.00")).toBe(165_000n);
+    expect(parseGatewayAmount("165000")).toBe(165_000n);
+  });
+
+  it("menolak desimal bukan .00, ribuan, dan teks", () => {
+    expect(() => parseGatewayAmount("165000.5")).toThrow();
+    expect(() => parseGatewayAmount("165.000")).toThrow();
+    expect(() => parseGatewayAmount("Rp165000")).toThrow();
+    expect(() => parseGatewayAmount("")).toThrow();
+  });
+});
+
+describe("toGatewayAmount", () => {
+  it("menghasilkan number integer untuk JSON gateway", () => {
+    expect(toGatewayAmount("165000.00")).toBe(165_000);
+  });
+
+  it("menolak nilai di luar presisi number", () => {
+    expect(() => toGatewayAmount("9007199254740993")).toThrow();
   });
 });

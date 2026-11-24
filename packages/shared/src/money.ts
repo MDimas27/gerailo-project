@@ -116,3 +116,30 @@ export function moneyMultiply(
 export function toRpcAmount(input: MoneyInput): string {
   return parseRupiah(input).toString();
 }
+
+const GATEWAY_AMOUNT_PATTERN = /^\d+(\.00)?$/;
+
+/** Parse `gross_amount` gateway yang hanya boleh integer rupiah atau `.00`. */
+export function parseGatewayAmount(input: string): bigint {
+  const text = input.trim();
+
+  if (!GATEWAY_AMOUNT_PATTERN.test(text)) {
+    throw new TypeError(`Format gross_amount gateway tidak dikenali: "${input}"`);
+  }
+
+  return assertInt8(BigInt(text.split(".")[0] ?? text));
+}
+
+/** Ubah uang ke number aman untuk field JSON `gross_amount` gateway. */
+export function toGatewayAmount(input: MoneyInput): number {
+  const value =
+    typeof input === "string" && GATEWAY_AMOUNT_PATTERN.test(input.trim())
+      ? parseGatewayAmount(input)
+      : parseRupiah(input);
+
+  if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new RangeError("gross_amount gateway melewati batas presisi number");
+  }
+
+  return Number(value);
+}
