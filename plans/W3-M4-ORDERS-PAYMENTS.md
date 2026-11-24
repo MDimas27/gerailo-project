@@ -82,7 +82,7 @@ request Snap server-side.**
 ---
 
 ## SUB-SLICE 1 — Order status machine + pembayaran manual
-Status: `[ ]` belum dieksekusi. Gate keluar: CI hijau + **review founder #1**.
+Status: `[x]` dieksekusi (CI lokal hijau 24 Nov 2026). Gate keluar: menunggu **review founder #1** sebelum slice 2.
 > Development-only: sub-slice 1 **tidak boleh dianggap rilis/production** sebelum
 > sub-slice 3 hijau, karena jurnal belum dipasang.
 

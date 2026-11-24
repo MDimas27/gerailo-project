@@ -166,6 +166,8 @@ diperbarui.
 
 #35 · 24 Nov 2026 · arsitektur · Gate PLAN M4 1–1–1: Midtrans Snap server-side + webhook SHA512 memakai `MIDTRANS_SIGNATURE_SECRET_KEY` (terpisah dari Server Key sejak 28 Okt 2026; Server Key hanya untuk API), transfer/COD manual tetap didukung, `payment_events` gateway-agnostic. Eksekusi dipecah 3 sub-slice dengan gate CI + review founder. · Exception scoped: `SUPABASE_SERVICE_ROLE_KEY` HANYA di Worker webhook, hanya RPC allowlist `log_payment_event`/`apply_payment_event`, bukan query bebas, bundle web di-assert bebas secret. Tindakan: exception ini TIDAK otomatis dipakai milestone berikutnya; butuh approval gate baru. · HPP = rata-rata bergerak, jurnal immutable via reversing entry, semua BIGINT.
 
+#36 · 24 Nov 2026 · M4 · `/orders/new` tidak boleh INSERT langsung ke `orders`/`order_items`: 0003 sudah REVOKE dari `authenticated`. Tambah RPC `create_manual_order` (0006) dengan `harga_satuan` hanya dari form manual; `confirm_draft_order` tetap harga katalog server. · Tindakan: penomoran slice 2/3 migrasi bergeser ke 0007/0008–0009; jangan pakai cast `Number()` untuk argumen BIGINT, pakai `toRpcAmount` + cast tipe supabase-js.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
