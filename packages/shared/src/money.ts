@@ -111,3 +111,8 @@ export function moneyMultiply(
 
   return assertInt8(parseRupiah(amount) * factor);
 }
+
+/** Ubah uang ke string digit untuk argumen RPC BIGINT supabase-js. */
+export function toRpcAmount(input: MoneyInput): string {
+  return parseRupiah(input).toString();
+}

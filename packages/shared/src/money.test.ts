@@ -6,6 +6,7 @@ import {
   moneyMultiply,
   moneySubtract,
   parseRupiah,
+  toRpcAmount,
 } from "./money.js";
 
 describe("parseRupiah", () => {
@@ -72,5 +73,16 @@ describe("aritmetika uang", () => {
 
   it("menolak kuantitas pecahan", () => {
     expect(() => moneyMultiply(1_000n, 1.5)).toThrow();
+  });
+});
+
+describe("toRpcAmount", () => {
+  it("menghasilkan string digit BIGINT tanpa Number()", () => {
+    expect(toRpcAmount("Rp 1.500.000")).toBe("1500000");
+    expect(toRpcAmount("9007199254740993")).toBe("9007199254740993");
+  });
+
+  it("menolak pecahan", () => {
+    expect(() => toRpcAmount(1_500.5)).toThrow();
   });
 });
