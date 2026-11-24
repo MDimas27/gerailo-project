@@ -174,6 +174,8 @@ diperbarui.
 
 #39 · 24 Nov 2026 · M4 · Smoke test founder: bukti transfer tersimpan, tetapi detail order hanya menampilkan `bukti_path` (terlihat seperti id) dan tidak bisa dibuka. Bucket `bukti-pembayaran` sengaja privat, jadi jangan pakai public URL / jangan simpan URL publik. · Tindakan: detail order wajib membuat signed URL 10 menit via `supabase.storage.from(...).createSignedUrl(...)` dengan RLS owner; tampilkan tautan "Lihat bukti" + thumbnail gambar; status saja tidak cukup untuk DoD smoke test.
 
+#40 · 24 Nov 2026 · deploy · Service worker PWA bisa menyajikan bundle lama setelah deploy staging, sehingga UI verifikasi device tampak belum berubah walau HTML/JS server sudah baru. · Tindakan: saat smoke test pasca-deploy buka URL dengan cache-bust `?v=<stamp>` (atau unregister SW) sebelum menilai; verifikasi hash bundle lewat HTML + cek string di asset, jangan hanya percaya tampilan URL polos.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

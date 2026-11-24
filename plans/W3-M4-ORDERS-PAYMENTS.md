@@ -2,7 +2,7 @@
 
 > W3-M4 · dibuat 24 Nov 2026 oleh /prep + /plan · status: DRAFT — SUB-SLICE 2 DIEKSEKUSI
 > Gate founder: **1 – 1 – 1** (Midtrans; M4 + jurnal + HPP dalam 3 sub-slice; service_role khusus webhook).
-> Gate #1 sudah dijalankan dan disetujui founder 24 Nov 2026; Gate #2 menunggu CI + review founder.
+> Gate #1 sudah dijalankan dan disetujui founder 24 Nov 2026; Gate #2 menunggu review founder (CI hijau 4/4, deploy staging 24 Nov).
 
 ## Tujuan sesi
 Setelah ketiga sub-slice selesai: order DRAFT dari Smart Paste bisa diproses sampai
@@ -114,11 +114,13 @@ Status: `[x]` dieksekusi (CI hijau 24 Nov 2026). Gate keluar: **APPROVED oleh fo
 ---
 
 ## SUB-SLICE 2 — Midtrans Snap + webhook
-Status: `[~]` dieksekusi 24 Nov 2026. Gate keluar: CI hijau + **review founder #2**.
-Progres lokal Gate #2: pgTAP 229 hijau (tambah 0008 verifikasi append-only), Vitest 89 hijau
+Status: `[~]` dieksekusi 24 Nov 2026. Gate keluar: CI hijau 4/4 (run `45341010420`) + **review founder #2**.
+Progres Gate #2: pgTAP 229 hijau (tambah 0008 verifikasi append-only), Vitest 89 hijau
 (Shared + Worker), lint/typecheck/build/worker bundle/guard/browser types drift hijau,
-UI Snap token terpasang; task 2.9 (sandbox secrets + verifikasi founder) masih menunggu
-kredensial/KYC.
+UI Snap token terpasang. Deploy staging sukses; device USB `e8c955c3` membuka detail
+`ORD-20261124-001` via URL cache-bust: tombol "Bayar online" + "Lihat bukti" tampil,
+"Lihat bukti" membuka signed URL Supabase Storage. Task 2.9 (sandbox secrets +
+verifikasi founder) masih menunggu kredensial/KYC.
 
 ### Task berurutan
 | # | Task | Jenis | File utama | Gate |
