@@ -352,6 +352,9 @@ isOneToOne: false
 "create_business":
 { Args: { "p_jenis": string,"p_metode_bayar"?: string,"p_nama": string }; Returns: string
                            },
+"create_manual_order":
+{ Args: { "p_alamat"?: string,"p_catatan"?: string,"p_dp": number,"p_due_date"?: string,"p_items": Json,"p_metode_bayar"?: (string)[],"p_nama": string,"p_ongkir": number,"p_telepon": string }; Returns: string
+                           },
 "create_product":
 { Args: { "p_aliases"?: (string)[],"p_business_id": string,"p_harga_beli"?: number,"p_harga_jual": number,"p_nama": string,"p_stok_awal"?: number,"p_stok_min"?: number }; Returns: string
                            },
