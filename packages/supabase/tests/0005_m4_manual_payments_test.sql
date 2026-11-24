@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(49);
+select plan(53);
 
 create temporary table test_ids (
   key text primary key,
@@ -479,6 +479,66 @@ select throws_ok(
   '22023',
   'TRANSISI_TIDAK_VALID',
   'SELESAI ke DIKIRIM ditolak'
+);
+
+set local role postgres;
+update public.orders
+set status = 'DRAFT'
+where id = (select id from test_ids where key = 'order_illegal');
+set local role authenticated;
+set local request.jwt.claims =
+  '{"sub":"88888888-8888-8888-8888-888888888888","role":"authenticated"}';
+
+select throws_ok(
+  $$ select public.complete_order((select id from test_ids where key = 'order_illegal')) $$,
+  '22023',
+  'TRANSISI_TIDAK_VALID',
+  'DRAFT tidak bisa lompat langsung ke pengiriman'
+);
+
+set local role postgres;
+update public.orders
+set status = 'SELESAI'
+where id = (select id from test_ids where key = 'order_illegal');
+set local role authenticated;
+set local request.jwt.claims =
+  '{"sub":"88888888-8888-8888-8888-888888888888","role":"authenticated"}';
+
+select throws_ok(
+  $$ select public.cancel_order((select id from test_ids where key = 'order_illegal')) $$,
+  '22023',
+  'TRANSISI_TIDAK_VALID',
+  'cancel_order pada SELESAI ditolak'
+);
+
+select throws_ok(
+  $$
+    select public.record_payment(
+      (select id from test_ids where key = 'order_illegal'),
+      'DP',
+      -1000::bigint,
+      'MANUAL',
+      null
+    )
+  $$,
+  '22023',
+  'PEMBAYARAN_TIDAK_VALID',
+  'nominal pembayaran minus ditolak'
+);
+
+select throws_ok(
+  $$
+    select public.record_payment(
+      (select id from test_ids where key = 'order_illegal'),
+      'DP',
+      1000::bigint,
+      'MANUAL',
+      null
+    )
+  $$,
+  '22023',
+  'TRANSISI_TIDAK_VALID',
+  'catat bayar pada SELESAI ditolak'
 );
 
 select * from finish();

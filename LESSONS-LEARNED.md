@@ -168,6 +168,8 @@ diperbarui.
 
 #36 · 24 Nov 2026 · M4 · `/orders/new` tidak boleh INSERT langsung ke `orders`/`order_items`: 0003 sudah REVOKE dari `authenticated`. Tambah RPC `create_manual_order` (0006) dengan `harga_satuan` hanya dari form manual; `confirm_draft_order` tetap harga katalog server. · Tindakan: penomoran slice 2/3 migrasi bergeser ke 0007/0008–0009; jangan pakai cast `Number()` untuk argumen BIGINT, pakai `toRpcAmount` + cast tipe supabase-js.
 
+#37 · 24 Nov 2026 · arsitektur · Satu core posting `_post_payment` (0005) dipakai `record_payment` (manual) DAN wajib dipakai `apply_payment_event` (webhook Midtrans). Ini mencegah dua aturan status/jurnal saat slice 3. · Tindakan: webhook hanya menulis `payment_events` raw → verifikasi → idempotency → panggil core yang sama; jangan pernah membuat jalur posting kedua di Worker.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
