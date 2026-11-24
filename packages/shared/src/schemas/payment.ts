@@ -124,6 +124,9 @@ export const setShippingSchema = orderActionSchema.extend({
   resi: z.string().trim().min(1, "Nomor resi wajib diisi").max(80, "Nomor resi maksimal 80 karakter"),
 });
 
+export type PaymentJenis = z.infer<typeof paymentJenisSchema>;
+export type PaymentKanal = z.infer<typeof paymentKanalSchema>;
+export type MetodeBayar = z.infer<typeof metodeBayarSchema>;
 export type CreateManualOrderInput = z.infer<typeof createManualOrderSchema>;
 export type ManualOrderItemInput = z.infer<typeof manualOrderItemSchema>;
 export type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;

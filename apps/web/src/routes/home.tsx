@@ -86,7 +86,13 @@ export function HomePage() {
               Tes Smart Paste (Baca pesanan + Coba AI)
             </Link>
           </li>
-          <li>3. Catat order pertama sampai laporan.</li>
+          <li>
+            3.{" "}
+            <Link className="font-semibold text-primary underline" to="/orders">
+              Lihat pesanan &amp; catat pembayaran
+            </Link>
+            .
+          </li>
         </ul>
       </section>
     </main>

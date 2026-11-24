@@ -9,6 +9,9 @@ import { AuthCallbackPage } from "./routes/auth-callback.js";
 import { HomePage } from "./routes/home.js";
 import { LegalPage, NotFoundPage } from "./routes/legal.js";
 import { OnboardingPage } from "./routes/onboarding.js";
+import { OrderDetailPage } from "./routes/orders-detail.js";
+import { OrderNewPage } from "./routes/orders-new.js";
+import { OrdersPage } from "./routes/orders.js";
 import { PasteConfirmPage } from "./routes/paste-confirm.js";
 import { PastePage } from "./routes/paste.js";
 import { ProductFormPage } from "./routes/product-form.js";
@@ -76,6 +79,30 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <PasteConfirmPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/orders",
+    element: (
+      <RequireAuth>
+        <OrdersPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/orders/new",
+    element: (
+      <RequireAuth>
+        <OrderNewPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/orders/:id",
+    element: (
+      <RequireAuth>
+        <OrderDetailPage />
       </RequireAuth>
     ),
   },
