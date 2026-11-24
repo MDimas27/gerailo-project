@@ -217,8 +217,9 @@ export function OrderDetailPage() {
   const bisaBayar = !["SELESAI", "BATAL"].includes(order.status);
   const bisaKirim = ["DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
   const bisaSiap = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status);
-  const bisaBatal = !["SELESAI", "BATAL"].includes(order.status);
+  const bisaBatal = ["DRAFT", "DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
   const bisaBayarOnline = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status);
+  const bisaTerima = order.status === "DIKIRIM" && sisa === 0n;
 
   async function jalankan(aksi: () => PromiseLike<RpcResult>, pesan: string) {
     setBusy(true);
@@ -341,7 +342,7 @@ export function OrderDetailPage() {
 
       void jalankan(
         () =>
-          supabase.rpc("complete_order", {
+          supabase.rpc("ship_order", {
             p_order_id: data.order_id,
             ...(data.kurir_nama ? { p_kurir_nama: data.kurir_nama } : {}),
             ...(data.nomor_resi ? { p_nomor_resi: data.nomor_resi } : {}),
@@ -351,6 +352,13 @@ export function OrderDetailPage() {
     } catch (error) {
       setGalat(pesanError(error));
     }
+  }
+
+  function terimaOrder() {
+    void jalankan(
+      () => supabase.rpc("receive_order", { p_order_id: order.id }),
+      "Order ditandai diterima dan selesai.",
+    );
   }
 
   function perbaruiResi() {
@@ -585,6 +593,11 @@ export function OrderDetailPage() {
               />
             </label>
           </div>
+          {order.status === "DIKIRIM" && sisa > 0n ? (
+            <p className="text-xs text-danger">
+              Masih ada sisa {formatRupiah(sisa)} — catat pelunasan dulu.
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             {bisaSiap ? (
               <Button
@@ -612,6 +625,11 @@ export function OrderDetailPage() {
             {order.status === "DIKIRIM" ? (
               <Button type="button" disabled={busy} onClick={perbaruiResi}>
                 Simpan resi
+              </Button>
+            ) : null}
+            {bisaTerima ? (
+              <Button type="button" disabled={busy} onClick={terimaOrder}>
+                Tandai diterima/selesai
               </Button>
             ) : null}
           </div>
