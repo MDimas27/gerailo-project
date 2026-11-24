@@ -164,6 +164,8 @@ diperbarui.
 
 #34 · 23 Nov 2026 · closing · Laporan penutup final disinkronkan ke `plans/W2-M3-SMART-PASTE.md` (status SELESAI, 12 task [x]) dan `docs/MODULES/M3-SMART-PASTE.md` (Status final & verifikasi). Gate akhir: pgTAP 98, Vitest 57, lint 0 error / 1 warning lama, typecheck + build hijau, CI 4/4 hijau pada seluruh run closing. Staging bundle `index-DraCKu0H.js`; `/paste` blank; WebAPK staging `a31e5d83e0e7d8c17_v2` standalone. Backlog tetap M8, sisa M1, KYC, PWA hardening.
 
+#35 · 24 Nov 2026 · arsitektur · Gate PLAN M4 1–1–1: Midtrans Snap server-side + webhook SHA512 memakai `MIDTRANS_SIGNATURE_SECRET_KEY` (terpisah dari Server Key sejak 28 Okt 2026; Server Key hanya untuk API), transfer/COD manual tetap didukung, `payment_events` gateway-agnostic. Eksekusi dipecah 3 sub-slice dengan gate CI + review founder. · Exception scoped: `SUPABASE_SERVICE_ROLE_KEY` HANYA di Worker webhook, hanya RPC allowlist `log_payment_event`/`apply_payment_event`, bukan query bebas, bundle web di-assert bebas secret. Tindakan: exception ini TIDAK otomatis dipakai milestone berikutnya; butuh approval gate baru. · HPP = rata-rata bergerak, jurnal immutable via reversing entry, semua BIGINT.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
