@@ -91,6 +91,9 @@ waktu — jangan menggeser launch 19 Des.
   N query dari klien; setelah migrasi → jalankan `supabase gen types` + commit types.
 - Semua fetch data via TanStack Query; validasi input zod dari `packages/shared`.
 - Setiap endpoint Worker: verifikasi JWT Supabase + validasi zod; tidak percaya klien.
+- Pengujian PWA/perangkat: WAJIB `adb reverse tcp:5173 tcp:5173` + Playwright/CDP
+  (`chromium.connectOverCDP` lewat `adb forward tcp:9222 localabstract:chrome_devtools_remote`);
+  dilarang `adb shell input`/`uiautomator` untuk interaksi UI.
 
 ## Definisi selesai (semua modul)
 
