@@ -16,7 +16,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, FieldError } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import {
@@ -27,6 +27,7 @@ import {
 import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
 import { ambilSnapToken } from "@/lib/api";
+import { fieldErrorsFrom, pesanAksi } from "@/lib/form-error";
 import { rpcAmount } from "@/lib/rpc-amount";
 import { supabase } from "@/lib/supabase";
 
@@ -70,6 +71,23 @@ function formBayarAwal(): FormBayar {
   return { jenis: "DP", kanal: "MANUAL", jumlah: "", bukti: null };
 }
 
+type GalatField = {
+  jenis?: string;
+  kanal?: string;
+  jumlah?: string;
+  kurir_nama?: string;
+  nomor_resi?: string;
+};
+
+function galatPengiriman(error: unknown): GalatField {
+  const galat = fieldErrorsFrom(error);
+
+  return {
+    kurir_nama: galat.kurir_nama ?? galat.kurir,
+    nomor_resi: galat.nomor_resi ?? galat.resi,
+  };
+}
+
 type SnapPembayaran = {
   pay: (
     token: string,
@@ -109,13 +127,6 @@ function muatSnap(clientKey: string, environment: "sandbox" | "production"): Pro
     skrip.onerror = () => reject(new Error("Snap Midtrans gagal dimuat."));
     document.head.appendChild(skrip);
   });
-}
-
-function pesanError(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Aksi gagal. Coba lagi.";
 }
 
 function BuktiPembayaran({ path }: { path: string }) {
@@ -168,6 +179,7 @@ export function OrderDetailPage() {
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState("");
   const [galat, setGalat] = useState("");
+  const [galatField, setGalatField] = useState<GalatField>({});
 
   if (isPending) {
     return <p className="p-6 text-sm text-muted">Memuat usaha...</p>;
@@ -192,7 +204,7 @@ export function OrderDetailPage() {
   if (orders.error) {
     return (
       <p role="alert" className="p-6 text-sm font-medium text-danger">
-        Gagal memuat pesanan: {orders.error.message}
+        Gagal memuat pesanan. Coba muat ulang halaman.
       </p>
     );
   }
@@ -229,12 +241,13 @@ export function OrderDetailPage() {
     try {
       const hasil = await aksi();
       if (hasil.error) {
-        throw new Error(hasil.error.message);
+        setGalat(pesanAksi(hasil.error, "Aksi gagal. Coba lagi."));
+        return;
       }
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
       setInfo(pesan);
     } catch (error) {
-      setGalat(pesanError(error));
+      setGalat(pesanAksi(error, "Aksi gagal. Coba lagi."));
     } finally {
       setBusy(false);
     }
@@ -262,14 +275,14 @@ export function OrderDetailPage() {
             setInfo("Pembayaran masih diproses Midtrans.");
           },
           onError: (hasilBayar) => {
-            setGalat(pesanError(hasilBayar));
+            setGalat(pesanAksi(hasilBayar, "Pembayaran gagal. Coba lagi."));
           },
         });
       } catch {
         window.location.assign(hasil.redirect_url);
       }
     } catch (error) {
-      setGalat(pesanError(error));
+      setGalat(pesanAksi(error, "Pembayaran online gagal. Coba lagi."));
     } finally {
       setBusy(false);
     }
@@ -279,15 +292,28 @@ export function OrderDetailPage() {
     setBusy(true);
     setInfo("");
     setGalat("");
+    setGalatField({});
 
     try {
-      const data = recordPaymentSchema.parse({
+      const hasilValidasi = recordPaymentSchema.safeParse({
         order_id: order.id,
         jenis: formBayar.jenis,
         kanal: formBayar.kanal,
         jumlah: formBayar.jumlah,
       });
 
+      if (!hasilValidasi.success) {
+        const galat = fieldErrorsFrom(hasilValidasi.error);
+        setGalatField({
+          jenis: galat.jenis,
+          kanal: galat.kanal,
+          jumlah: galat.jumlah,
+        });
+        setGalat("Periksa kembali data pembayaran.");
+        return;
+      }
+
+      const data = hasilValidasi.data;
       let buktiPath: string | undefined;
 
       if (formBayar.bukti) {
@@ -319,39 +345,52 @@ export function OrderDetailPage() {
       const hasil = await supabase.rpc("record_payment", args);
 
       if (hasil.error) {
-        throw hasil.error;
+        const pesan = pesanAksi(hasil.error, "Pembayaran gagal dicatat. Coba lagi.");
+        if (hasil.error.message.includes("PEMBAYARAN_MELEBIHI_TOTAL")) {
+          setGalatField({ jumlah: pesan });
+        }
+        setGalat(pesan);
+        return;
       }
 
       setFormBayar(formBayarAwal());
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
       setInfo("Pembayaran dicatat.");
     } catch (error) {
-      setGalat(pesanError(error));
+      setGalat(pesanAksi(error, "Pembayaran gagal dicatat. Coba lagi."));
     } finally {
       setBusy(false);
     }
   }
 
   function kirimOrder() {
-    try {
-      const data = completeOrderSchema.parse({
-        order_id: order.id,
-        kurir_nama: kirim.kurir_nama || undefined,
-        nomor_resi: kirim.nomor_resi || undefined,
-      });
+    setInfo("");
+    setGalat("");
+    setGalatField({});
 
-      void jalankan(
-        () =>
-          supabase.rpc("ship_order", {
-            p_order_id: data.order_id,
-            ...(data.kurir_nama ? { p_kurir_nama: data.kurir_nama } : {}),
-            ...(data.nomor_resi ? { p_nomor_resi: data.nomor_resi } : {}),
-          }) ,
-        "Order ditandai dikirim.",
-      );
-    } catch (error) {
-      setGalat(pesanError(error));
+    const hasilValidasi = completeOrderSchema.safeParse({
+      order_id: order.id,
+      kurir_nama: kirim.kurir_nama || undefined,
+      nomor_resi: kirim.nomor_resi || undefined,
+    });
+
+    if (!hasilValidasi.success) {
+      setGalatField(galatPengiriman(hasilValidasi.error));
+      setGalat("Periksa kembali data pengiriman.");
+      return;
     }
+
+    const data = hasilValidasi.data;
+
+    void jalankan(
+      () =>
+        supabase.rpc("ship_order", {
+          p_order_id: data.order_id,
+          ...(data.kurir_nama ? { p_kurir_nama: data.kurir_nama } : {}),
+          ...(data.nomor_resi ? { p_nomor_resi: data.nomor_resi } : {}),
+        }),
+      "Order ditandai dikirim.",
+    );
   }
 
   function terimaOrder() {
@@ -362,25 +401,33 @@ export function OrderDetailPage() {
   }
 
   function perbaruiResi() {
-    try {
-      const data = setShippingSchema.parse({
-        order_id: order.id,
-        kurir: kirim.kurir_nama,
-        resi: kirim.nomor_resi,
-      });
+    setInfo("");
+    setGalat("");
+    setGalatField({});
 
-      void jalankan(
-        () =>
-          supabase.rpc("set_shipping", {
-            p_order_id: data.order_id,
-            p_kurir: data.kurir,
-            p_resi: data.resi,
-          }) ,
-        "Kurir dan resi diperbarui.",
-      );
-    } catch (error) {
-      setGalat(pesanError(error));
+    const hasilValidasi = setShippingSchema.safeParse({
+      order_id: order.id,
+      kurir: kirim.kurir_nama,
+      resi: kirim.nomor_resi,
+    });
+
+    if (!hasilValidasi.success) {
+      setGalatField(galatPengiriman(hasilValidasi.error));
+      setGalat("Periksa kembali data pengiriman.");
+      return;
     }
+
+    const data = hasilValidasi.data;
+
+    void jalankan(
+      () =>
+        supabase.rpc("set_shipping", {
+          p_order_id: data.order_id,
+          p_kurir: data.kurir,
+          p_resi: data.resi,
+        }),
+      "Kurir dan resi diperbarui.",
+    );
   }
 
   return (
@@ -518,6 +565,7 @@ export function OrderDetailPage() {
                   </option>
                 ))}
               </Select>
+              <FieldError>{galatField.jenis}</FieldError>
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-muted">Kanal</span>
@@ -536,6 +584,7 @@ export function OrderDetailPage() {
                   </option>
                 ))}
               </Select>
+              <FieldError>{galatField.kanal}</FieldError>
             </label>
           </div>
           <label className="flex flex-col gap-1">
@@ -548,6 +597,7 @@ export function OrderDetailPage() {
                 setFormBayar((value) => ({ ...value, jumlah: event.target.value }))
               }
             />
+            <FieldError>{galatField.jumlah}</FieldError>
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-muted">
@@ -582,6 +632,7 @@ export function OrderDetailPage() {
                   setKirim((value) => ({ ...value, kurir_nama: event.target.value }))
                 }
               />
+              <FieldError>{galatField.kurir_nama}</FieldError>
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-muted">Nomor resi</span>
@@ -591,6 +642,7 @@ export function OrderDetailPage() {
                   setKirim((value) => ({ ...value, nomor_resi: event.target.value }))
                 }
               />
+              <FieldError>{galatField.nomor_resi}</FieldError>
             </label>
           </div>
           {order.status === "DIKIRIM" && sisa > 0n ? (

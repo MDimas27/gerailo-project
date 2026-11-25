@@ -13,12 +13,13 @@ import {
 } from "@gerailo/shared";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, FieldError } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
+import { fieldErrorsFrom, pesanAksi } from "@/lib/form-error";
 import { rpcAmount } from "@/lib/rpc-amount";
 import { supabase } from "@/lib/supabase";
 
@@ -33,13 +34,6 @@ type ItemForm = {
 
 function itemKosong(kunci: number): ItemForm {
   return { kunci, product_id: "", qty: "1", harga_satuan: "0" };
-}
-
-function pesanError(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Gagal menyimpan order. Coba lagi.";
 }
 
 export function OrderNewPage() {
@@ -59,6 +53,7 @@ export function OrderNewPage() {
   const [items, setItems] = useState<ItemForm[]>([itemKosong(1)]);
   const [busy, setBusy] = useState(false);
   const [galat, setGalat] = useState("");
+  const [galatField, setGalatField] = useState<Record<string, string>>({});
   const [kunciBerikut, setKunciBerikut] = useState(2);
 
   if (isPending) {
@@ -123,9 +118,10 @@ export function OrderNewPage() {
   async function simpan() {
     setBusy(true);
     setGalat("");
+    setGalatField({});
 
     try {
-      const data = createManualOrderSchema.parse({
+      const hasilValidasi = createManualOrderSchema.safeParse({
         nama: form.nama,
         telepon: form.telepon,
         alamat: form.alamat || undefined,
@@ -141,6 +137,13 @@ export function OrderNewPage() {
         })),
       });
 
+      if (!hasilValidasi.success) {
+        setGalatField(fieldErrorsFrom(hasilValidasi.error));
+        setGalat("Periksa kembali data order.");
+        return;
+      }
+
+      const data = hasilValidasi.data;
       const args = {
         p_items: data.items.map((item) => ({
           product_id: item.product_id,
@@ -175,12 +178,13 @@ export function OrderNewPage() {
       );
 
       if (error) {
-        throw error;
+        setGalat(pesanAksi(error, "Gagal menyimpan order. Coba lagi."));
+        return;
       }
 
       navigate(`/orders/${orderId}`);
     } catch (error) {
-      setGalat(pesanError(error));
+      setGalat(pesanAksi(error, "Gagal menyimpan order. Coba lagi."));
     } finally {
       setBusy(false);
     }
@@ -207,6 +211,7 @@ export function OrderNewPage() {
               value={form.nama}
               onChange={(event) => setForm((value) => ({ ...value, nama: event.target.value }))}
             />
+            <FieldError>{galatField.nama}</FieldError>
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-muted">Telepon</span>
@@ -215,6 +220,7 @@ export function OrderNewPage() {
               value={form.telepon}
               onChange={(event) => setForm((value) => ({ ...value, telepon: event.target.value }))}
             />
+            <FieldError>{galatField.telepon}</FieldError>
           </label>
         </div>
         <label className="flex flex-col gap-1">
@@ -223,6 +229,7 @@ export function OrderNewPage() {
             value={form.alamat}
             onChange={(event) => setForm((value) => ({ ...value, alamat: event.target.value }))}
           />
+          <FieldError>{galatField.alamat}</FieldError>
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-muted">Catatan (opsional)</span>
@@ -230,12 +237,13 @@ export function OrderNewPage() {
             value={form.catatan}
             onChange={(event) => setForm((value) => ({ ...value, catatan: event.target.value }))}
           />
+          <FieldError>{galatField.catatan}</FieldError>
         </label>
       </Card>
 
       <Card className="flex flex-col gap-3 p-4">
         <p className="text-sm font-semibold text-ink">Item</p>
-        {items.map((item) => (
+        {items.map((item, indeks) => (
           <div key={item.kunci} className="flex flex-col gap-2 rounded-control border border-border p-3">
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-muted">Produk</span>
@@ -250,6 +258,7 @@ export function OrderNewPage() {
                   </option>
                 ))}
               </Select>
+              <FieldError>{galatField[`items.${indeks}.product_id`]}</FieldError>
             </label>
             <div className="grid gap-2 sm:grid-cols-2">
               <label className="flex flex-col gap-1">
@@ -259,6 +268,7 @@ export function OrderNewPage() {
                   value={item.qty}
                   onChange={(event) => ubahItem(item.kunci, { qty: event.target.value })}
                 />
+                <FieldError>{galatField[`items.${indeks}.qty`]}</FieldError>
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-muted">Harga satuan</span>
@@ -269,6 +279,7 @@ export function OrderNewPage() {
                     ubahItem(item.kunci, { harga_satuan: event.target.value })
                   }
                 />
+                <FieldError>{galatField[`items.${indeks}.harga_satuan`]}</FieldError>
               </label>
             </div>
             {items.length > 1 ? (
@@ -308,6 +319,7 @@ export function OrderNewPage() {
               value={form.ongkir}
               onChange={(event) => setForm((value) => ({ ...value, ongkir: event.target.value }))}
             />
+            <FieldError>{galatField.ongkir}</FieldError>
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-muted">DP</span>
@@ -316,6 +328,7 @@ export function OrderNewPage() {
               value={form.dp}
               onChange={(event) => setForm((value) => ({ ...value, dp: event.target.value }))}
             />
+            <FieldError>{galatField.dp}</FieldError>
           </label>
         </div>
         <label className="flex flex-col gap-1">
@@ -325,6 +338,7 @@ export function OrderNewPage() {
             value={form.due_date}
             onChange={(event) => setForm((value) => ({ ...value, due_date: event.target.value }))}
           />
+          <FieldError>{galatField.due_date}</FieldError>
         </label>
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-muted">Metode bayar</span>
@@ -340,6 +354,7 @@ export function OrderNewPage() {
               </label>
             ))}
           </div>
+          <FieldError>{galatField.metode_bayar}</FieldError>
         </div>
         <div className="flex justify-between border-t border-border pt-2 text-sm font-semibold text-ink">
           <span>Total</span>
