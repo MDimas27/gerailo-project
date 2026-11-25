@@ -186,6 +186,10 @@ diperbarui.
 
 #45 · 25 Nov 2026 · UX · Review founder: seller awam tidak boleh perlu tahu enum `DRAFT`/`DP_DITERIMA`/`SIAP_DIKIRIM`. · Keputusan: UI-only — 4 work lane, label humanis, badge pembayaran terpisah dari fulfillment, satu Next Best Action; `metode_bayar` hanya ditambahkan ke read model. · Tindakan: jangan pernah menambah status/error path atau "allowed actions" RPC hanya untuk kosmetik UI; semua CTA tetap memanggil RPC yang ada, backend authoritative. "Batalkan" sengaja tetap secondary pra-kirim agar smoke Fase A terbaca; jangan disembunyikan ke menu tersembunyi.
 
+#46 · 25 Nov 2026 · testing · Port CDP 9222 di mesin ini ternyata milik Chrome headless Windows (`User-Agent HeadlessChrome`, tanpa `Android-Package`), sehingga Playwright "4 passed" tapi layar HP tidak berubah. · Tindakan: WAJIB verifikasi `curl /json/version` mengandung `Android-Package` sebelum smoke; bila 9222 dipakai, `adb forward tcp:9223 localabstract:chrome_devtools_remote` dan pakai `CDP_URL=http://127.0.0.1:9223`. Jangan percaya "CDP tersambung" tanpa memeriksa target/browser.
+
+#47 · 25 Nov 2026 · M4 · Smoke COD menemukan `metode_bayar` Supabase berbentuk `text[]` (`["COD"]`), tetapi read model/UI membandingkannya dengan string `"COD"`, sehingga order COD di `DIKONFIRMASI` salah meminta bayar dan tidak bisa auto-selesai. · Tindakan: read model menerima `string | string[]`, deteksi COD lewat helper `adalahCod()` yang mengecek `includes("COD")`, lalu golden test array COD. Type Supabase jangan dianggap string hanya karena supabase-js mengembalikan BIGINT sebagai string.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

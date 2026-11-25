@@ -6,7 +6,7 @@ export type OrderView = {
   status: OrderStatus;
   sisa: bigint;
   sudah_dibayar: bigint;
-  metode_bayar: string;
+  metode_bayar: string | string[];
 };
 
 export type AksiUtama = {
@@ -82,8 +82,14 @@ function aksi(
   return { kind, label, bantuan };
 }
 
+export function adalahCod(metode_bayar: string | string[]): boolean {
+  return Array.isArray(metode_bayar)
+    ? metode_bayar.includes("COD")
+    : metode_bayar === "COD";
+}
+
 function isCod(order: OrderView): boolean {
-  return order.metode_bayar === "COD";
+  return adalahCod(order.metode_bayar);
 }
 
 export function nextAction(order: OrderView): AksiUtama {

@@ -1,7 +1,7 @@
 import { chromium, expect, test, type Browser, type Page } from "@playwright/test";
 
 const baseURL = process.env.PWA_BASE_URL ?? "http://localhost:5173";
-const cdpURL = process.env.CDP_URL ?? "http://127.0.0.1:9222";
+const cdpURL = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 
 let browser: Browser;
 let page: Page;

@@ -14,7 +14,7 @@ function view(
   status: OrderView["status"],
   sisa: bigint,
   sudah_dibayar: bigint,
-  metode_bayar = "TRANSFER",
+  metode_bayar: OrderView["metode_bayar"] = "TRANSFER",
 ): OrderView {
   return { status, sisa, sudah_dibayar, metode_bayar };
 }
@@ -63,6 +63,15 @@ describe("nextAction", () => {
     const hasil = nextAction(view("DIKIRIM", 100000n, 0n, "COD"));
     expect(hasil.kind).toBe("BAYAR");
     expect(hasil.label).toBe("Catat COD diterima");
+  });
+
+  it("mengenali COD dari metode bayar array Supabase", () => {
+    expect(nextAction(view("DIKIRIM", 100000n, 0n, ["COD"])).label).toBe(
+      "Catat COD diterima",
+    );
+    expect(nextAction(view("DIKONFIRMASI", 100000n, 0n, ["COD"])).kind).toBe(
+      "SIAP_DIKIRIM",
+    );
   });
 
   it("Fase C: COD auto-SELESAI terjadi di RPC; UI tidak punya jalur lain", () => {

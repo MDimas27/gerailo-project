@@ -45,7 +45,7 @@ export type OrderRecord = {
   nomor_resi: string | null;
   total: bigint;
   sudah_dibayar: bigint;
-  metode_bayar: string;
+  metode_bayar: string | string[];
   items: OrderItem[];
   payments: OrderPayment[];
 };
@@ -61,7 +61,7 @@ type RawOrder = {
   dp: string | number;
   kurir_nama: string | null;
   nomor_resi: string | null;
-  metode_bayar: string;
+  metode_bayar: string | string[];
 };
 
 type RawCustomer = {

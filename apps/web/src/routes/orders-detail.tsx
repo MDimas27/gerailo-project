@@ -28,7 +28,7 @@ import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
 import { ambilSnapToken } from "@/lib/api";
 import { fieldErrorsFrom, pesanAksi } from "@/lib/form-error";
-import { ringkasOrder } from "@/lib/order-presentation";
+import { adalahCod, ringkasOrder } from "@/lib/order-presentation";
 import { rpcAmount } from "@/lib/rpc-amount";
 import { supabase } from "@/lib/supabase";
 
@@ -232,7 +232,8 @@ export function OrderDetailPage() {
   const bisaBatal = ["DRAFT", "DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
   const bisaBayarOnline = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status) && bisaBayar;
   const bisaTerima = order.status === "DIKIRIM" && sisa === 0n;
-  const modeCod = order.status === "DIKIRIM" && order.metode_bayar === "COD" && bisaBayar;
+  const modeCod =
+    order.status === "DIKIRIM" && adalahCod(order.metode_bayar) && bisaBayar;
   const modePelunasan = order.status === "DP_DITERIMA" && bisaBayar;
   const jenisEfektif: PaymentJenis = modeCod
     ? "COD"
