@@ -178,6 +178,8 @@ diperbarui.
 
 #41 · 24 Nov 2026 · M4 · Nama RPC yang bohong mahal: `complete_order` ternyata hanya "kirim", menyesatkan founder saat smoke test. · Tindakan: rename ke `ship_order` (migrasi 0009, nama lama di-drop) sebelum production; transisi akhir `DIKIRIM→SELESAI` punya RPC eksplisit `receive_order`, wajib owner + lunas (sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"), tanpa payment/jurnal baru; cancel diblokir di DIKIRIM oleh DB dan UI; M8 nanti memanggil RPC yang sama. Melengkapi #38/#39.
 
+#42 · 25 Nov 2026 · M4 · Founder melihat array JSON error Zod sebagai teks merah saat lupa mengisi nominal pembayaran; pesan teknis seperti itu merusak kepercayaan UI. · Tindakan: jangan pernah render `error.message` mentah di halaman order; pakai `safeParse` + `fieldErrorsFrom()` untuk error per field dan `pesanAksi()` untuk menerjemahkan kode RPC/Postgrest ke instruksi perbaikan, dengan fallback generik. Golden test helper di `apps/web/src/lib/form-error.test.ts`.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
