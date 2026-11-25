@@ -45,6 +45,7 @@ export type OrderRecord = {
   nomor_resi: string | null;
   total: bigint;
   sudah_dibayar: bigint;
+  metode_bayar: string;
   items: OrderItem[];
   payments: OrderPayment[];
 };
@@ -60,6 +61,7 @@ type RawOrder = {
   dp: string | number;
   kurir_nama: string | null;
   nomor_resi: string | null;
+  metode_bayar: string;
 };
 
 type RawCustomer = {
@@ -135,6 +137,7 @@ function assemble(
       nomor_resi: order.nomor_resi,
       total: moneyAdd(ongkir, ...orderItems.map((item) => item.subtotal)),
       sudah_dibayar: moneyAdd(0n, ...orderPayments.map((payment) => payment.jumlah)),
+      metode_bayar: order.metode_bayar,
       items: orderItems,
       payments: orderPayments,
     };
@@ -186,7 +189,7 @@ export function useOrders(
       let orderQuery = supabase
         .from("orders")
         .select(
-          "id,nomor,status,created_at,due_date,customer_id,ongkir,dp,kurir_nama,nomor_resi",
+          "id,nomor,status,created_at,due_date,customer_id,ongkir,dp,metode_bayar,kurir_nama,nomor_resi",
         )
         .eq("business_id", businessId)
         .order("created_at", { ascending: false });

@@ -363,7 +363,7 @@ export function OrderNewPage() {
       </Card>
 
       <Button type="button" disabled={busy} onClick={() => void simpan()}>
-        Simpan order DRAFT
+        Simpan pesanan
       </Button>
 
       {galat ? (

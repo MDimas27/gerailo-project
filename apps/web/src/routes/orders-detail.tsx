@@ -28,25 +28,15 @@ import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
 import { ambilSnapToken } from "@/lib/api";
 import { fieldErrorsFrom, pesanAksi } from "@/lib/form-error";
+import { ringkasOrder } from "@/lib/order-presentation";
 import { rpcAmount } from "@/lib/rpc-amount";
 import { supabase } from "@/lib/supabase";
 
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  DRAFT: "DRAFT",
-  DIKONFIRMASI: "Dikonfirmasi",
-  DP_DITERIMA: "DP diterima",
-  SIAP_DIKIRIM: "Siap dikirim",
-  DIKIRIM: "Dikirim",
-  SELESAI: "Selesai",
-  BATAL: "Batal",
-};
-
-const LANGKAH: OrderStatus[] = [
-  "DIKONFIRMASI",
-  "DP_DITERIMA",
-  "SIAP_DIKIRIM",
-  "DIKIRIM",
-  "SELESAI",
+const LANGKAH_UI: Array<{ label: string; status: OrderStatus[] }> = [
+  { label: "Dikonfirmasi", status: ["DIKONFIRMASI", "DP_DITERIMA"] },
+  { label: "Siap dikirim", status: ["SIAP_DIKIRIM"] },
+  { label: "Dalam pengiriman", status: ["DIKIRIM"] },
+  { label: "Selesai", status: ["SELESAI"] },
 ];
 
 const JENIS_OPSI: PaymentJenis[] = ["DP", "PELUNASAN", "COD"];
@@ -225,13 +215,36 @@ export function OrderDetailPage() {
   const order: typeof selectedOrder = selectedOrder;
   const currentBusiness: NonNullable<typeof business> = business;
   const sisa = moneySubtract(order.total, order.sudah_dibayar);
-  const statusIndex = order.status === "DRAFT" || order.status === "BATAL" ? -1 : LANGKAH.indexOf(order.status);
-  const bisaBayar = !["SELESAI", "BATAL"].includes(order.status);
+  const ringkasan = ringkasOrder({
+    status: order.status,
+    sisa,
+    sudah_dibayar: order.sudah_dibayar,
+    metode_bayar: order.metode_bayar,
+  });
+  const aksi = ringkasan.aksi;
+  const statusIndex =
+    order.status === "DRAFT" || order.status === "BATAL"
+      ? -1
+      : LANGKAH_UI.findIndex((langkah) => langkah.status.includes(order.status));
+  const bisaBayar = aksi.kind === "BAYAR";
   const bisaKirim = ["DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
   const bisaSiap = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status);
   const bisaBatal = ["DRAFT", "DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
-  const bisaBayarOnline = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status);
+  const bisaBayarOnline = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status) && bisaBayar;
   const bisaTerima = order.status === "DIKIRIM" && sisa === 0n;
+  const modeCod = order.status === "DIKIRIM" && order.metode_bayar === "COD" && bisaBayar;
+  const modePelunasan = order.status === "DP_DITERIMA" && bisaBayar;
+  const jenisEfektif: PaymentJenis = modeCod
+    ? "COD"
+    : modePelunasan
+      ? "PELUNASAN"
+      : formBayar.jenis;
+  const kanalEfektif: PaymentKanal = modeCod ? "COD" : formBayar.kanal;
+  const jenisOpsi: PaymentJenis[] =
+    modeCod || modePelunasan ? [] : JENIS_OPSI.filter((jenis) => jenis !== "COD");
+  const kanalOpsi: PaymentKanal[] = modeCod
+    ? []
+    : KANAL_OPSI.filter((kanal) => kanal !== "COD");
 
   async function jalankan(aksi: () => PromiseLike<RpcResult>, pesan: string) {
     setBusy(true);
@@ -297,8 +310,8 @@ export function OrderDetailPage() {
     try {
       const hasilValidasi = recordPaymentSchema.safeParse({
         order_id: order.id,
-        jenis: formBayar.jenis,
-        kanal: formBayar.kanal,
+        jenis: jenisEfektif,
+        kanal: kanalEfektif,
         jumlah: formBayar.jumlah,
       });
 
@@ -436,11 +449,24 @@ export function OrderDetailPage() {
         <Link className="text-xs font-semibold text-primary" to="/orders">
           ← Daftar pesanan
         </Link>
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <h1 className="text-2xl font-semibold tabular-nums text-ink">{order.nomor}</h1>
-          <Badge variant={order.status === "SELESAI" ? "success" : order.status === "BATAL" ? "danger" : "warning"}>
-            {STATUS_LABEL[order.status]}
-          </Badge>
+          <div className="flex flex-wrap gap-1.5">
+            <Badge
+              variant={
+                order.status === "SELESAI"
+                  ? "success"
+                  : order.status === "BATAL"
+                    ? "danger"
+                    : "warning"
+              }
+            >
+              {ringkasan.label}
+            </Badge>
+            <Badge variant={ringkasan.pembayaran === "Lunas" ? "success" : "neutral"}>
+              {ringkasan.pembayaran}
+            </Badge>
+          </div>
         </div>
         <p className="text-sm text-muted">
           {order.nama_pelanggan} · {order.telepon_pelanggan}
@@ -448,18 +474,15 @@ export function OrderDetailPage() {
       </div>
 
       <Card className="flex flex-col gap-2 p-4">
-        <p className="text-xs font-semibold text-muted">Alur order</p>
+        <p className="text-xs font-semibold text-muted">Alur pesanan</p>
         <div className="flex flex-wrap gap-1.5">
-          {LANGKAH.map((langkah, index) => (
-            <Badge
-              key={langkah}
-              variant={index <= statusIndex ? "success" : "neutral"}
-            >
-              {STATUS_LABEL[langkah]}
+          {LANGKAH_UI.map((langkah, index) => (
+            <Badge key={langkah.label} variant={index <= statusIndex ? "success" : "neutral"}>
+              {langkah.label}
             </Badge>
           ))}
         </div>
-        {order.kurir_nama || order.nomor_resi ? (
+        {order.status === "DIKIRIM" ? (
           <p className="text-xs text-muted">
             Kurir: {order.kurir_nama ?? "-"} · Resi: {order.nomor_resi ?? "-"}
           </p>
@@ -522,71 +545,105 @@ export function OrderDetailPage() {
         ))}
       </Card>
 
-      {bisaBayarOnline ? (
-        <Card className="flex flex-col gap-3 p-4">
-          <p className="text-sm font-semibold text-ink">Bayar online</p>
-          <p className="text-xs text-muted">
-            Nominal dihitung otomatis dari pesanan. Sisa saat ini: {formatRupiah(sisa)}.
+      <Card className="flex flex-col gap-2 border-primary p-4">
+        <p className="text-xs font-semibold text-primary">Langkah berikutnya</p>
+        <p className="text-sm font-semibold text-ink">{aksi.label}</p>
+        <p className="text-xs text-muted">{aksi.bantuan}</p>
+        {order.status === "DIKIRIM" && sisa > 0n ? (
+          <p className="text-xs font-semibold text-danger">
+            Masih ada sisa {formatRupiah(sisa)} — catat pelunasan dulu.
           </p>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-muted">Jenis pembayaran</span>
-            <Select
-              value={jenisOnline}
-              onChange={(event) => setJenisOnline(event.target.value as IntentJenis)}
-            >
-              <option value="PELUNASAN">Pelunasan</option>
-              <option value="DP">DP</option>
-            </Select>
-          </label>
-          <Button type="button" disabled={busy} onClick={() => void bayarOnline()}>
-            Buat pembayaran QRIS/VA
+        ) : null}
+      </Card>
+
+      {aksi.kind === "KONFIRMASI" ? (
+        <Card className="flex flex-col gap-3 p-4">
+          <p className="text-sm font-semibold text-ink">Periksa pesanan</p>
+          <p className="text-xs text-muted">
+            Pastikan produk, harga, alamat, dan estimasi pengerjaan sudah sesuai
+            sebelum menyetujui pesanan ini.
+          </p>
+          <Button
+            type="button"
+            disabled={busy}
+            onClick={() =>
+              void jalankan(
+                () =>
+                  supabase.rpc("confirm_order", {
+                    p_order_id: order.id,
+                  }),
+                "Order dikonfirmasi.",
+              )
+            }
+          >
+            Periksa & konfirmasi
           </Button>
         </Card>
       ) : null}
 
       {bisaBayar ? (
         <Card className="flex flex-col gap-3 p-4">
-          <p className="text-sm font-semibold text-ink">Catat pembayaran</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-muted">Jenis</span>
-              <Select
-                value={formBayar.jenis}
-                onChange={(event) =>
-                  setFormBayar((value) => ({
-                    ...value,
-                    jenis: event.target.value as PaymentJenis,
-                  }))
-                }
-              >
-                {JENIS_OPSI.map((jenis) => (
-                  <option key={jenis} value={jenis}>
-                    {jenis}
-                  </option>
-                ))}
-              </Select>
-              <FieldError>{galatField.jenis}</FieldError>
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-muted">Kanal</span>
-              <Select
-                value={formBayar.kanal}
-                onChange={(event) =>
-                  setFormBayar((value) => ({
-                    ...value,
-                    kanal: event.target.value as PaymentKanal,
-                  }))
-                }
-              >
-                {KANAL_OPSI.map((kanal) => (
-                  <option key={kanal} value={kanal}>
-                    {kanal}
-                  </option>
-                ))}
-              </Select>
-              <FieldError>{galatField.kanal}</FieldError>
-            </label>
-          </div>
+          <p className="text-sm font-semibold text-ink">{aksi.label}</p>
+          <p className="text-xs text-muted">
+            Total {formatRupiah(order.total)} · sudah dibayar{" "}
+            {formatRupiah(order.sudah_dibayar)} · sisa {formatRupiah(sisa)}.
+          </p>
+          {order.status === "DIKIRIM" && sisa > 0n ? (
+            <p className="text-xs text-danger">
+              Masih ada sisa {formatRupiah(sisa)} — catat pelunasan dulu.
+            </p>
+          ) : null}
+          {modeCod || modePelunasan ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              <p className="text-xs text-muted">
+                Jenis: <span className="font-semibold text-ink">{jenisEfektif}</span>
+              </p>
+              <p className="text-xs text-muted">
+                Kanal: <span className="font-semibold text-ink">{kanalEfektif}</span>
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-semibold text-muted">Jenis</span>
+                <Select
+                  value={formBayar.jenis}
+                  onChange={(event) =>
+                    setFormBayar((value) => ({
+                      ...value,
+                      jenis: event.target.value as PaymentJenis,
+                    }))
+                  }
+                >
+                  {jenisOpsi.map((jenis) => (
+                    <option key={jenis} value={jenis}>
+                      {jenis}
+                    </option>
+                  ))}
+                </Select>
+                <FieldError>{galatField.jenis}</FieldError>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-semibold text-muted">Kanal</span>
+                <Select
+                  value={formBayar.kanal}
+                  onChange={(event) =>
+                    setFormBayar((value) => ({
+                      ...value,
+                      kanal: event.target.value as PaymentKanal,
+                    }))
+                  }
+                >
+                  {kanalOpsi.map((kanal) => (
+                    <option key={kanal} value={kanal}>
+                      {kanal}
+                    </option>
+                  ))}
+                </Select>
+                <FieldError>{galatField.kanal}</FieldError>
+              </label>
+            </div>
+          )}
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-muted">Nominal</span>
             <Input
@@ -615,14 +672,107 @@ export function OrderDetailPage() {
             />
           </label>
           <Button type="button" disabled={busy} onClick={() => void catatBayar()}>
-            Simpan pembayaran
+            {aksi.label}
           </Button>
+          {bisaBayarOnline ? (
+            <div className="flex flex-col gap-2 rounded-control border border-border p-3">
+              <p className="text-xs font-semibold text-muted">Atau bayar online</p>
+              <Select
+                value={jenisOnline}
+                onChange={(event) => setJenisOnline(event.target.value as IntentJenis)}
+              >
+                <option value="PELUNASAN">Pelunasan</option>
+                <option value="DP">DP</option>
+              </Select>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={() => void bayarOnline()}
+              >
+                Buat QRIS/VA
+              </Button>
+            </div>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            {bisaSiap ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={() =>
+                  void jalankan(
+                    () =>
+                      supabase.rpc("mark_ready", {
+                        p_order_id: order.id,
+                        }),
+                    "Order siap dikirim.",
+                  )
+                }
+              >
+                Tandai siap dikirim
+              </Button>
+            ) : null}
+            {bisaKirim ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={kirimOrder}
+              >
+                Tandai dikirim
+              </Button>
+            ) : null}
+          </div>
         </Card>
       ) : null}
 
-      {(bisaKirim || order.status === "DIKIRIM") ? (
+      {aksi.kind === "SIAP_DIKIRIM" ? (
         <Card className="flex flex-col gap-3 p-4">
-          <p className="text-sm font-semibold text-ink">Pengiriman</p>
+          <p className="text-sm font-semibold text-ink">{aksi.label}</p>
+          <p className="text-xs text-muted">{aksi.bantuan}</p>
+          <Button
+            type="button"
+            disabled={busy}
+            onClick={() =>
+              void jalankan(
+                () =>
+                  supabase.rpc("mark_ready", {
+                    p_order_id: order.id,
+                  }),
+                "Order siap dikirim.",
+              )
+            }
+          >
+            Tandai siap dikirim
+          </Button>
+          {bisaKirim ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={busy}
+              onClick={kirimOrder}
+            >
+              Tandai dikirim
+            </Button>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {aksi.kind === "KIRIM" || order.status === "DIKIRIM" ? (
+        <Card className="flex flex-col gap-3 p-4">
+          <p className="text-sm font-semibold text-ink">
+            {order.status === "DIKIRIM" ? "Pengiriman" : aksi.label}
+          </p>
+          <p className="text-xs text-muted">
+            {order.status === "DIKIRIM"
+              ? "Perbarui kurir/resi bila perlu."
+              : aksi.bantuan}
+          </p>
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-muted">Kurir</span>
@@ -651,34 +801,21 @@ export function OrderDetailPage() {
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">
-            {bisaSiap ? (
+            {order.status === "DIKIRIM" ? (
               <Button
                 type="button"
                 variant="secondary"
+                size="sm"
                 disabled={busy}
-                onClick={() =>
-                  void jalankan(
-                    () =>
-                      supabase.rpc("mark_ready", {
-                        p_order_id: order.id,
-                      }) ,
-                    "Order siap dikirim.",
-                  )
-                }
+                onClick={perbaruiResi}
               >
-                Tandai siap dikirim
+                Simpan resi
               </Button>
-            ) : null}
-            {bisaKirim ? (
+            ) : (
               <Button type="button" disabled={busy} onClick={kirimOrder}>
                 Tandai dikirim
               </Button>
-            ) : null}
-            {order.status === "DIKIRIM" ? (
-              <Button type="button" disabled={busy} onClick={perbaruiResi}>
-                Simpan resi
-              </Button>
-            ) : null}
+            )}
             {bisaTerima ? (
               <Button type="button" disabled={busy} onClick={terimaOrder}>
                 Tandai diterima/selesai
@@ -688,43 +825,27 @@ export function OrderDetailPage() {
         </Card>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        {order.status === "DRAFT" ? (
-          <Button
-            type="button"
-            disabled={busy}
-            onClick={() =>
-              void jalankan(
-                () =>
-                  supabase.rpc("confirm_order", {
-                    p_order_id: order.id,
-                  }) ,
-                "Order dikonfirmasi.",
-              )
-            }
-          >
-            Konfirmasi order
-          </Button>
-        ) : null}
-        {bisaBatal ? (
+      {bisaBatal ? (
+        <div>
           <Button
             type="button"
             variant="danger"
+            size="sm"
             disabled={busy}
             onClick={() =>
               void jalankan(
                 () =>
                   supabase.rpc("cancel_order", {
                     p_order_id: order.id,
-                  }) ,
+                  }),
                 "Order dibatalkan.",
               )
             }
           >
             Batalkan order
           </Button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {info ? <p className="text-sm font-medium text-success">{info}</p> : null}
       {galat ? (
