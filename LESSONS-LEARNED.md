@@ -190,6 +190,12 @@ diperbarui.
 
 #47 · 25 Nov 2026 · M4 · Smoke COD menemukan `metode_bayar` Supabase berbentuk `text[]` (`["COD"]`), tetapi read model/UI membandingkannya dengan string `"COD"`, sehingga order COD di `DIKONFIRMASI` salah meminta bayar dan tidak bisa auto-selesai. · Tindakan: read model menerima `string | string[]`, deteksi COD lewat helper `adalahCod()` yang mengecek `includes("COD")`, lalu golden test array COD. Type Supabase jangan dianggap string hanya karena supabase-js mengembalikan BIGINT sebagai string. Deploy ulang staging CI `45598889915` bundle `index-DTeG_QNY.js`; CEK5/CEK6 PASS di `ORD-20261125-008` setelah SW/cache dibersihkan.
 
+#48 · 25 Nov 2026 · strategi · Founder mengubah arah slice 2: **TIDAK ADA Midtrans per-seller**. Buyer→seller tetap manual (no. rekening/QRIS seller + `record_payment`); platform tidak pernah memegang dana buyer (risiko lisensi PJP). Snap/webhook lama RESCOPED/DITUNDA dan diarsipkan sebagai template slice billing langganan dengan merchant account Gerailo; KYC seller bukan blocker. · Tindakan: jangan aktifkan Midtrans per order seller tanpa keputusan baru; KYC Gerailo hanya saat tagihan langganan dibangun.
+
+#49 · 25 Nov 2026 · deploy · Produksi dipromosikan dalam satu deploy membawa UX seller 4 lane, state SELESAI, dan fix COD: Worker `gerailo-production`, bundle `index-BRLaIdz4.js`, version `57a2c302-032a-4a37-bddf-44d9544b84cf`, health OK. Migrasi 0001–0009 ter-apply, auth redirect + OTP 6 production di-push, secret Worker hanya `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `LLM_API_KEY`, `ADMIN_EMAILS`. Tidak ada `service_role`/`MIDTRANS_*` di produksi. · Tindakan: config auth template custom tidak bisa di-push ke free tier tanpa SMTP; template lokal tetap ada, redirect/OTP sudah benar.
+
+#50 · 25 Nov 2026 · data · Cek constraint `orders.metode_bayar`: bukan satu nilai. Migrasi `0004_multi_metode_bayar.sql:9-12` menetapkan `text[]` dengan `cardinality(...) between 1 and 4` dan anggota `TRANSFER/COD/QRIS/LAINNYA`; UI form juga checkbox ganda. · Tindakan: multi-nilai memang disengaja sejak #24; jangan masuk daftar pembersihan. Bug #47 bukan constraint, melainkan read model yang mengira selalu string.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

@@ -1,9 +1,9 @@
 # M4 — Order & Pembayaran
 
-> Status implementasi 24 Nov 2026: **SUB-SLICE 1 APPROVED founder (#1)**;
-> **SUB-SLICE 2 (Midtrans Snap + webhook) dieksekusi, menunggu Gate #2**. Jurnal, HPP,
-> dan stok KELUAR masih target sub-slice 3. Baris di bawah adalah kontrak akhir modul;
-> bagian "Deviasi sementara" memuat batas yang benar-benar aktif sekarang.
+> Status implementasi 25 Nov 2026: **SUB-SLICE 1 + UX seller + fix COD di-production**;
+> **SUB-SLICE 2 Midtrans per-seller RESCOPED/DITUNDA** (kode lama = arsip template
+> billing). Jurnal, HPP, dan stok KELUAR masih target sub-slice 3. Baris di bawah adalah
+> kontrak akhir modul; bagian "Deviasi sementara" memuat batas yang benar-benar aktif.
 
 ## Tujuan & nilai
 Order = objek sentral: status jelas, DP/COD/pelunasan tertangani benar, jurnal otomatis
@@ -48,16 +48,21 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
   detail order wajib menampilkan tautan/pratinjau lewat signed URL 10 menit (RLS owner),
   bukan `bukti_path` mentah.
 - Label UI detail: "Status belum memposting jurnal sampai sub-slice 3 selesai."
-- Pembayaran manual = MANUAL/COD. Midtrans sudah tersedia sebagai kanal `MIDTRANS`,
-  tetapi masih status-only: webhook menulis `payments` lewat `_post_payment`, belum
-  jurnal T1/T4/T12 (slice 3).
-- Snap token dibuat Worker dari RPC `create_payment_intent`; nominal dihitung server,
-  browser menerima token Snap + client key publik saja.
-- Webhook mencatat raw event UNVERIFIED → verifikasi SHA512 dengan Signature Secret
-  Key → tulis verifikasi append-only → apply idempoten. Redirect browser tidak pernah
-  dijadikan bukti pembayaran.
-- Sandbox Midtrans belum terverifikasi karena kredensial/KYC menunggu founder; formula
-  sudah dikutip dari docs resmi. Jika sandbox berbeda, stop dan lapor.
+- Pembayaran buyer→seller = MANUAL/COD via rekening atau QRIS seller, lalu seller
+  mencatat dengan `record_payment`; bukti opsional privat. Ini jalur aktif satu-satunya.
+- Midtrans per-seller DITUNDA. Kode Snap/webhook lama tetap di repo sebagai arsip
+  template untuk slice billing; tidak aktif, tidak memakai secret produksi, dan bukan
+  blocker rilis. Redirect browser tidak pernah dijadikan bukti pembayaran.
+- Platform TIDAK PERNAH memegang dana buyer. Midtrans/Xendit kelak hanya untuk tagihan
+  langganan seller→Gerailo dengan merchant account Gerailo (KYC sekali saat slice billing).
+
+## Strategi pembayaran (keputusan founder 25 Nov 2026)
+- Buyer membayar langsung ke rekening/QRIS milik seller; seller mencatat penerimaan di
+  aplikasi. Gerailo hanya mencatat, bukan menahan atau menyalurkan dana buyer.
+- Slice 2 lama (Snap + webhook per order seller) diubah menjadi arsip template slice
+  billing. Lima kondisi keras Midtrans dipertahankan sebagai referensi implementasi
+  langganan, bukan untuk M4.
+- KYC seller tidak relevan. KYC Gerailo baru dibutuhkan saat tagihan langganan dibangun.
 
 ## Status & aksi (perpindahan via aksi eksplisit)
 DRAFT → DIKONFIRMASI → (DP diterima: T1) → [opsional: SIAP_DIKIRIM via `mark_ready` —
