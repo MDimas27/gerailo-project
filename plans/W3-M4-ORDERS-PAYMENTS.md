@@ -42,7 +42,7 @@ Regresi smoke UI (Fase A–D, dari founder 25 Nov):
 - **C** — COD dibayar penuh di order Fase B: status langsung SELESAI tanpa tap Terima; terminal tanpa aksi.
 - **D** — Sanity: DRAFT/SIAP_DIKIRIM tidak menampilkan "Tandai diterima".
 
-Hasil smoke 25 Nov 2026: CEK0–CEK4/CEK7/CEK8 PASS di staging pada `ORD-20261123-001`; CEK9 dilewati karena tidak ada order BATAL. CEK5/CEK6 sempat FAIL karena deteksi COD membandingkan `metode_bayar` array dengan string; setelah `adalahCod()` + golden test, PASS di dev server Android pada `ORD-20261125-007`. Fix belum di-deploy staging.
+Hasil smoke 25 Nov 2026: CEK0–CEK4/CEK7/CEK8 PASS di staging pada `ORD-20261123-001`; CEK9 dilewati karena tidak ada order BATAL. CEK5/CEK6 sempat FAIL karena deteksi COD membandingkan `metode_bayar` array dengan string; setelah `adalahCod()` + golden test, PASS di dev server Android pada `ORD-20261125-007` dan di staging pada `ORD-20261125-008` (CI `45598889915`, bundle `index-DTeG_QNY.js`, SW/cache dibersihkan).
 
 ## Tujuan sesi
 Setelah ketiga sub-slice selesai: order DRAFT dari Smart Paste bisa diproses sampai

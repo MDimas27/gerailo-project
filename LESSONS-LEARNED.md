@@ -188,7 +188,7 @@ diperbarui.
 
 #46 · 25 Nov 2026 · testing · Port CDP 9222 di mesin ini ternyata milik Chrome headless Windows (`User-Agent HeadlessChrome`, tanpa `Android-Package`), sehingga Playwright "4 passed" tapi layar HP tidak berubah. · Tindakan: WAJIB verifikasi `curl /json/version` mengandung `Android-Package` sebelum smoke; bila 9222 dipakai, `adb forward tcp:9223 localabstract:chrome_devtools_remote` dan pakai `CDP_URL=http://127.0.0.1:9223`. Jangan percaya "CDP tersambung" tanpa memeriksa target/browser.
 
-#47 · 25 Nov 2026 · M4 · Smoke COD menemukan `metode_bayar` Supabase berbentuk `text[]` (`["COD"]`), tetapi read model/UI membandingkannya dengan string `"COD"`, sehingga order COD di `DIKONFIRMASI` salah meminta bayar dan tidak bisa auto-selesai. · Tindakan: read model menerima `string | string[]`, deteksi COD lewat helper `adalahCod()` yang mengecek `includes("COD")`, lalu golden test array COD. Type Supabase jangan dianggap string hanya karena supabase-js mengembalikan BIGINT sebagai string.
+#47 · 25 Nov 2026 · M4 · Smoke COD menemukan `metode_bayar` Supabase berbentuk `text[]` (`["COD"]`), tetapi read model/UI membandingkannya dengan string `"COD"`, sehingga order COD di `DIKONFIRMASI` salah meminta bayar dan tidak bisa auto-selesai. · Tindakan: read model menerima `string | string[]`, deteksi COD lewat helper `adalahCod()` yang mengecek `includes("COD")`, lalu golden test array COD. Type Supabase jangan dianggap string hanya karena supabase-js mengembalikan BIGINT sebagai string. Deploy ulang staging CI `45598889915` bundle `index-DTeG_QNY.js`; CEK5/CEK6 PASS di `ORD-20261125-008` setelah SW/cache dibersihkan.
 
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
