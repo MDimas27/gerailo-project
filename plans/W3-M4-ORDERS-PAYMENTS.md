@@ -12,6 +12,36 @@
 4. **Webhook lifecycle/raw append-only** → tabel verifikasi + RPC `packages/supabase/migrations/0008_m4_midtrans_verifications.sql:1-51`; urutan Worker `log UNVERIFIED → verify → mark → apply` `apps/worker/src/routes/payments.ts:202-255`; pgTAP adversarial di `packages/supabase/tests/0008_m4_midtrans_verifications_test.sql:104-150`. LESSONS #38.
 5. **Belum produksi: jurnal/stok masuk slice 3** → batasan dev-only `plans/W3-M4-ORDERS-PAYMENTS.md:100-101,159-183`; banner UI `apps/web/src/routes/orders-detail.tsx:736`; kontrak `docs/API-CONTRACTS.md:43`. Isolasi usaha dijaga `_assert_order_owner` `packages/supabase/migrations/0005_m4_manual_payments.sql:82-110` + pgTAP lintas `business_id`.
 
+### Penyempurnaan UX seller 25 Nov 2026 — UI-only
+
+Keputusan founder setelah review: **TIDAK** mengubah schema/migrasi/RPC/RLS/business logic.
+Perubahan hanya lapisan presentasi + read model: enum internal tetap menjadi sumber
+kebenaran backend, frontend hanya menerjemahkan ke pekerjaan seller dan satu
+**Next Best Action**. `metode_bayar` ditambahkan ke `select`/`OrderRecord` di
+`apps/web/src/hooks/use-orders.ts` dari kolom yang sudah ada — bukan perubahan DB.
+
+| Internal | Label seller | Badge pembayaran (turunan) | Kelompok pekerjaan | Primary action |
+|---|---|---|---|---|
+| DRAFT | Menunggu konfirmasi | Belum dibayar | Pesanan Baru | Periksa & konfirmasi |
+| DIKONFIRMASI | Pesanan dikonfirmasi | Belum bayar / DP diterima / Lunas | Diproses | Prepaid sisa>0 → Catat pembayaran; COD → Siapkan pesanan; lunas → Tandai siap dikirim |
+| DP_DITERIMA | Pesanan dikonfirmasi | DP diterima / Lunas | Diproses | sisa>0 → Catat pelunasan; lunas → Tandai siap dikirim |
+| SIAP_DIKIRIM | Siap dikirim | mengikuti sisa | Siap Dikirim | Tandai dikirim + kurir/resi |
+| DIKIRIM | Dalam pengiriman | Belum lunas / Lunas | Diproses (sublabel) | sisa>0 → Catat pelunasan/COD; sisa=0 → Tandai diterima/selesai |
+| SELESAI | Selesai | Lunas | Selesai | tidak ada |
+| BATAL | Dibatalkan | — | Selesai (sublabel terminal) | tidak ada |
+
+Aturan yang **tidak berubah**: cancel hanya DRAFT–SIAP_DIKIRIM; terima hanya
+DIKIRIM + sisa Rp0; prepaid belum lunas tidak bisa ditutup; COD lunas di DIKIRIM
+auto-SELESAI; SELESAI terminal; DP/parsial tetap bisa dicatat. Tombol "Batalkan"
+tetap terlihat sebagai secondary di pra-kirim agar Fase A/C tetap terverifikasi.
+
+Regresi smoke UI (Fase A–D, dari founder 25 Nov):
+
+- **A** — Prepaid lunas sebelum kirim: DRAFT tampil "Menunggu konfirmasi" + Batalkan ada → konfirmasi → bayar penuh → siap dikirim → kirim → Batalkan hilang + Terima muncul → tap Terima → SELESAI tanpa aksi.
+- **B** — COD belum bayar: DIKIRIM + sisa>0 → Terima tidak ada, warning "Masih ada sisa Rp …" tampil, Batalkan hilang; biarkan order tetap terbuka.
+- **C** — COD dibayar penuh di order Fase B: status langsung SELESAI tanpa tap Terima; terminal tanpa aksi.
+- **D** — Sanity: DRAFT/SIAP_DIKIRIM tidak menampilkan "Tandai diterima".
+
 ## Tujuan sesi
 Setelah ketiga sub-slice selesai: order DRAFT dari Smart Paste bisa diproses sampai
 lunas/dikirim dengan status machine eksplisit, pembayaran manual transfer/COD tetap

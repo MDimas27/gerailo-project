@@ -24,8 +24,13 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
   COD T5/T6), `receive_order` (DIKIRIM lunas → SELESAI; tanpa uang baru),
   `set_shipping` (update resi), `cancel_order` (reversi). UPDATE langsung
   `orders`/`payments` di-REVOKE di DB.
-- Aksi share (M8): "Lihat halaman pembeli", "Share WhatsApp" (wa.me + template terisi),
-  "Salin link", "Rotasi/cabut link" — kontrak penuh di
+- UI seller 25 Nov 2026 (UI-only): label humanis + 4 work lane + satu Next Best Action
+  di `/orders` dan `/orders/:id`; badge pembayaran terpisah dari fulfillment; cohort
+  konfirmasi/pembayaran/pengiriman tidak disatukan. Tidak ada perubahan schema, RPC,
+  RLS, kalkulasi uang, atau transisi status; backend tetap authoritative. Detail dan
+  regresi Fase A–D: `plans/W3-M4-ORDERS-PAYMENTS.md` §"Penyempurnaan UX seller".
+- Aksi share (M8 — target, belum terpasang): "Lihat halaman pembeli", "Share WhatsApp"
+  (wa.me + template terisi), "Salin link", "Rotasi/cabut link" — kontrak penuh di
   `docs/MODULES/M8-SMART-TRANSACTION-PAGE.md`.
 - Laporan bayar buyer (M8 P1): daftar `payment_reports` DILAPORKAN di detail order →
   seller cek dana → `record_payment` (uang benar) + `resolve_payment_report`; laporan

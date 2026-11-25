@@ -184,6 +184,8 @@ diperbarui.
 
 #44 · 25 Nov 2026 · M4 · Asumsi auto-`SELESAI`: `_post_payment` `0005_m4_manual_payments.sql:200-202` memperlakukan "pembayaran dicatat saat `DIKIRIM`" sebagai serah terima. Ini benar untuk COD (bayar saat serah terima), tetapi bisa premature untuk pelunasan transfer saat paket masih di jalan. · Tindakan: saat desain slice 3, pertimbangkan auto-`SELESAI` HANYA untuk `jenis = 'COD'`; pelunasan non-COD tetap lewat `receive_order` setelah konfirmasi penerimaan. Tidak diubah sekarang.
 
+#45 · 25 Nov 2026 · UX · Review founder: seller awam tidak boleh perlu tahu enum `DRAFT`/`DP_DITERIMA`/`SIAP_DIKIRIM`. · Keputusan: UI-only — 4 work lane, label humanis, badge pembayaran terpisah dari fulfillment, satu Next Best Action; `metode_bayar` hanya ditambahkan ke read model. · Tindakan: jangan pernah menambah status/error path atau "allowed actions" RPC hanya untuk kosmetik UI; semua CTA tetap memanggil RPC yang ada, backend authoritative. "Batalkan" sengaja tetap secondary pra-kirim agar smoke Fase A terbaca; jangan disembunyikan ke menu tersembunyi.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

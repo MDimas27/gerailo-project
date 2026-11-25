@@ -75,6 +75,27 @@ Microcopy: "Tambah transaksi" bukan "Create transaction"; "Simpan" bukan "Submit
 "Pesanan #ORD-1042 berhasil disimpan." / "Pembayaran Rp100.000 berhasil dicatat.
 Sisa tagihan Rp140.000."
 
+### 4.1 Alur kerja seller M4 (UI-only, 25 Nov 2026)
+
+Seller tidak perlu memahami enum. Tiga konteks dipisah: **pembuatan order**
+(`/orders/new`, hanya mencatat kesepakatan), **konfirmasi order** (periksa lalu
+terima/tolak), dan **eksekusi order** (pembayaran → persiapan → pengiriman →
+penerimaan). `/orders` dikelompokkan per pekerjaan: **Pesanan Baru**, **Diproses**,
+**Siap Dikirim**, **Selesai**; BATAL masuk terminal "Selesai" dengan sublabel
+"Dibatalkan".
+
+Status pembayaran dan pemenuhan ditampilkan sebagai dua badge terpisah. Badge
+pembayaran diturunkan dari `sudah_dibayar`/`sisa` (Belum bayar · DP diterima ·
+Lunas); badge utama adalah tahap pekerjaan. `DP_DITERIMA` tidak dipakai sebagai
+langkah pemenuhan. Satu **Next Best Action** tampil sebagai CTA utama; aksi legal
+lainnya tetap tersedia sebagai secondary — "Batalkan" sengaja tetap terlihat di
+DRAFT–SIAP_DIKIRIM untuk verifikasi smoke Fase A.
+
+Tidak ada perubahan schema/RPC/RLS/business logic: semua CTA memanggil handler dan
+RPC yang sudah ada; backend tetap authoritative. Keterbatasan yang masih ada:
+prepaid belum lunas masih boleh dikirim (UI memberi peringatan, bukan memblokir
+kirim), COD lunas di DIKIRIM tetap auto-SELESAI, halaman buyer/katalog belum ada.
+
 ## 5. Responsif & aksesibilitas
 
 - Mobile satu kolom + bottom nav; sticky ringkasan total tanpa menutupi input; tabel
@@ -168,7 +189,13 @@ Status diperbarui di LINK YANG SAMA — buyer tidak pernah bisa mengubah status.
 
 ### 8.5 Sisi seller (di `/orders/:id` — M4)
 
-- Tindakan: **"Lihat halaman pembeli"** (preview), **"Share WhatsApp"** (wa.me +
+> Kontrak M8 di bawah masih target roadmap dan belum terpasang. Implementasi M4
+> sekarang memakai **Next Best Action** di `apps/web/src/routes/orders-detail.tsx`:
+> konfirmasi / catat pembayaran (DP, pelunasan, COD) / siap dikirim / kirim + resi /
+> terima-selesai; "Batalkan" tetap secondary pra-kirim; riwayat pembayaran dan bukti
+> privat tetap terlihat. Tidak ada tombol yang hanya dekoratif.
+
+- Tindakan (target M8): **"Lihat halaman pembeli"** (preview), **"Share WhatsApp"** (wa.me +
   template per status), **"Bagikan update"** (bayar dikonfirmasi / dikirim + resi),
   **"Tandai siap dikirim"** (RPC `mark_ready`), **"Konfirmasi laporan bayar"**
   (`record_payment` + `resolve_payment_report`), **"Salin link"**, **"Rotasi/cabut
