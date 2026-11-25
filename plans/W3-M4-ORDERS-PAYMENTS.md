@@ -2,7 +2,15 @@
 
 > W3-M4 · dibuat 24 Nov 2026 oleh /prep + /plan · status: DRAFT — SUB-SLICE 2 DIEKSEKUSI
 > Gate founder: **1 – 1 – 1** (Midtrans; M4 + jurnal + HPP dalam 3 sub-slice; service_role khusus webhook).
-> Gate #1 sudah dijalankan dan disetujui founder 24 Nov 2026; Gate #2 menunggu review founder (CI terakhir `45351527629` hijau 4/4, deploy staging 24 Nov, termasuk `ship_order`/`receive_order`/cancel DIKIRIM ditolak).
+> Gate #1 sudah dijalankan dan disetujui founder 24 Nov 2026; Gate #2 re-test founder OK 25 Nov (CI terakhir `45519793042` hijau 4/4, deploy staging 25 Nov, termasuk `ship_order`/`receive_order`/cancel DIKIRIM ditolak).
+
+### Jawaban Gate #1 founder (file:line, 25 Nov 2026)
+
+1. **`complete_order` menyesatkan, bukan "terima"** → rename lewat migrasi BARU `packages/supabase/migrations/0009_m4_receive_order.sql:1-32` (`ship_order`; nama lama di-`drop` di `:32`), bukan mengedit `0005` yang sudah ter-apply. Transisi akhir ada di `receive_order` `:34-68`. UI: `apps/web/src/routes/orders-detail.tsx:387,398`; regresi test: `packages/supabase/tests/0005_m4_manual_payments_test.sql:251`.
+2. **Batal setelah barang dikirim** → DB hanya mengizinkan `DRAFT`–`SIAP_DIKIRIM`: `packages/supabase/migrations/0009_m4_receive_order.sql:70-90`. UI menyembunyikan tombol lewat `bisaBatal` `apps/web/src/routes/orders-detail.tsx:232,709`. pgTAP: `packages/supabase/tests/0009_m4_receive_order_test.sql:349-365`.
+3. **Satu jalur posting uang** → core privat `_post_payment` `packages/supabase/migrations/0005_m4_manual_payments.sql:131-212`; dipanggil `record_payment` `:252` dan `apply_payment_event` `packages/supabase/migrations/0008_m4_midtrans_verifications.sql:164`. Tidak ada jalur webhook kedua; LESSONS #37.
+4. **Webhook lifecycle/raw append-only** → tabel verifikasi + RPC `packages/supabase/migrations/0008_m4_midtrans_verifications.sql:1-51`; urutan Worker `log UNVERIFIED → verify → mark → apply` `apps/worker/src/routes/payments.ts:202-255`; pgTAP adversarial di `packages/supabase/tests/0008_m4_midtrans_verifications_test.sql:104-150`. LESSONS #38.
+5. **Belum produksi: jurnal/stok masuk slice 3** → batasan dev-only `plans/W3-M4-ORDERS-PAYMENTS.md:100-101,159-183`; banner UI `apps/web/src/routes/orders-detail.tsx:736`; kontrak `docs/API-CONTRACTS.md:43`. Isolasi usaha dijaga `_assert_order_owner` `packages/supabase/migrations/0005_m4_manual_payments.sql:82-110` + pgTAP lintas `business_id`.
 
 ## Tujuan sesi
 Setelah ketiga sub-slice selesai: order DRAFT dari Smart Paste bisa diproses sampai

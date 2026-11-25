@@ -180,6 +180,10 @@ diperbarui.
 
 #42 · 25 Nov 2026 · M4 · Founder melihat array JSON error Zod sebagai teks merah saat lupa mengisi nominal pembayaran; pesan teknis seperti itu merusak kepercayaan UI. · Tindakan: jangan pernah render `error.message` mentah di halaman order; pakai `safeParse` + `fieldErrorsFrom()` untuk error per field dan `pesanAksi()` untuk menerjemahkan kode RPC/Postgrest ke instruksi perbaikan, dengan fallback generik. Golden test helper di `apps/web/src/lib/form-error.test.ts`.
 
+#43 · 25 Nov 2026 · M4 · Keterbatasan yang disadari (BELUM diimplementasi): order `DIKIRIM` yang gagal terkirim/ditolak tidak punya jalur penutupan — `cancel_order` dikunci mulai `DIKIRIM` (`0009_m4_receive_order.sql:70-90`) dan `receive_order` ditolak bila sisa > 0 (`:62-64`). Retur/refund menyentuh jurnal, jadi desainnya masuk slice 3 bersama reversal T11. · Tindakan: sebelum slice 3, pastikan kiriman gagal TIDAK bisa memposting pendapatan; jangan menambah status/error path baru di slice 1/2 tanpa ADR.
+
+#44 · 25 Nov 2026 · M4 · Asumsi auto-`SELESAI`: `_post_payment` `0005_m4_manual_payments.sql:200-202` memperlakukan "pembayaran dicatat saat `DIKIRIM`" sebagai serah terima. Ini benar untuk COD (bayar saat serah terima), tetapi bisa premature untuk pelunasan transfer saat paket masih di jalan. · Tindakan: saat desain slice 3, pertimbangkan auto-`SELESAI` HANYA untuk `jenis = 'COD'`; pelunasan non-COD tetap lewat `receive_order` setelah konfirmasi penerimaan. Tidak diubah sekarang.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
