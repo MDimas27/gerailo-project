@@ -2,8 +2,9 @@
 
 > Status implementasi 25 Nov 2026: **SUB-SLICE 1 + UX seller + fix COD di-production**;
 > **SUB-SLICE 2 Midtrans per-seller RESCOPED/DITUNDA** (kode lama = arsip template
-> billing). Jurnal, HPP, dan stok KELUAR masih target sub-slice 3. Baris di bawah adalah
-> kontrak akhir modul; bagian "Deviasi sementara" memuat batas yang benar-benar aktif.
+> billing). **SUB-SLICE 3 jurnal/HPP/stok KELUAR**: kode + pgTAP `0010`–`0013` hijau
+> lokal (`Files=13, Tests=434`), belum di-commit/deploy/review founder #3. Baris di bawah adalah kontrak akhir
+> modul; bagian "Status sub-slice 3" memuat batas yang benar-benar aktif.
 
 ## Tujuan & nilai
 Order = objek sentral: status jelas, DP/COD/pelunasan tertangani benar, jurnal otomatis
@@ -37,17 +38,29 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
   tidak pernah otomatis mengubah status. `due_date` (batas pelunasan DP) diisi di form
   order & tampil di halaman pembeli.
 
-## Deviasi sementara sub-slice 1 (belum rilis)
-- `confirm_order`, `record_payment`, `mark_ready`, `ship_order`, `receive_order`,
-  `set_shipping`, `cancel_order` sudah mengubah status/rLS dan `payments` saja.
-- `ship_order` BELUM menulis jurnal T2/T3, `stock_movements` KELUAR, atau HPP.
+## Status sub-slice 3 (lokal, belum rilis)
+- `confirm_order`, `mark_ready`, `set_shipping` tetap tanpa jurnal/stok.
+- `ship_order` mengecek stok dulu; kurang = `STOK_TIDAK_CUKUP` tanpa jurnal/movement
+  parsial. Lalu menulis T2/T5/T6 + T3 HPP + T7 opsional + `stock_movements` KELUAR
+  unik per order/produk dalam satu transaksi.
 - `receive_order` HANYA DIKIRIM + lunas; sisa > 0 ditolak, tanpa payment/jurnal baru.
-- `cancel_order` DITOLAK di DIKIRIM/SELESAI/BATAL; reversi T2+T3 masuk slice 3.
-  `record_payment` BELUM T1/T4/T12.
+- Auto-SELESAI saat pelunasan HANYA untuk COD; pelunasan transfer/QRIS saat `DIKIRIM`
+  tetap `DIKIRIM` sampai `receive_order`.
+- `cancel_order` DITOLAK di DIKIRIM/SELESAI/BATAL; jurnal order T1/T4/T7/T12 dibatalkan
+  lewat `_reverse_journal` T11. `record_payment` menulis T1/T4/T12.
+- `gagal_kirim` menutup `DIKIRIM→BATAL`: reversi T2/T3 (+T4/T5/T6/T7) dan MASUK
+  pengembalian memakai snapshot `harga_beli` KELUAR asli; UMP T1 tidak direversi sampai
+  refund/manual. Tombol UI: "Lapor gagal kirim".
+- `products.hpp_rata_rata` diperbarui `record_stock_move` MASUK; jual KELUAR dari klien
+  tetap ditolak (hanya `ship_order` yang boleh). Jurnal T8 belum otomatis dipost dari
+  MASUK (akun lawan belum menjadi input RPC).
+- `v_rekap_harian` tersedia untuk pendapatan/HPP/laba kotor/kas/piutang/UMP/beban.
 - Bukti pembayaran masuk bucket privat `bukti-pembayaran` dengan prefix `business_id/`;
   detail order wajib menampilkan tautan/pratinjau lewat signed URL 10 menit (RLS owner),
   bukan `bukti_path` mentah.
-- Label UI detail: "Status belum memposting jurnal sampai sub-slice 3 selesai."
+- Label UI detail di produksi masih "Status belum memposting jurnal sampai sub-slice 3
+  selesai." — di working tree sudah diganti menjadi "Jurnal otomatis aktif; kiriman gagal
+  dibatalkan lewat reversi." dan akan ikut deploy bersama slice 3.
 - Pembayaran buyer→seller = MANUAL/COD via rekening atau QRIS seller, lalu seller
   mencatat dengan `record_payment`; bukti opsional privat. Ini jalur aktif satu-satunya.
 - Midtrans per-seller DITUNDA. Kode Snap/webhook lama tetap di repo sebagai arsip
@@ -67,18 +80,29 @@ template T0–T12 di `docs/ACCOUNTING-RULES.md`) + `stock_movements` saat DIKIRI
 ## Status & aksi (perpindahan via aksi eksplisit)
 DRAFT → DIKONFIRMASI → (DP diterima: T1) → [opsional: SIAP_DIKIRIM via `mark_ready` —
 tanpa jurnal/stok] → DIKIRIM (T2+T3, stok keluar) → SELESAI (via `receive_order` bila
-sudah lunas tanpa uang baru, atau otomatis saat pelunasan/COD T4/T5/T6) ·
-BATAL (pra-kirim; reversi + stok kembali masuk slice 3).
-COD dengan DP = T6. Ongkir ditagih = pendapatan ongkir; ditanggung penjual = T7.
+sudah lunas tanpa uang baru; otomatis saat COD T5/T6 lunas; pelunasan non-COD T4 tetap
+DIKIRIM) · BATAL pra-kirim via `cancel_order` (jurnal T1/T4/T7/T12 direversi T11, tanpa
+stok KELUAR) · BATAL setelah kirim via `gagal_kirim` (reversi T2/T3/T4/T5/T6/T7 + stok
+MASUK; UMP T1 tetap). COD dengan DP = T6. Ongkir ditagih = pendapatan ongkir; ditanggung
+penjual = T7.
 
 ## Aturan khusus
 - Pembayaran melebihi sisa → RPC menolak dengan pesan (bukan silently).
-- Batal hanya DRAFT–SIAP_DIKIRIM; di DIKIRIM/SELESAI/BATAL ditolak DB dan UI.
-  Reversi T2+T3+stok setelah kirim masuk slice 3 (rules/01 §4–6).
+- `cancel_order` hanya DRAFT–SIAP_DIKIRIM; di DIKIRIM/SELESAI/BATAL ditolak DB dan UI.
+  Untuk DIKIRIM yang gagal, pakai `gagal_kirim` (bukan status/error path baru).
+  Reversi T11 hanya untuk jurnal order yang sudah dibatalkan (rules/01 §4–6).
 - Tanpa ORM: kontrak RPC = `docs/API-CONTRACTS.md` §B; perubahan RPC = migrasi baru
   + gen types + golden test.
 
 ## Golden tests (test RPC di Supabase lokal)
+- `packages/supabase/tests/0010_m4_journal_core_test.sql`: invariant, trigger, RLS,
+  `post_journal` internal, authenticated dilarang update/delete.
+- `packages/supabase/tests/0011_m4_journal_integration_test.sql`: T1–T8/T12, T9/T10,
+  T11, HPP rata-rata, stok KELUAR, `v_rekap_harian`, transisi ilegal, lintas tenant.
+- `packages/supabase/tests/0012_m4_failed_shipment_test.sql`: gagal kirim prepaid/COD,
+  round-trip jurnal non-UMP, stok MASUK, pelunasan tetap DIKIRIM, stok kurang, owner guard.
+- `packages/supabase/tests/0013_m4_cod_only_completion_test.sql`: non-COD lunas tetap
+  DIKIRIM + T4, COD lunas auto-SELESAI + T5.
 - Seluruh fixture T1–T6 + batal sebelum/sesudah kirim (docs/ACCOUNTING-RULES.md §Fixture).
 - Pembayaran ganda/berlebih ditolak; dua DP parsial → UMP akumulasi benar.
 - DIKIRIM tanpa pembayaran → piutang penuh; pelunasan menutup.
@@ -88,8 +112,9 @@ COD dengan DP = T6. Ongkir ditagih = pendapatan ongkir; ditanggung penjual = T7.
   ORD-YYYYMMDD-### & share_token unik dari trigger (docs/UI-UX.md §8.3).
 - `mark_ready` TANPA jurnal; `ship_order` dari SIAP_DIKIRIM jalan;
   `receive_order` 0009: lunas→SELESAI, SIAP_DIKIRIM/sisa>0/COD belum bayar/
-  lintas tenant/dobel ditolak, cancel di DIKIRIM ditolak; tanpa payment/jurnal baru.
-  `add_payment_report` tidak pernah menulis payments/jurnal/orders.status.
+  lintas tenant/dobel ditolak, `cancel_order` di DIKIRIM ditolak (pakai `gagal_kirim`);
+  tanpa payment/jurnal baru. `add_payment_report` tidak pernah menulis
+  payments/jurnal/orders.status.
 
 ## DoD
 Alur chat→order→DP→kirim→lunas di HP dengan jurnal benar; rekap harian (M7 parsial)

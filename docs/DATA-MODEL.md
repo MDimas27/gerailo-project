@@ -12,7 +12,7 @@
 | businesses | Profil usaha | id, owner_id (auth.users), nama, jenis, metode_bayar, plan, onboarding_selesai, pdpr_consent_at (izin simpan teks chat) |
 | store_profiles | Identitas toko: halaman pembeli (M8) & katalog publik (M9) | business_id unique, nama_toko, logo_path, kontak, alamat_singkat, slug (unique, katalog), katalog_aktif |
 | bank_accounts | Rekening tampil di instruksi pembayaran (M8) | id, business_id, bank, nomor_rekening, atas_nama, aktif |
-| products | Master produk (+ data katalog publik M9) | id, business_id, nama, harga_jual BIGINT, harga_promo BIGINT?, foto_paths text[] (max 3), deskripsi_singkat, kategori, tampil_katalog (default false), stok_min, aktif |
+| products | Master produk (+ data katalog publik M9) | id, business_id, nama, harga_jual BIGINT, harga_promo BIGINT?, hpp_rata_rata BIGINT (default 0), foto_paths text[] (max 3), deskripsi_singkat, kategori, tampil_katalog (default false), stok_min, aktif |
 | product_aliases | Alias nama untuk parser M3 (unik case-insensitive per usaha) | id, business_id, product_id, alias |
 | product_variants | Varian teks sederhana | id, business_id, product_id, nama, selisih_harga BIGINT, aktif |
 | customers | Pelanggan | id, business_id, nama, telepon (unique per usaha, bentuk 628…), alamat, catatan |
@@ -25,22 +25,30 @@
 | payment_event_outcomes | Hasil pemrosesan webhook (append-only) | id, business_id, order_id, provider, event_id, outcome (POSTED/IGNORED/REJECTED), payment_id?, detail; UNIQUE(order_id,event_id) + UNIQUE(provider,event_id) |
 | payment_reports | Laporan bayar dari buyer (M8 P1) | id, order_id, jumlah BIGINT, tanggal, catatan, url_bukti?, status (DILAPORKAN/KONFIRMASI/DITOLAK); insert HANYA via RPC by token |
 | order_leads | Pesanan masuk dari katalog publik (M9 Fase 2) | id, business_id, slug, items jsonb, nama, telepon, alamat?, catatan?, status (BARU/DIKONVERSI/DITOLAK); insert HANYA via RPC by slug; TIDAK pernah otomatis jadi orders |
-| stock_movements | Pergerakan stok | id, business_id, product_id, jenis (MASUK/KELUAR/PENYESUAIAN), qty, harga_beli BIGINT?, alasan, order_id? |
+| stock_movements | Pergerakan stok | id, business_id, product_id, jenis (MASUK/KELUAR/PENYESUAIAN), qty, harga_beli BIGINT?, alasan, order_id? → orders (NOT VALID); UNIQUE order_id+product_id untuk KELUAR; MASUK pengembalian dari `gagal_kirim` boleh berdampingan dengan KELUAR |
 | accounts | COA per usaha | id, business_id, kode, nama, tipe (seed 19 akun) |
-| journal_entries | Header jurnal | id, business_id, kejadian (T0..T12), tanggal, order_id?, expense_id?, reversi_dari? |
-| journal_lines | Baris debit-kredit | id, entry_id, account_id, debit BIGINT, kredit BIGINT |
+| journal_entries | Header jurnal (immutable) | id, business_id, kejadian (T1..T12 + T0 hanya konsep), tanggal, order_id?, expense_id?, reversi_dari_id? → journal_entries |
+| journal_lines | Baris debit-kredit (immutable) | id, entry_id → journal_entries, business_id, account_id, tanggal, debit BIGINT, kredit BIGINT |
 | expenses | Beban operasional manual | id, business_id, akun beban, jumlah BIGINT, tanggal |
 | ai_usage_logs | Log ekstraksi Smart Paste | id, business_id, sumber (PARSER/AI), skor, token, model?, simpan_teks (consent), teks_asli (NULL tanpa consent), dikoreksi, created_at |
 | subscriptions | Paket & masa berlaku | id, business_id, plan, status, periode, ref_pembayaran |
 | app_settings | Pengaturan usaha | kuota_ai_terpakai, kuota_ai_periode (reset bulanan lazy), preferensi export, retensi log |
+| v_rekap_harian | View ringkasan harian minimal (M7) | turunan `journal_lines` per business_id+tanggal: pendapatan, HPP, laba kotor, kas masuk, piutang, UMP, beban; `security_invoker = on` |
 
 ## Relasi & aturan integritas
 
 - `orders.status` enum: `DRAFT, DIKONFIRMASI, DP_DITERIMA, SIAP_DIKIRIM, DIKIRIM,
   SELESAI, BATAL` — SIAP_DIKIRIM opsional (M8): `mark_ready`, TANPA jurnal/stok.
+  `BATAL` pra-kirim via `cancel_order`; `DIKIRIM→BATAL` khusus `gagal_kirim`.
 - Piutang & UMP **bukan tabel** — saldo akun 1-1030 dan 2-2010 dari jurnal (sengaja,
   agar laporan tak bisa beda dengan buku besar).
-- `stock_movements` KELUAR selalu merujuk order status DIKIRIM; PENYESUAIAN wajib alasan.
+- `stock_movements` KELUAR selalu dibuat oleh `ship_order` untuk order DIKIRIM dan unik per
+  order+produk; `record_stock_move` dari klien menolak KELUAR. PENYESUAIAN wajib alasan.
+  `gagal_kirim` membuat MASUK pengembalian dengan `harga_beli` = **snapshot `harga_beli`
+  dari baris KELUAR saat barang dikirim**, bukan moving average saat ini; alasan
+  `pengembalian kiriman gagal`. `record_stock_move` MASUK tetap menghitung ulang rata-rata
+  dengan harga snapshot tersebut. T8 tidak otomatis:
+  template manual, prefill dari MASUK terakhir + risiko divergensi ledger-vs-stok.
 - Index wajib: journal_lines (business_id, account_id, tanggal); orders (business_id,
   status) + UNIQUE (business_id, nomor) + UNIQUE (share_token); products (business_id +
   trigram nama) + product_aliases (UNIQUE business_id + lower(alias), trigram
@@ -58,15 +66,16 @@
 | `claim_ai_quota(...)` | Klaim kuota + log AI atomik `FOR UPDATE`; reset periode lazy; `AI_QUOTA_EXCEEDED` bila habis; teks asli hanya dengan consent |
 | `log_parser_extraction(...)` | Log parser pola tanpa kuota; teks asli hanya dengan consent |
 | `mark_extraction_corrected(...)` | Tandai log pernah dikoreksi untuk metrik akurasi final; guard owner |
-| `record_stock_move(...)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien (menunggu RPC order M4) |
-| `ship_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM; kurir/resi opsional. Target slice 3: T2+T3 + KELUAR + HPP satu transaksi |
-| `receive_order(p_order_id)` | **Status-only:** DIKIRIM lunas → SELESAI; sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"; tanpa payment/jurnal baru; guard owner |
-| `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?)` | Tulis `payments` + hitung sisa di server + tolak overpay + update status. **Belum T1/T4/T12** sampai slice 3; dua DP parsial tetap akumulasi benar |
+| `record_stock_move(...)` | MASUK/PENYESUAIAN; MASUK memperbarui HPP rata-rata bergerak; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien |
+| `ship_order(p_order_id, p_kurir_nama?, p_nomor_resi?, p_biaya_kurir?)` | DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM; cek stok dulu (`STOK_TIDAK_CUKUP` → rollback tanpa jurnal/movement); kurir/resi opsional; satu transaksi T2/T5/T6 + T3 HPP + T7 bila biaya kurir > 0 + movement KELUAR unik per order/produk |
+| `receive_order(p_order_id)` | DIKIRIM lunas → SELESAI; sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"; tanpa payment/jurnal baru; guard owner |
+| `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?, p_biaya_gateway?)` | Tulis `payments` + hitung sisa di server + tolak overpay + update status + T1/T4/T12; dua DP parsial tetap akumulasi benar; auto-SELESAI saat lunas HANYA COD — non-COD di DIKIRIM tetap DIKIRIM |
 | `create_payment_intent(p_order_id, p_jenis?, p_expiry_minutes?)` | Amount Snap dihitung server-side; satu PENDING per order; JWT seller |
 | `log_payment_event(...)` | Worker/service_role only; raw notification append-only + replay guard |
 | `mark_payment_event_verified(...)` | Worker/service_role only; tulis VERIFIED/INVALID ke tabel verifikasi append-only |
 | `apply_payment_event(...)` | Worker/service_role only; cek verifikasi + amount + status + idempotensi; sukses via `_post_payment` |
-| `cancel_order(p_order_id)` | **Status-only:** DRAFT/DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → BATAL; DIKIRIM/SELESAI/BATAL ditolak. Target slice 3: reversi T2+T3/pembayaran + stok masuk kembali |
+| `cancel_order(p_order_id)` | DRAFT/DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → BATAL; DIKIRIM/SELESAI/BATAL ditolak; jurnal order T1/T4/T7/T12 direversi via T11 |
+| `gagal_kirim(p_order_id)` | DIKIRIM → BATAL; guard owner; reversi T2/T3/T4/T5/T6/T7 via `_reverse_journal`; MASUK pengembalian per item berkirim dengan snapshot HPP KELUAR; T1/UMP tidak direversi |
 | `set_shipping(p_order_id, p_kurir, p_resi)` | Perbarui kurir/resi setelah kirim — TANPA menyentuh jurnal | halaman pembeli M8 |
 | `get_public_order(p_token)` | SECURITY DEFINER: lookup by token, kembalikan HANYA kolom aman (masking telepon/alamat, tanpa HPP); token salah = kosong | halaman publik M8 |
 | `rotate_share_token(p_order_id)` | Token baru → link lama mati (404) | pencabutan akses M8 |
@@ -76,18 +85,23 @@
 | `get_public_catalog(p_slug)` | SECURITY DEFINER: hanya produk aktif+tampil_katalog — foto, nama, harga/promo, varian, status stok (TANPA HPP/stok_min/alias); slug salah/katalog mati = kosong | katalog publik M9 |
 | `add_order_lead(p_slug, p_items, p_nama, p_telepon, p_alamat?, p_catatan?)` | SECURITY DEFINER by slug → insert order_leads (BARU); TIDAK menulis orders/payments/jurnal | form pemesanan M9 Fase 2 |
 | `convert_order_lead(p_lead_id)` | Satu transaksi: dedup/buat customer by telepon + order DRAFT + items; TANPA jurnal; lead → DIKONVERSI | konversi lead M9 Fase 2 |
-| `post_journal(...)` | INTERNAL (REVOKE dari klien): assertion SUM(debit)=SUM(kredit) SEBELUM insert, satu transaksi |
+| `post_journal(p_business_id, p_kejadian, p_tanggal, p_order_id, p_reversi_dari_id, p_lines)` | INTERNAL (REVOKE dari klien): assertion SUM(debit)=SUM(kredit) SEBELUM insert, constraint trigger DEFERRED, satu transaksi |
 
 ## Invariant di level database (lapisan kedua di atas RPC)
 
 - **Constraint trigger DEFERRED** pada `journal_lines` (AFTER ROW, INITIALLY DEFERRED):
   saat commit, SUM(debit) = SUM(kredit) per entry — pelanggaran = rollback, SEKALIPUN
   penyebabnya bug aplikasi/lupa assertion.
+- `journal_entries`/`journal_lines` immutable: REVOKE UPDATE/DELETE dari semua role,
+  termasuk service_role; koreksi = entri reversi T11 via `_reverse_journal`.
 - REVOKE INSERT/UPDATE/DELETE langsung pada `journal_entries`, `journal_lines`,
   `payments`, `payment_intents`, `payment_events`,
   `payment_event_verifications`, `payment_event_outcomes` dari
   anon/authenticated/service_role — hanya RPC yang boleh menulis.
 - `stock_movements` KELUAR hanya dibuat oleh `ship_order` (guard di RPC).
+- `ship_order` memvalidasi saldo setiap item sebelum jurnal/movement; saldo kurang = rollback
+  penuh dengan `STOK_TIDAK_CUKUP`, bukan stok negatif. `gagal_kirim` hanya menerima
+  `DIKIRIM` dan menolak pemanggilan kedua lewat guard status.
 
 ## Nomor pesanan & halaman pembeli publik (M8)
 
@@ -104,8 +118,9 @@
 
 ## Views laporan (M7 — tanpa agregat paralel)
 
-`v_rekap_harian`, `v_pnl_bulan`, `v_arus_kas`, `v_piutang_ump` — SQL murni atas
-journal_lines/orders, dibuat dengan `security_invoker = on` agar mengikuti RLS.
+`v_rekap_harian` sudah ada (slice 3); `v_pnl_bulan`, `v_arus_kas`, `v_piutang_ump`
+masih target M7 — semuanya SQL murni atas journal_lines/orders dengan
+`security_invoker = on` agar mengikuti RLS.
 
 ## Enum & nilai awal penting
 

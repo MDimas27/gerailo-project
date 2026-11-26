@@ -117,6 +117,70 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"journal_entries": {
+                  Row: {
+                    "business_id": string,"created_at": string,"id": string,"kejadian": string,"order_id": string | null,"reversi_dari_id": string | null,"tanggal": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"id"?: string,"kejadian": string,"order_id"?: string | null,"reversi_dari_id"?: string | null,"tanggal"?: string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"id"?: string,"kejadian"?: string,"order_id"?: string | null,"reversi_dari_id"?: string | null,"tanggal"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "journal_entries_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "journal_entries_order_id_fkey"
+      columns: ["order_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "journal_entries_reversi_dari_id_fkey"
+      columns: ["reversi_dari_id"]
+isOneToOne: false
+      referencedRelation: "journal_entries"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"journal_lines": {
+                  Row: {
+                    "account_id": string,"business_id": string,"debit": number,"entry_id": string,"id": string,"kredit": number,"tanggal": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"business_id": string,"debit"?: number,"entry_id": string,"id"?: string,"kredit"?: number,"tanggal"?: string
+                  }
+                  Update: {
+                    "account_id"?: string,"business_id"?: string,"debit"?: number,"entry_id"?: string,"id"?: string,"kredit"?: number,"tanggal"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "journal_lines_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "journal_lines_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "journal_lines_entry_id_fkey"
+      columns: ["entry_id"]
+isOneToOne: false
+      referencedRelation: "journal_entries"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"order_items": {
                   Row: {
                     "business_id": string,"created_at": string,"harga_satuan": number,"id": string,"order_id": string,"product_id": string,"qty": number,"variant_id": string | null
@@ -353,14 +417,14 @@ isOneToOne: false
                   ]
                 },"products": {
                   Row: {
-                    "aktif": boolean,"business_id": string,"created_at": string,"deskripsi_singkat": string | null,"foto_paths": (string)[],"harga_jual": number,"harga_promo": number | null,"id": string,"kategori": string | null,"nama": string,"stok_min": number,"tampil_katalog": boolean,"updated_at": string
+                    "aktif": boolean,"business_id": string,"created_at": string,"deskripsi_singkat": string | null,"foto_paths": (string)[],"harga_jual": number,"harga_promo": number | null,"hpp_rata_rata": number,"id": string,"kategori": string | null,"nama": string,"stok_min": number,"tampil_katalog": boolean,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "aktif"?: boolean,"business_id": string,"created_at"?: string,"deskripsi_singkat"?: string | null,"foto_paths"?: (string)[],"harga_jual": number,"harga_promo"?: number | null,"id"?: string,"kategori"?: string | null,"nama": string,"stok_min"?: number,"tampil_katalog"?: boolean,"updated_at"?: string
+                    "aktif"?: boolean,"business_id": string,"created_at"?: string,"deskripsi_singkat"?: string | null,"foto_paths"?: (string)[],"harga_jual": number,"harga_promo"?: number | null,"hpp_rata_rata"?: number,"id"?: string,"kategori"?: string | null,"nama": string,"stok_min"?: number,"tampil_katalog"?: boolean,"updated_at"?: string
                   }
                   Update: {
-                    "aktif"?: boolean,"business_id"?: string,"created_at"?: string,"deskripsi_singkat"?: string | null,"foto_paths"?: (string)[],"harga_jual"?: number,"harga_promo"?: number | null,"id"?: string,"kategori"?: string | null,"nama"?: string,"stok_min"?: number,"tampil_katalog"?: boolean,"updated_at"?: string
+                    "aktif"?: boolean,"business_id"?: string,"created_at"?: string,"deskripsi_singkat"?: string | null,"foto_paths"?: (string)[],"harga_jual"?: number,"harga_promo"?: number | null,"hpp_rata_rata"?: number,"id"?: string,"kategori"?: string | null,"nama"?: string,"stok_min"?: number,"tampil_katalog"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -384,6 +448,12 @@ isOneToOne: false
                   }
                   Relationships: [
                     {
+      foreignKeyName: "stock_movements_order_fkey"
+      columns: ["order_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "stock_movements_product_fkey"
       columns: ["product_id","business_id"]
 isOneToOne: false
@@ -400,7 +470,21 @@ isOneToOne: false
                 }
           }
           Views: {
-            "v_stock_balance": {
+            "v_rekap_harian": {
+                  Row: {
+                    "beban": number | null,"business_id": string | null,"hpp": number | null,"kas_masuk": number | null,"laba_kotor": number | null,"pendapatan": number | null,"piutang": number | null,"tanggal": string | null,"uang_muka": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "journal_lines_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"v_stock_balance": {
                   Row: {
                     "business_id": string | null,"product_id": string | null,"saldo": number | null
                   }
@@ -420,11 +504,17 @@ isOneToOne: false
             "_assert_order_owner":
 { Args: { "p_order_id": string }; Returns: string
                            },
+"_journal_event":
+{ Args: { "p_biaya": number,"p_business_id": string,"p_dp": number,"p_hpp": number,"p_kejadian": string,"p_ongkir": number,"p_order_id": string,"p_tanggal": string,"p_total": number }; Returns: string
+                           },
 "_order_total":
 { Args: { "p_order_id": string }; Returns: number
                            },
 "_post_payment":
-{ Args: { "p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
+{ Args: { "p_biaya_gateway"?: number,"p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
+                           },
+"_reverse_journal":
+{ Args: { "p_entry_id": string }; Returns: string
                            },
 "apply_payment_event":
 { Args: { "p_event_id": string,"p_fraud_status"?: string,"p_gross_amount": number,"p_provider_order_id": string,"p_status_code": string,"p_transaction_status": string }; Returns: string
@@ -453,6 +543,9 @@ isOneToOne: false
 "create_product":
 { Args: { "p_aliases"?: (string)[],"p_business_id": string,"p_harga_beli"?: number,"p_harga_jual": number,"p_nama": string,"p_stok_awal"?: number,"p_stok_min"?: number }; Returns: string
                            },
+"gagal_kirim":
+{ Args: { "p_order_id": string }; Returns: undefined
+                           },
 "log_parser_extraction":
 { Args: { "p_skor": number,"p_teks_asli"?: string }; Returns: string
                            },
@@ -471,11 +564,14 @@ isOneToOne: false
 "normalize_telepon":
 { Args: { "p_telepon": string }; Returns: string
                            },
+"post_journal":
+{ Args: { "p_business_id": string,"p_kejadian": string,"p_lines": Json,"p_order_id": string,"p_reversi_dari_id": string,"p_tanggal": string }; Returns: string
+                           },
 "receive_order":
 { Args: { "p_order_id": string }; Returns: undefined
                            },
 "record_payment":
-{ Args: { "p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
+{ Args: { "p_biaya_gateway"?: number,"p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
                            },
 "record_stock_move":
 { Args: { "p_order_id"?: string,"p_product_id": string,"p_qty": number,"p_reason"?: string,"p_type": string,"p_unit_price"?: number }; Returns: string
@@ -484,7 +580,7 @@ isOneToOne: false
 { Args: { "p_kurir": string,"p_order_id": string,"p_resi": string }; Returns: undefined
                            },
 "ship_order":
-{ Args: { "p_kurir_nama"?: string,"p_nomor_resi"?: string,"p_order_id": string }; Returns: undefined
+{ Args: { "p_biaya_kurir"?: number,"p_kurir_nama"?: string,"p_nomor_resi"?: string,"p_order_id": string }; Returns: undefined
                            }
           }
           Enums: {

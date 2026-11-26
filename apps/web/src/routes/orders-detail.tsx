@@ -9,7 +9,6 @@ import {
   parseRupiah,
   recordPaymentSchema,
   setShippingSchema,
-  type IntentJenis,
   type PaymentKanal,
   type PaymentJenis,
 } from "@gerailo/shared";
@@ -26,7 +25,6 @@ import {
 } from "@/hooks/use-orders";
 import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
-import { ambilSnapToken } from "@/lib/api";
 import { fieldErrorsFrom, pesanAksi } from "@/lib/form-error";
 import { adalahCod, ringkasOrder } from "@/lib/order-presentation";
 import { rpcAmount } from "@/lib/rpc-amount";
@@ -78,47 +76,6 @@ function galatPengiriman(error: unknown): GalatField {
   };
 }
 
-type SnapPembayaran = {
-  pay: (
-    token: string,
-    opsi: {
-      onSuccess: (hasil: unknown) => void;
-      onPending: (hasil: unknown) => void;
-      onError: (hasil: unknown) => void;
-    },
-  ) => void;
-};
-
-function jendelaSnap(): { snap?: SnapPembayaran } {
-  return window as unknown as { snap?: SnapPembayaran };
-}
-
-function muatSnap(clientKey: string, environment: "sandbox" | "production"): Promise<SnapPembayaran> {
-  const existing = jendelaSnap().snap;
-  if (existing) {
-    return Promise.resolve(existing);
-  }
-
-  return new Promise((resolve, reject) => {
-    const skrip = document.createElement("script");
-    skrip.src = environment === "production"
-      ? "https://app.midtrans.com/snap/snap.js"
-      : "https://app.sandbox.midtrans.com/snap/snap.js";
-    skrip.async = true;
-    skrip.setAttribute("data-client-key", clientKey);
-    skrip.onload = () => {
-      const snap = jendelaSnap().snap;
-      if (snap) {
-        resolve(snap);
-      } else {
-        reject(new Error("Snap Midtrans gagal dimuat."));
-      }
-    };
-    skrip.onerror = () => reject(new Error("Snap Midtrans gagal dimuat."));
-    document.head.appendChild(skrip);
-  });
-}
-
 function BuktiPembayaran({ path }: { path: string }) {
   const bukti = usePaymentProofUrl(path);
 
@@ -164,7 +121,6 @@ export function OrderDetailPage() {
   const orders = useOrders(business?.id, { orderId: id });
   const products = useProducts(business?.id);
   const [formBayar, setFormBayar] = useState<FormBayar>(formBayarAwal);
-  const [jenisOnline, setJenisOnline] = useState<IntentJenis>("PELUNASAN");
   const [kirim, setKirim] = useState({ kurir_nama: "", nomor_resi: "" });
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState("");
@@ -230,8 +186,8 @@ export function OrderDetailPage() {
   const bisaKirim = ["DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
   const bisaSiap = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status);
   const bisaBatal = ["DRAFT", "DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
-  const bisaBayarOnline = ["DIKONFIRMASI", "DP_DITERIMA"].includes(order.status) && bisaBayar;
   const bisaTerima = order.status === "DIKIRIM" && sisa === 0n;
+  const bisaGagalKirim = order.status === "DIKIRIM";
   const modeCod =
     order.status === "DIKIRIM" && adalahCod(order.metode_bayar) && bisaBayar;
   const modePelunasan = order.status === "DP_DITERIMA" && bisaBayar;
@@ -262,41 +218,6 @@ export function OrderDetailPage() {
       setInfo(pesan);
     } catch (error) {
       setGalat(pesanAksi(error, "Aksi gagal. Coba lagi."));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function bayarOnline() {
-    setBusy(true);
-    setInfo("");
-    setGalat("");
-
-    try {
-      const hasil = await ambilSnapToken({
-        orderId: order.id,
-        jenis: jenisOnline,
-      });
-
-      try {
-        const snap = await muatSnap(hasil.client_key, hasil.environment);
-        snap.pay(hasil.token, {
-          onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ["orders"] });
-            setInfo("Pembayaran dikirim. Menunggu konfirmasi Midtrans.");
-          },
-          onPending: () => {
-            setInfo("Pembayaran masih diproses Midtrans.");
-          },
-          onError: (hasilBayar) => {
-            setGalat(pesanAksi(hasilBayar, "Pembayaran gagal. Coba lagi."));
-          },
-        });
-      } catch {
-        window.location.assign(hasil.redirect_url);
-      }
-    } catch (error) {
-      setGalat(pesanAksi(error, "Pembayaran online gagal. Coba lagi."));
     } finally {
       setBusy(false);
     }
@@ -675,27 +596,6 @@ export function OrderDetailPage() {
           <Button type="button" disabled={busy} onClick={() => void catatBayar()}>
             {aksi.label}
           </Button>
-          {bisaBayarOnline ? (
-            <div className="flex flex-col gap-2 rounded-control border border-border p-3">
-              <p className="text-xs font-semibold text-muted">Atau bayar online</p>
-              <Select
-                value={jenisOnline}
-                onChange={(event) => setJenisOnline(event.target.value as IntentJenis)}
-              >
-                <option value="PELUNASAN">Pelunasan</option>
-                <option value="DP">DP</option>
-              </Select>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                disabled={busy}
-                onClick={() => void bayarOnline()}
-              >
-                Buat QRIS/VA
-              </Button>
-            </div>
-          ) : null}
           <div className="flex flex-wrap gap-2">
             {bisaSiap ? (
               <Button
@@ -822,6 +722,25 @@ export function OrderDetailPage() {
                 Tandai diterima/selesai
               </Button>
             ) : null}
+            {bisaGagalKirim ? (
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                disabled={busy}
+                onClick={() =>
+                  void jalankan(
+                    () =>
+                      supabase.rpc("gagal_kirim", {
+                        p_order_id: order.id,
+                      }),
+                    "Kiriman gagal; jurnal dan stok dibalik.",
+                  )
+                }
+              >
+                Lapor gagal kirim
+              </Button>
+            ) : null}
           </div>
         </Card>
       ) : null}
@@ -855,7 +774,7 @@ export function OrderDetailPage() {
         </p>
       ) : null}
       <p className="text-xs text-muted">
-        Status belum memposting jurnal sampai sub-slice 3 selesai.
+        Jurnal otomatis aktif; kiriman gagal dibatalkan lewat reversi.
       </p>
     </main>
   );

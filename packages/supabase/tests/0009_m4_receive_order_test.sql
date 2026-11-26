@@ -36,8 +36,8 @@ select lives_ok(
       25000,
       0,
       array['kopi terima'],
-      0,
-      null
+      50,
+      10000
     )
   $$,
   'create_product Kopi Terima'

@@ -35,17 +35,18 @@ Web memakai `VITE_WORKER_URL` publik untuk memanggil Worker.
 | `claim_ai_quota(p_model, p_tokens, p_skor, p_teks_asli?)` | Klaim kuota + log AI atomik; reset bulanan lazy `FOR UPDATE`; `AI_QUOTA_EXCEEDED` bila habis; teks asli hanya dengan consent | fallback AI M3 |
 | `log_parser_extraction(p_skor, p_teks_asli?)` | Log ekstraksi pola tanpa kuota; teks asli hanya dengan consent | parser pola M3 |
 | `mark_extraction_corrected(p_log_id)` | Tandai ekstraksi pernah dikoreksi user (metrik akurasi final); guard owner | koreksi Smart Paste M3 |
-| `record_stock_move(p_product_id, p_type, p_qty, p_unit_price, p_reason, p_order_id?)` | MASUK/PENYESUAIAN; PENYESUAIAN wajib alasan; KELUAR dari klien = DITOLAK (HPP rata-rata menyusul W3) | stok awal & pembelian M5 |
+| `record_stock_move(p_product_id, p_type, p_qty, p_unit_price, p_reason, p_order_id?)` | MASUK/PENYESUAIAN; MASUK memperbarui `products.hpp_rata_rata` rata-rata bergerak; PENYESUAIAN wajib alasan; KELUAR dari klien = DITOLAK (hanya `ship_order`) | stok awal & pembelian M5 |
 | `create_manual_order(p_items, p_ongkir, p_dp, p_nama, p_telepon, p_alamat?, p_catatan?, p_metode_bayar[]?, p_due_date?)` | SATU transaksi: customer dedup + order DRAFT + items; `p_items` wajib `product_id, qty, harga_satuan` — harga manual HANYA lewat form `/orders/new`; product_id harus milik usaha; tanpa jurnal/payment/stok | order manual M4 |
 | `confirm_order(p_order_id)` | DRAFT → DIKONFIRMASI; guard owner; tanpa jurnal | konfirmasi order M4 |
-| `ship_order(p_order_id, p_kurir_nama?, p_nomor_resi?)` | **Status-only sementara (slice 1):** DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM + kurir/resi opsional. Target slice 3: jurnal T2+T3 + movement KELUAR + HPP satu transaksi | aksi "kirim" M4 |
-| `receive_order(p_order_id)` | **Status-only:** DIKIRIM lunas → SELESAI; sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"; tanpa payment/jurnal baru; guard owner | terima pesanan buyer M4/M8 |
-| `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?)` | Catat DP/PELUNASAN/COD ke `payments`, hitung sisa di server, tolak overpay/transisi ilegal, update status (DP_DITERIMA/SELESAI). **Belum memposting jurnal T1/T4/T12** sampai slice 3 | pembayaran M4 |
-| `create_payment_intent(p_order_id, p_jenis?, p_expiry_minutes?)` | JWT seller; hitung `amount` BIGINT dari total server-side dikurangi payments (DP dibatasi `orders.dp`); satu intent PENDING per order; `provider_order_id` dibuat server | Snap token M4 |
-| `log_payment_event(p_provider, p_event_id, p_payload, p_signature_status)` | **Worker/service_role only**; append-only raw notification dengan `provider + event_id` unik; duplikat = replay | webhook M4 |
-| `mark_payment_event_verified(p_event_id, p_signature_status)` | **Worker/service_role only**; tulis hasil verifikasi ke `payment_event_verifications` append-only; tidak mengubah payload raw | webhook M4 |
-| `apply_payment_event(p_event_id, p_provider_order_id, p_gross_amount, p_transaction_status, p_status_code, p_fraud_status?)` | **Worker/service_role only**; cek verifikasi, amount == intent server, status sukses, legal transition, idempotensi; sukses memanggil `_post_payment` (bukan `record_payment`) | webhook M4 |
-| `cancel_order(p_order_id)` | **Status-only:** DRAFT/DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → BATAL; DIKIRIM/SELESAI/BATAL ditolak. Target slice 3: reversi jurnal (T11) + stok kembali | batal M4 |
+| `ship_order(p_order_id, p_kurir_nama?, p_nomor_resi?, p_biaya_kurir?)` | DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM + kurir/resi opsional; CEK STOK dulu — kurang = `STOK_TIDAK_CUKUP: <nama> — tersedia X, butuh Y` (22023), tanpa jurnal/movement parsial; satu transaksi: jurnal T2/T5/T6 + T3 HPP + T7 bila `p_biaya_kurir > 0` + movement KELUAR unik per order/produk | aksi "kirim" M4 |
+| `receive_order(p_order_id)` | DIKIRIM lunas → SELESAI; sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"; tanpa payment/jurnal baru; guard owner | terima pesanan buyer M4/M8 |
+| `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?, p_biaya_gateway?)` | Catat DP/PELUNASAN/COD ke `payments`, hitung sisa di server, tolak overpay/transisi ilegal, update status; DP T1, pelunasan setelah kirim T4, COD tidak menambah jurnal di sini (T5/T6 dipost `ship_order`), `p_biaya_gateway > 0` → T12; auto-`SELESAI` saat lunas HANYA bila metode COD — pelunasan non-COD di `DIKIRIM` tetap `DIKIRIM`, selesai via `receive_order` | pembayaran M4 |
+| `create_payment_intent(p_order_id, p_jenis?, p_expiry_minutes?)` | JWT seller; hitung `amount` BIGINT dari total server-side dikurangi payments (DP dibatasi `orders.dp`); satu intent PENDING per order; `provider_order_id` dibuat server | Snap token M4 (arsip billing) |
+| `log_payment_event(p_provider, p_event_id, p_payload, p_signature_status)` | **Worker/service_role only**; append-only raw notification dengan `provider + event_id` unik; duplikat = replay | webhook M4 (arsip billing) |
+| `mark_payment_event_verified(p_event_id, p_signature_status)` | **Worker/service_role only**; tulis hasil verifikasi ke `payment_event_verifications` append-only; tidak mengubah payload raw | webhook M4 (arsip billing) |
+| `apply_payment_event(p_event_id, p_provider_order_id, p_gross_amount, p_transaction_status, p_status_code, p_fraud_status?)` | **Worker/service_role only**; cek verifikasi, amount == intent server, status sukses, legal transition, idempotensi; sukses memanggil `_post_payment` (bukan `record_payment`) | webhook M4 (arsip billing) |
+| `cancel_order(p_order_id)` | DRAFT/DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → BATAL; DIKIRIM/SELESAI/BATAL ditolak (pakai `gagal_kirim` untuk DIKIRIM); jurnal T1/T4/T7/T12 order dibatalkan lewat `_reverse_journal` T11 | batal pra-kirim M4 |
+| `gagal_kirim(p_order_id)` | DIKIRIM → BATAL; guard owner + status; reversi jurnal T2/T3 (+T4/T5/T6/T7 yang relevan) via `_reverse_journal`, `stock_movements` MASUK pengembalian per item yang punya KELUAR dengan `harga_beli` = snapshot KELUAR asli; T1/UMP tidak direversi (DP tetap liabilitas s/d refund/manual); pemanggilan kedua ditolak | kiriman gagal/retur M4 |
 | `set_shipping(p_order_id, p_kurir, p_resi)` | Perbarui kurir/resi setelah kirim — tanpa jurnal | update resi M8 |
 | `get_public_order(p_token)` | SECURITY DEFINER: hanya kolom aman (masking PII, tanpa HPP); token salah = kosong | halaman publik M8 |
 | `rotate_share_token(p_order_id)` | Token baru → link lama 404 | pencabutan akses M8 |
@@ -55,7 +56,12 @@ Web memakai `VITE_WORKER_URL` publik untuk memanggil Worker.
 | `get_public_catalog(p_slug)` | SECURITY DEFINER: hanya produk aktif+tampil_katalog (tanpa HPP/stok_min/alias); slug salah = kosong | katalog publik M9 |
 | `add_order_lead(p_slug, p_items, p_nama, p_telepon, p_alamat?, p_catatan?)` | SECURITY DEFINER by slug → insert order_leads; TIDAK menulis orders/payments/jurnal | form pemesanan Fase 2 |
 | `convert_order_lead(p_lead_id)` | Dedup/buat customer + order DRAFT + items — satu transaksi, tanpa jurnal; lead → DIKONVERSI | inbox lead Fase 2 |
-| `post_journal(...)` | **INTERNAL** — REVOKE dari anon/authenticated; dipanggil RPC lain; assertion debit=kredit | mesin jurnal |
+| `post_journal(p_business_id, p_kejadian, p_tanggal, p_order_id, p_reversi_dari_id, p_lines)` | **INTERNAL** — REVOKE dari anon/authenticated; dipanggil RPC lain; assertion debit=kredit + constraint trigger DEFERRED + jurnal immutable | mesin jurnal |
+
+Catatan Gate #3: T8 tetap template manual internal `_journal_event('T8')` — UI jurnal
+manual kelak mem-prefill qty/harga dari `stock_movements` MASUK terakhir dan wajib
+menampilkan risiko divergensi ledger-vs-stok; `record_stock_move` tidak memposting T8
+otomatis. T9 dikonfirmasi sebagai template beban operasional manual internal.
 
 Aturan: operasi multi-tabel/atomik WAJIB jadi RPC baru (bukan N query dari klien).
 Tambah RPC = migrasi baru + update daftar ini + golden test. RPC

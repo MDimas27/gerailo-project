@@ -132,7 +132,8 @@ request Snap server-side.**
 
 ## Status machine (urutan beku)
 `DRAFT → DIKONFIRMASI → DP_DITERIMA → [SIAP_DIKIRIM] → DIKIRIM → SELESAI`
-`BATAL` dari status pra-kirim; setelah kirim = BATAL via reversing entry + stok masuk.
+`BATAL` dari status pra-kirim via `cancel_order`; setelah kirim = BATAL via `gagal_kirim`
+(reversi T2/T3/T4/T5/T6/T7 + stok MASUK pengembalian; DP T1 tetap s/d direfund).
 
 - Transfer manual: seller input/catat DP atau pelunasan via `record_payment`; bukti opsional.
 - COD: tanpa gateway; T5/T6 diproses di `ship_order`.
@@ -205,9 +206,10 @@ Riwayat: `pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build` + pgTAP + d
 ---
 
 ## SUB-SLICE 3 — Jurnal T0–T12 + stok KELUAR/HPP + rekap harian minimal
-Status: `[ ]` aktif berikutnya. Gate keluar: CI hijau + **review founder #3**.
-Sebelum commit pertama slice 3, isi Jawaban Gate #1 (5 pertanyaan + file:line) wajib
-ditempelkan ke chat untuk arsip review.
+Status: `[~]` lokal hijau: pgTAP `0010`–`0013` (`Files=13, Tests=434`), `pnpm lint` (0 error), `pnpm typecheck`, `pnpm test` (105), `pnpm build` (`index-BrrhJJ05.js`), Worker bundle dry-run, type drift/secret guard/journal guard/`git diff --check`; belum commit/CI/HP/founder #3.
+Gate keluar: CI hijau + **review founder #3**.
+Jawaban Gate #1 (5 pertanyaan + file:line) sudah ditempelkan ke chat dan diarsipkan di
+`plans/W3-M4-ORDERS-PAYMENTS.md:9-15`.
 
 ### Task berurutan
 | # | Task | Jenis | File utama | Gate |
@@ -220,11 +222,65 @@ ditempelkan ke chat untuk arsip review.
 | 3.6 | Koreksi docs: `docs/ACCOUNTING-RULES.md:15` `templates.ts` → template di SQL migration sesuai rules/01 §1; update API-CONTRACTS/DATA-MODEL/M4 | docs | 4 file docs | review |
 | 3.7 | `supabase gen types` + commit types; verifikasi RLS lintas usaha; CI grep jurnal hanya di migrasi | ops | `types/db.ts`, `.github/workflows/ci.yml` | drift hijau |
 | 3.8 | Verify manual HP: alur Siti `3×75.000 + 15.000 ongkir, DP 100.000, kirim, lunas 140.000`; COD tanpa DP; COD+DP; batal sebelum/sesudah kirim; rekap harian cocok | ops | staging | founder review |
+| 3.9 | Celah 1: `gagal_kirim(p_order_id)` DIKIRIM→BATAL, reversi T2/T3/T4/T5/T6/T7, stok MASUK pengembalian dengan snapshot `harga_beli` KELUAR (bukan rata-rata saat ini), guard owner, tombol UI | migrasi/test/UI | `0012_m4_failed_shipment.sql`, `0012_m4_failed_shipment_test.sql`, `orders-detail.tsx` | hijau |
+| 3.10 | Celah 2: auto-SELESAI hanya `jenis='COD'`; pelunasan non-COD saat DIKIRIM tetap DIKIRIM lalu `receive_order` | migrasi/test | `0013_m4_cod_only_completion.sql`, `0013_m4_cod_only_completion_test.sql` | hijau |
+| 3.11 | Gate #3 a–d: blok stok kurang, T8 prefill manual + risiko divergensi, sembunyikan Bayar online, konfirmasi T9 | docs/UI | plan + docs + UI | review |
 
 ### Golden fixture wajib
 - Siti T1–T4: DP `100.000` ke UMP; T2 UMP+Piutang `140.000` / Pendapatan `225.000` + Ongkir `15.000`; T3 HPP `165.000` / Persediaan; T4 Kas `140.000` / Piutang.
-- T5 COD tanpa DP; T6 COD+DP; T7 ongkir ditanggung penjual; T8 pembelian mengubah rata-rata; T10 prive; T11 batal setelah kirim = reversi + stok kembali; **T12 fee dari input manual penjual, bukan hardcode 0,7% universal**; T0 tanpa jurnal.
+- T5 COD tanpa DP; T6 COD+DP; T7 ongkir ditanggung penjual; T8 pembelian mengubah rata-rata; T10 prive; T11 pra-kirim = `cancel_order` (reversi jurnal order, tanpa stok KELUAR); T11 setelah kirim = `gagal_kirim` (reversi T2/T3/T4/T5/T6/T7 + stok MASUK memakai snapshot HPP KELUAR); **T12 fee dari input manual penjual, bukan hardcode 0,7% universal**; T0 tanpa jurnal.
 - Adversarial: amount mismatch, transisi ilegal, duplikat pembayaran manual, insert jurnal timpang, langsung UPDATE/DELETE jurnal, lintas `business_id`.
+
+### Jawaban Gate #3 founder (file:line, 26 Nov 2026)
+1. **Stok kurang saat `ship_order`** — DIBLOK, bukan diizinkan negatif. `ship_order`
+   mengecek stok tersedia sebelum movement/jurnal apa pun dan menaikkan
+   `STOK_TIDAK_CUKUP: <nama produk> — tersedia X, butuh Y`
+   (`packages/supabase/migrations/0012_m4_failed_shipment.sql:53-68`). Tidak ada jurnal
+   atau stok parsial (pgTAP `0012_m4_failed_shipment_test.sql:362-385`). Fixture lama
+   `0005`/`0009` diberi stok awal 50 agar tetap realistis.
+2. **T8 manual** — template `_journal_event('T8')` tetap internal SQL; belum dipost
+   otomatis oleh `record_stock_move`. Saat UI jurnal manual dibangun, field qty/harga
+   DI-PREFILL dari `stock_movements` MASUK terakhir produk yang bersangkutan, lalu seller
+   boleh mengubah. Risiko: ledger bisa diverge dari stok bila seller mengubah nilai atau
+   tidak memposting T8; dicatat di `docs/ACCOUNTING-RULES.md` dan `docs/DATA-MODEL.md`.
+3. **Tombol "Bayar online"** — DISEmbunyikan/dihapus dari produksi. Blok QRIS/VA dan
+   loader Snap dihapus dari `apps/web/src/routes/orders-detail.tsx`; Midtrans per-seller
+   ditunda, jadi tidak ada CTA yang mengarah ke Worker tanpa secret. Worker lama tetap
+   arsip template billing. Gate HP: tidak ada tombol "Buat QRIS/VA".
+4. **T9** — DIKONFIRMASI sebagai template beban operasional manual internal
+    (`_journal_event('T9')` → 6-6040), bukan jalur order. Teruji di
+    `packages/supabase/tests/0011_m4_journal_integration_test.sql:862-904`.
+
+Tambahan Review #3: snapshot HPP retur wajib dari `harga_beli` movement KELUAR asli, bukan
+`products.hpp_rata_rata` saat `gagal_kirim` (LESSONS #53); dikunci 2 assertion pgTAP `0012`.
+
+### Skrip retest HP lanjutan (CEK 10+ — staging, setelah CI 4/4)
+Prasyarat origin: `https://gerailo-staging.mdimas-jobs.workers.dev`.
+1. `adb devices` → pastikan device `e8c955c3`; `adb forward tcp:9223 localabstract:chrome_devtools_remote`.
+2. Cek target HP: `curl http://127.0.0.1:9223/json/version` wajib mengandung `Android-Package`.
+3. CLEAR SITE DATA per-origin staging sebelum tes (SW cache per-origin):
+   `cdp = await context.newCDPSession(page); await cdp.send("Storage.clearDataForOrigin", { origin: "https://gerailo-staging.mdimas-jobs.workers.dev", storageTypes: "all" });`
+   lalu reload dan cek HTML memuat `/assets/index-BrrhJJ05.js`; aset mengandung
+   "Lapor gagal kirim", "Jurnal otomatis aktif", "Catat COD diterima", TANPA
+   "Bayar online"/"Buat QRIS/VA".
+4. **CEK10 `gagal_kirim`/reversi**: buat order transfer DP `100.000`, 3×`75.000` + ongkir
+   `15.000`; konfirmasi → catat DP → kirim → lunas `140.000` (status tetap DIKIRIM) →
+   tombol "Lapor gagal kirim" → status BATAL milik usaha itu; rekap harian pendapatan/HPP/
+   piutang = `0`, UMP = `100.000`, kas = `100.000`; stok balik; baris KELUAR lama tetap ada
+   dan MASUK memakai HPP snapshot KELUAR.
+5. **CEK11 COD auto-SELESAI**: order COD tanpa DP → konfirmasi → kirim → "Catat COD
+   diterima" → status SELESAI langsung; jurnal T5 sekali, T4 tidak dobel.
+6. **CEK12 prepaid TIDAK auto-SELESAI**: order transfer tanpa DP → konfirmasi → kirim →
+   catat pelunasan penuh → status MASIH DIKIRIM + CTA "Tandai diterima/selesai" → klik →
+   SELESAI tanpa uang/jurnal baru.
+7. **CEK13 blokir stok kurang**: produk stok 1, order qty 2 → konfirmasi → "Tandai dikirim"
+   → error `STOK_TIDAK_CUKUP: <nama> — tersedia 1, butuh 2`; status tetap DIKONFIRMASI;
+   tidak ada jurnal/stock movement baru.
+8. **CEK14 Bayar online absen**: di detail DIKONFIRMASI/DP_DITERIMA tidak ada tombol
+   "Bayar online"/"Buat QRIS/VA", tetapi "Catat pembayaran" manual masih berfungsi dan
+   memposting T1/T4; `metode_bayar` array COD/TRANSFER tetap tampil benar.
+9. Rekam nomor order + screenshot per CEK; production TIDAK dipromosikan sampai Review #3
+   ACC dan CEK10–CEK14 lulus.
 
 ### Gate keluar 3 / Definition of Done
 `pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build`, semua pgTAP hijau, drift types hijau, grep bundle hijau, CI 4/4, manual HP terverifikasi. `AGENTS.md`, `LESSONS-LEARNED.md`, modul M4, API-CONTRACTS, DATA-MODEL diperbarui; M4 baru ditandai `[x]` setelah review founder #3 + /remember.
@@ -232,7 +288,7 @@ ditempelkan ke chat untuk arsip review.
 ## Risiko & mitigasi
 | Risiko | Mitigasi |
 |---|---|
-| Slice 1/2 belum memposting jurnal | Tandai development-only; production diblokir sampai gate #3 hijau. |
+| Slice 1/2 belum memposting jurnal | Produksi tetap menampilkan banner sampai slice 3 di-deploy; gate #3 belum hijau. |
 | KYC Midtrans | Tidak relevan untuk M4; Midtrans per-seller ditunda. KYC Gerailo hanya saat slice billing langganan. |
 | `service_role` meluas ke milestone lain | LESSONS #35 mencatat scoped exception; DB membatasi 2 RPC; CI grep; approval gate baru untuk penggunaan lain. |
 | `gross_amount` Midtrans desimal | `parseGatewayAmount` + regex `^\d+(\.00)?$` di TS dan SQL; BIGINT di kedua sisi. |

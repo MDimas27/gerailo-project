@@ -47,6 +47,13 @@ jobs:
             exit 1
           fi
 
+      - name: Fail on direct journal writes outside migrations
+        run: |
+          if grep -rEi --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --exclude-dir=node_modules '(update|insert|delete)[[:space:]]+(into[[:space:]]+)?(public\.)?journal_(entries|lines)' apps packages; then
+            echo "Tulis jurnal langsung dari aplikasi dilarang; gunakan post_journal"
+            exit 1
+          fi
+
   db-tests:
     runs-on: ubuntu-latest
     steps:
