@@ -290,15 +290,23 @@ Prasyarat origin: `https://gerailo-staging.mdimas-jobs.workers.dev`.
    "Bayar online"/"Buat QRIS/VA", tetapi "Catat pembayaran" manual masih berfungsi dan
    memposting T1/T4; `metode_bayar` array COD/TRANSFER tetap tampil benar.
 9. Rekam nomor order + screenshot per CEK; CEK10–CEK14 lulus 20/20 dan Review #3 ACC.
-   Produksi dipromosikan hanya setelah batch pra-promosi lolos CI 4/4.
+   Produksi dipromosikan 26 Nov setelah batch pra-promosi lolos CI 4/4: commit `5bb15e3`,
+   CI `45788400727` 4/4, staging `index-Zbfd4X71.js`, produksi `index-DgwjxP9i.js`.
 
 ### Gate keluar 3 / Definition of Done
-`pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build`, semua pgTAP hijau, drift types hijau, grep bundle hijau, CI 4/4, manual HP terverifikasi. `AGENTS.md`, `LESSONS-LEARNED.md`, modul M4, API-CONTRACTS, DATA-MODEL diperbarui; M4 baru ditandai `[x]` setelah promosi produksi + `/remember`.
+`pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build`, semua pgTAP hijau, drift types hijau, grep bundle hijau, CI 4/4, manual HP terverifikasi. `AGENTS.md`, `LESSONS-LEARNED.md`, modul M4, API-CONTRACTS, DATA-MODEL diperbarui; M4 ditandai `[x]` setelah promosi produksi + smoke HP produksi `ORD-20261126-003`. `/remember` masih menyusul.
+
+### Promosi & smoke produksi 26 Nov
+- Commit `5bb15e3`, CI `45788400727` 4/4, staging `index-Zbfd4X71.js`.
+- Migrasi `0010`–`0013` ter-apply ke Supabase produksi; Worker `gerailo-production` version `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`; bundle `index-DgwjxP9i.js`; health OK.
+- Smoke HP produksi `ORD-20261126-003`: 3×Sosis @75000 + ongkir 15000 → `PELUNASAN` 240000 MANUAL → DIKONFIRMASI/Lunas → SIAP_DIKIRIM → DIKIRIM (JNE JP0012345678) → `receive_order` → SELESAI/Lunas/Sisa 0.
+- Verifikasi REST/JWT: T1 240/240, T2 240/240, T3 150/150; stok KELUAR −3, HPP snapshot 50000, stok akhir 17. Order cacat `ORD-20261126-001`/`002` dibatalkan.
+- Catatan: email produksi masih Magic Link default; magic link dibuka di Chrome HP yang sama dan `/auth/callback` sukses.
 
 ## Risiko & mitigasi
 | Risiko | Mitigasi |
 |---|---|
-| Slice 1/2 belum memposting jurnal | Sudah ditutup di Slice 3; banner lama diganti, jurnal otomatis aktif, produksi tinggal dipromosikan. |
+| Slice 1/2 belum memposting jurnal | Sudah ditutup di Slice 3; banner lama diganti, jurnal otomatis aktif, produksi dipromosikan 26 Nov dan terverifikasi. |
 | KYC Midtrans | Tidak relevan untuk M4; Midtrans per-seller ditunda. KYC Gerailo hanya saat slice billing langganan. |
 | `service_role` meluas ke milestone lain | LESSONS #35 mencatat scoped exception; DB membatasi 2 RPC; CI grep; approval gate baru untuk penggunaan lain. |
 | `gross_amount` Midtrans desimal | `parseGatewayAmount` + regex `^\d+(\.00)?$` di TS dan SQL; BIGINT di kedua sisi. |

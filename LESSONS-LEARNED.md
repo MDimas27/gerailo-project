@@ -212,6 +212,12 @@ diperbarui.
 
 #58 · 26 Nov 2026 · bukti · Retest HP CEK10–CEK14 PASS 20/20 pada device `e8c955c3`, CDP 9223, bundle staging `index-BC-7Gz73.js`, SW/cache dibersihkan. · Tindakan: screenshot + `retest-results.json` disimpan di `docs/evidence/m4/`; `plans/W3-M4-ORDERS-PAYMENTS.md:263` diperbaiki dari `index-BrrhJJ05.js` ke hash yang benar.
 
+#59 · 26 Nov 2026 · deploy · Batch pra-promosi di-commit `5bb15e3` (15 files, +848/−19), push `c3ea691..5bb15e3 main -> main`, CI `45788400727` hijau 4/4, staging bundle `index-Zbfd4X71.js`. · Tindakan: promosi produksi dilakukan setelah CI hijau: migrasi `0010`–`0013` di-apply ke Supabase produksi (`fqncaxjqyebrijjcdvjh`), Worker `gerailo-production` version `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`, bundle `index-DgwjxP9i.js`, health OK. `.env` punya duplikat `VITE_*`: baris 13/14 produksi, baris 20/21 staging; build produksi harus memakai pasangan pertama + `VITE_WORKER_URL` produksi.
+
+#60 · 26 Nov 2026 · smoke · Smoke produksi HP `e8c955c3` sukses pada `ORD-20261126-003`: onboarding dibuat, 3×Sosis @75000 + ongkir 15000, `PELUNASAN` 240000 MANUAL → DIKONFIRMASI/Lunas → SIAP_DIKIRIM → DIKIRIM (JNE JP0012345678) → `receive_order` → SELESAI/Lunas/Sisa 0. · Tindakan: verifikasi REST dengan JWT (RLS) menunjukkan T1 240/240, T2 240/240, T3 150/150, satu `stock_movements` KELUAR qty −3 dengan `harga_beli=50000`, stok akhir 17. Dua order uji cacat `ORD-20261126-001`/`002` dibatalkan.
+
+#61 · 26 Nov 2026 · auth/device · OTP produksi awalnya gagal karena Chrome Android tidak bisa resolve host Supabase (`ERR_NAME_NOT_RESOLVED`) walau `adb shell ping` berhasil; permintaan di-proxy lewat CDP `Fetch` + Node `fetch` mengungkap email produksi memakai template default **Magic Link**, bukan kode 6 digit (free tier tidak bisa push template custom tanpa SMTP). · Tindakan: magic link dibuka di Chrome HP yang sama dan `/auth/callback` berhasil membuat sesi; gunakan tab existing dari `/json/list` karena `page.goto` langsung sering gagal. Playwright `connectOverCDP` sempat hang setelah target kosong; raw CDP `Runtime.evaluate` + proxy `Fetch` lebih stabil.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
@@ -230,10 +236,13 @@ diperbarui.
   bareng komponen) — refactor kecil, bukan blocker M3
 - **Reminder UMP tertahan** di detail order: `UMP tertahan Rp X — kembalikan & catat refund`
   (follow-up pasca-promosi; refund tetap manual)
+- **Template email OTP 6 produksi** di dashboard Supabase: produksi masih memakai Magic Link
+  default `{{ .ConfirmationURL }}`; ubah ke template `{{ .Token }}` bila ingin alur kode 6 digit
 
 ## Status deploy production
 
-- 25 Nov 2026: `https://gerailo-production.mdimas-jobs.workers.dev` — Worker `gerailo-production`, migrasi 0001–0009, bundle `index-BRLaIdz4.js`, version `57a2c302-032a-4a37-bddf-44d9544b84cf`. Slice 3 (`0010`–`0013`) belum ikut deploy.
+- 25 Nov 2026: `https://gerailo-production.mdimas-jobs.workers.dev` — Worker `gerailo-production`, migrasi 0001–0009, bundle `index-BRLaIdz4.js`, version `57a2c302-032a-4a37-bddf-44d9544b84cf`. Pada saat itu Slice 3 (`0010`–`0013`) belum ikut deploy; lihat entri 26 Nov di bawah.
+- 26 Nov 2026: produksi dipromosikan ke bundle `index-DgwjxP9i.js`, version `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`, migrasi `0010`–`0013` ter-apply, health OK. Smoke HP produksi `ORD-20261126-003` SELESAI/Lunas/Sisa 0, T1/T2/T3 seimbang, stok 17.
 
 ## PERLU SSoT v1.x
 

@@ -1,10 +1,13 @@
 # M4 — Order & Pembayaran
 
-> Status implementasi 25 Nov 2026: **SUB-SLICE 1 + UX seller + fix COD di-production**;
-> **SUB-SLICE 2 Midtrans per-seller RESCOPED/DITUNDA** (kode lama = arsip template
-> billing). **SUB-SLICE 3 jurnal/HPP/stok KELUAR**: kode + pgTAP `0010`–`0013` hijau
-> lokal (`Files=13, Tests=434`), belum di-commit/deploy/review founder #3. Baris di bawah adalah kontrak akhir
-> modul; bagian "Status sub-slice 3" memuat batas yang benar-benar aktif.
+> Status implementasi 26 Nov 2026: **M4 SELESAI**. SUB-SLICE 1 status machine +
+> pembayaran manual ACC founder #1; SUB-SLICE 2 Midtrans per-seller RESCOPED/DITUNDA
+> (kode lama = arsip template billing); SUB-SLICE 3 jurnal/HPP/stok KELUAR + `gagal_kirim`
+> + COD-only ACC Gate #3. pgTAP `Files=13, Tests=434`; commit `5bb15e3`, CI
+> `45788400727` 4/4, produksi bundle `index-DgwjxP9i.js` version
+> `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`. Smoke HP produksi `ORD-20261126-003`
+> SELESAI/Lunas/Sisa 0 dengan T1/T2/T3 seimbang dan stok akhir 17. Baris di bawah adalah
+> kontrak akhir modul; bagian "Status sub-slice 3" memuat batas yang benar-benar aktif.
 
 ## Tujuan & nilai
 Order = objek sentral: status jelas, DP/COD/pelunasan tertangani benar, jurnal otomatis

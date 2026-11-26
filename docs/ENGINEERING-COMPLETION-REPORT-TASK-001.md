@@ -193,10 +193,19 @@ Two UI caveats were found during the run and did not block the checks: at `DIKIR
 | Deploy provenance | CI `45351527629` (commit `84b0c8f`, 24 Nov) first deployed `index-BB2ga9MK.js`. CI `45352513863` (commit `1ab17af`, docs-only) redeployed the identical `index-BB2ga9MK.js`. The first code change was CI `45519222493` (commit `2fa0c3a`, 25 Nov) deploying `index-CxqO3nNU.js`. The CI quality job built `index-zbsBKyFy.js` separately because it uses different build env; deploy-staging produced the served hashes. |
 | pgTAP `432 → 434` | `432` was an intermediate local run before the founder-mandated HPP snapshot checks. Two assertions were added in `packages/supabase/tests/0012_m4_failed_shipment_test.sql` (lines 367–389), taking that file's plan from 39 to 41 and the suite total from 432 to 434. `434` is canonical. |
 
+## Production Promotion & Smoke (26 Nov 2026)
+
+- Pre-promotion batch committed as `5bb15e3` (`15 files changed, 848 insertions(+), 19 deletions(-)`), pushed `c3ea691..5bb15e3 main -> main`; CI `45788400727` passed 4/4 and staging served `/assets/index-Zbfd4X71.js` + `/assets/index-mN0Q7tUp.css`.
+- Migrations `0010_m4_journal_core.sql`, `0011_m4_journal_integration.sql`, `0012_m4_failed_shipment.sql`, and `0013_m4_cod_only_completion.sql` were applied to the production Supabase project (`fqncaxjqyebrijjcdvjh`) via `supabase db push`.
+- Production Worker `gerailo-production` deployed with `pnpm exec wrangler deploy --env production`; version ID `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`, bundle `/assets/index-DgwjxP9i.js`, health `{"status":"ok","service":"gerailo-worker"}`. Bundle contains `PELUNASAN`, `STOK_TIDAK_CUKUP`, `Jurnal otomatis aktif`, `Catat COD diterima` and contains no `Bayar online` / `Buat QRIS/VA` / `service_role`.
+- Android device `e8c955c3` (CDP 9223) completed the production smoke: `ORD-20261126-003`, 3× Sosis @ Rp75.000 + ongkir Rp15.000, `PELUNASAN` Rp240.000 MANUAL → `DIKONFIRMASI`/Lunas → `SIAP_DIKIRIM` → `DIKIRIM` (JNE JP0012345678) → `receive_order` → `SELESAI`/Lunas/Sisa Rp0.
+- REST verification with the browser JWT (RLS, not service role) confirmed journal T1 240000/240000, T2 240000/240000, T3 150000/150000, one `stock_movements` KELUAR row qty −3 with `harga_beli=50000`, and final stock 17. The two malformed trial orders `ORD-20261126-001` and `ORD-20261126-002` were cancelled.
+- Production email template is still Supabase's default Magic Link (`{{ .ConfirmationURL }}`) rather than the 6-digit OTP template (`{{ .Token }}`); the magic link was opened in the same Chrome profile and `/auth/callback` established the session successfully.
+
 ## Known Limitations
 
 - Android HP retest CEK10–CEK14 passed; screenshots/evidence are committed in `docs/evidence/m4/`.
-- Production is not promoted yet; it still runs the earlier approved bundle `index-BRLaIdz4.js` until the pre-promotion batch passes CI.
+- Production was promoted on 26 Nov to bundle `index-DgwjxP9i.js`; the earlier `index-BRLaIdz4.js` is retained only as deployment history.
 - iOS physical device verification remains unavailable; M3 had the same limitation.
 - `plans/W3-M4-ORDERS-PAYMENTS.md:263` was corrected from local bundle `index-BrrhJJ05.js` to the actually served `index-BC-7Gz73.js`.
 - Service workers may serve stale bundles until site data / Cache Storage is cleared.
@@ -208,7 +217,7 @@ Two UI caveats were found during the run and did not block the checks: at `DIKIR
 
 ## Remaining Risks
 
-- Production promotion is authorized by Gate #3 ACC but must wait for the pre-promotion batch commit and CI 4/4.
+- Production promotion is complete; Gate #3 ACC was honored through commit `5bb15e3`, CI `45788400727` 4/4, staging HP retest, and production smoke.
 - Failed-shipment UMP handling leaves `2-2010` as liability until refund/manual correction; PM/accounting owner must accept this behavior.
 - T8 ledger can diverge from stock if seller edits or does not post the manual journal.
 - Non-COD paid orders at `DIKIRIM` require explicit `receive_order`; if seller forgets, stock/revenue are already posted but status remains `DIKIRIM`.
@@ -225,9 +234,10 @@ Two UI caveats were found during the run and did not block the checks: at `DIKIR
 - Baseline push: `de64a7f..c3ea691 main -> main`
 - Baseline diff summary: `21 files changed, 3296 insertions(+), 172 deletions(-)`
 - Baseline CI: `https://github.com/MDimas27/gerailo-project/actions/runs/45740583748`
-- Pre-promotion batch: UI/docs fixes, report, and `docs/evidence/m4/` evidence staged for commit.
-- Staging: `https://gerailo-staging.mdimas-jobs.workers.dev`
-- Production: unchanged; promote only after the pre-promotion batch CI is green.
+- Pre-promotion batch commit: `5bb15e3 M4: kunci default pembayaran dan arsipkan bukti Gate #3` (UI/docs fixes, report, and `docs/evidence/m4/` evidence).
+- Pre-promotion CI: `https://github.com/MDimas27/gerailo-project/actions/runs/45788400727` (4/4).
+- Staging: `https://gerailo-staging.mdimas-jobs.workers.dev` — latest bundle `index-Zbfd4X71.js`.
+- Production: `https://gerailo-production.mdimas-jobs.workers.dev` — bundle `index-DgwjxP9i.js`, version `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`.
 
 ## Agent Self-Assessment
 
@@ -237,13 +247,14 @@ Complete:
 - All 10 Review #3 evidence points were compiled and delivered in chat before this report.
 - Guard RED proof and final green verification are recorded.
 - Android HP CEK10–CEK14 passed: 20/20 assertions on connected device `e8c955c3`.
-- Pre-promotion UI/docs fixes have golden tests and are staged with evidence.
+- Pre-promotion UI/docs fixes have golden tests, were committed in `5bb15e3`, and are backed by `docs/evidence/m4/`.
+- Production promotion and production HP smoke completed on 26 Nov with `ORD-20261126-003`.
 
 Incomplete:
 
-- Production promotion is pending the pre-promotion batch CI.
 - No physical iOS verification.
+- Production email template still uses Magic Link instead of the 6-digit OTP code.
 
 ## Founder Decision
 
-ACCEPT — Gate #3 accepted. Acceptance covers code, CI, staging, Android HP evidence, and the UMP-as-liability decision. Production promotion is authorized after the pre-promotion batch passes CI 4/4.
+ACCEPT — Gate #3 accepted. Acceptance covers code, CI, staging, Android HP evidence, and the UMP-as-liability decision. Production promotion was completed after the pre-promotion batch passed CI 4/4 and was verified by the 26 Nov production smoke.
