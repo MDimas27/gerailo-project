@@ -2,6 +2,9 @@
 description: Buat rencana kerja modul (fase PLAN loop ECC) → plans/W<n>-<MODUL>.md
 ---
 
+> Legacy alias. Ritual mengikat: `/ecc-plan` (gate ACC wajib, lihat
+> `.opencode/command/ecc-plan.md`).
+
 Jalankan fase **PLAN** loop ECC Gerailo untuk target: $ARGUMENTS
 
 1. Baca `AGENTS.md`, `docs/MODULES/<MODUL>.md`, skill `skills/<modul>/SKILL.md`,

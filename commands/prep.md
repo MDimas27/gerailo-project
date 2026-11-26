@@ -2,6 +2,9 @@
 description: Muat konteks proyek Gerailo dan siapkan sesi (fase PREP loop ECC).
 ---
 
+> Legacy alias. Ritual mengikat: `/ecc-prep` (gate ACC wajib, lihat
+> `.opencode/command/ecc-prep.md`).
+
 Jalankan fase **PREP** loop ECC Gerailo:
 
 1. Baca `AGENTS.md`, `docs/PRODUCT.md`, `LESSONS-LEARNED.md`.

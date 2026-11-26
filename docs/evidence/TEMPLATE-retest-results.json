@@ -1,0 +1,33 @@
+{
+  "stamp": "<HHMMSS>",
+  "shotDir": "<folder screenshot lokal>",
+  "device": "<serial perangkat / kosongkan>",
+  "bundle": "index-<hash>.js",
+  "ciRun": "<run id>",
+  "versionId": "<Worker version id, kosongkan bila staging>",
+  "results": [
+    {
+      "nama": "CEK1 <ringkas>",
+      "lulus": true,
+      "detail": "<nilai nyata yang diperiksa>"
+    },
+    {
+      "nama": "CEK2 <ringkas>",
+      "lulus": false,
+      "detail": "<gejala + langkah reproduksi>"
+    }
+  ],
+  "readme": {
+    "CEK1": {
+      "order": "ORD-<tanggal>-<urut>",
+      "id": "<uuid>",
+      "snap": {
+        "order": {},
+        "entries": [],
+        "payments": [],
+        "movements": [],
+        "rekap": {}
+      }
+    }
+  }
+}

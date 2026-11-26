@@ -4,8 +4,8 @@ description: Jalankan satu modul end-to-end dalam satu sesi (PREP→PLAN→EXECU
 
 Kerjakan modul: $ARGUMENTS — gunakan loop ECC penuh dalam sesi ini.
 
-1. `/prep` → 2. `/plan <modul>` → tunggu persetujuan founder → 3. `/execute <plan>`
-→ 4. `/review` → 5. minta verify manual founder di HP → 6. `/remember`.
+1. `/ecc-prep` → 2. `/ecc-plan <modul>` → gate ACC → 3. `/execute <plan>`
+→ 4. `/ecc-review` → 5. minta verify manual founder di HP → 6. `/ecc-laporan`.
 
 Aturan sesi tunggal:
 - Modul boleh dikerjakan penuh HANYA jika plan tidak melebihi ~10 task; kalau lebih,

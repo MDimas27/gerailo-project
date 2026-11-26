@@ -2,6 +2,9 @@
 description: Simpan pelajaran sesi + perbarui status proyek (fase REMEMBER loop ECC) — wajib di akhir sesi.
 ---
 
+> Legacy alias. Ritual mengikat: `/ecc-laporan` (evidence + status + LESSONS, lihat
+> `.opencode/command/ecc-laporan.md`).
+
 Jalankan fase **REMEMBER** loop ECC Gerailo mengikuti `skills/ecc-remember/SKILL.md`:
 
 1. Ringkas sesi: modul/potongan, task selesai/belum, keputusan kecil, hal yang
@@ -12,6 +15,6 @@ Jalankan fase **REMEMBER** loop ECC Gerailo mengikuti `skills/ecc-remember/SKILL
    halangan) dan tandai task di `plans/<PLAN>.md`.
 4. Deteksi deviasi scope/arsitektur/harga → entri "PERLU SSoT v1.x" (JANGAN edit
    blueprint langsung).
-5. Tulis antrian sesi berikutnya (target + prasyarat) agar /prep esok akurat.
+5. Tulis antrian sesi berikutnya (target + prasyarat) agar /ecc-prep esok akurat.
 
 $ARGUMENTS

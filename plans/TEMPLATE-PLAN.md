@@ -20,15 +20,33 @@ Satu paragraf: apa yang akan ada di staging setelah sesi ini selesai.
 | 4 | Wiring UI <halaman> | UI | apps/web/src/routes/... | [ ] |
 | 5 | pnpm lint+test+build hijau & deploy staging (wrangler) | ops | — | [ ] |
 
-## Daftar test (semua wajib di CI)
-- Golden: <daftar fixture dari docs modul>
+## Golden test matrix (WAJIB — ditetapkan di fase PLAN, bukan saat coding)
+| # | Test | Fixture (sumber dokumentasi) | Assert | RED proof (cara bukti gagal) | File |
+|---|---|---|---|---|---|
+| 1 | | | | | |
+
+> Fixture diturunkan dari `docs/`, bukan dari implementasi. Setiap guard baru
+> wajib punya "RED proof": test/probe yang GAGAL sebelum guard dipasang (lihat
+> `sop/HARD-RULES.md` §3).
+
+## Lane & kepemilikan berkas (wajib bila sesi memakai swarm)
+| Lane | Agent | Boleh menulis | Serial/paralel | Gate |
+|---|---|---|---|---|
+| | | | | |
+
+> Migrasi/RPC/jurnal/RLS/logika uang = satu penulis, serial. Lane aman paralel:
+> riset (tanpa tulis), test MERAH, dokumentasi, teks UI (`sop/SWARM-DISCIPLINE.md`).
+
+## Test pendukung
 - Negatif RLS: <query lintas business_id ditolak>
-- Edge: <mis. pembayaran berlebih ditolak>
+- Edge: <mis. pembayaran berlebih ditolak, stok kurang ditolak>
 
 ## Definition of Done
 - [ ] Test hijau (jumlah: ...)
+- [ ] Golden test terbukti MERAH dulu (commit/test merah dicatat)
 - [ ] Verify manual 5 menit di HP (alur: ...)
-- [ ] Review MERGE (rules 00–03 dicek)
+- [ ] Review MERGE (rules 00–03 + `sop/HARD-RULES.md` dicek)
+- [ ] Evidence `docs/evidence/<m>/` + provenance (CI run, hash bundle, version id)
 - [ ] Status AGENTS.md + LESSONS-LEARNED diperbarui
 
 ## Risiko & mitigasi

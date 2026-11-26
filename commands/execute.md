@@ -23,4 +23,4 @@ Aturan eksekusi (melanggar = revert):
    keputusan penting tiap commit 2–3 kalimat agar founder memahami.
 6. Catat progress di plan (tandai task selesai) sejak berjalan, bukan di akhir saja.
 
-Selesaikan dengan fase REVIEW (command /review) dan REMEMBER (command /remember).
+Selesaikan dengan fase REVIEW (command /ecc-review) dan LAPORAN (command /ecc-laporan).

@@ -2,10 +2,13 @@
 description: Review diff sesi ini terhadap rules + verifikasi test (fase REVIEW/VERIFY loop ECC). Hasil: MERGE / FIX / REVERT.
 ---
 
+> Legacy alias. Ritual mengikat: `/ecc-review` (audit HARD-RULES + verdict, lihat
+> `.opencode/command/ecc-review.md`).
+
 Jalankan fase **REVIEW + VERIFY** loop ECC Gerailo untuk perubahan sesi ini.
 
 1. Kumpulkan diff (commit sejak plan dimulai) dan review terhadap:
-   - `rules/00-iron-rules.md` (semua 12 butir, khususnya jurnal immutable, RLS,
+   - `rules/00-iron-rules.md` (semua 14 butir, khususnya jurnal immutable, RLS,
      BIGINT via money.ts, kredensial, scope).
    - `rules/01-accounting-safety.md` bila menyentuh jurnal/stok/HPP.
    - `rules/02-parser-safety.md` bila menyentuh Smart Paste/AI.
@@ -21,4 +24,4 @@ Jalankan fase **REVIEW + VERIFY** loop ECC Gerailo untuk perubahan sesi ini.
 4. Beri verdict: **MERGE** (aman ke main/staging) / **FIX** (daftar perbaikan spesifik,
    lalu perbaiki sekarang dan ulangi cek) / **REVERT** (pendekatan salah).
 5. Setelah MERGE: minta founder verify manual 5 menit di HP (staging) sesuai DoD modul,
-   dan catat temuannya untuk fase /remember.
+   dan catat temuannya untuk fase /ecc-laporan.

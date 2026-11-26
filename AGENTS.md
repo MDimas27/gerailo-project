@@ -3,6 +3,29 @@
 > File ini dibaca agent (jcode/Claude/Cursor/dll) di awal setiap sesi.
 > Jaga tetap di bawah ~150 baris. Detail panjang ada di docs/, bukan di sini.
 
+## PROSES WAJIB (ECC) — mengikat semua agent, tidak boleh dilewati
+
+**Urutan beku: PREP → GATE → PLAN → GATE → EXECUTE → LAPORAN.**
+
+1. **PREP** — baca file ini, `sop/HARD-RULES.md`, `LESSONS-LEARNED.md` (#50–akhir),
+   plan aktif, docs modul + data model + accounting rules. Laporkan ringkasan
+   pemahaman ≤10 baris + 5 pertanyaan gate. **Tidak menulis kode.**
+2. **GATE PREP** — tunggu ACC founder. Tanpa ACC, dilarang lanjut.
+3. **PLAN** — tulis/perbarui `plans/W<n>-<MODUL>.md`: golden test ditetapkan di
+   fase ini (fixture, assert, cara bukti MERAH), lane + kepemilikan berkas.
+4. **GATE PLAN** — tunggu ACC rencana. Rencana disetujui = kontrak sesi.
+5. **EXECUTE** — golden test MERAH → implement → HIJAU → bukti RED probe untuk
+   tiap guard. Satu task satu commit `M<n>: <task>`. Jurnal/RPC/RLS/money =
+   penulis tunggal, serial (`sop/SWARM-DISCIPLINE.md`).
+6. **LAPORAN** — `/ecc-laporan`: angka test, hash bundle, Worker Version ID, CI
+   run, evidence `docs/evidence/<m>/`, update status AGENTS + LESSONS.
+
+- Slash command: `/ecc-prep`, `/ecc-plan`, `/ecc-review`, `/ecc-laporan` (`.opencode/command/`).
+- Larangan: deploy manual; enum/status baru tanpa ADR; guard tanpa RED probe; menyalin logika `_post_payment`; menyatakan selesai tanpa CI hijau.
+- Deployment HANYA via CI dari `main`; produksi dari tag yang lolos CI + smoke HP.
+
+**Kalimat pembuka sesi baru (salin apa adanya):** "Baca AGENTS.md, `sop/HARD-RULES.md`, `LESSONS-LEARNED.md` (#50–akhir), `plans/<plan-aktif>.md`, `docs/MODULES/<modul>.md`, `docs/DATA-MODEL.md`, `docs/ACCOUNTING-RULES.md`. Tulis ringkasan pemahaman ≤10 baris + 5 pertanyaan gate (PREP). Jangan tulis kode sebelum gate ACC. Jurnal tidak disentuh tanpa golden test hijau."
+
 ## Identitas proyek
 
 Gerailo = PWA SaaS untuk UMKM Indonesia yang menjual via WhatsApp. Alur inti:
@@ -55,7 +78,7 @@ waktu — jangan menggeser launch 19 Des.
 7. Kredensial hanya via secrets/env; `service_role` & `LLM_API_KEY` dilarang masuk
    bundle browser (CI grep).
 8. Commit kecil per task; staging tiap hari; production hanya dari tag lolos uji.
-9. Akhiri setiap sesi dengan `/remember`.
+9. Akhiri setiap sesi dengan `/ecc-laporan` (termasuk update `LESSONS-LEARNED.md`).
 10. **Halaman publik pembeli (M8)**: akses hanya via token acak ≥128-bit; TANPA
     telepon/alamat penuh/HPP; label "terverifikasi" hanya setelah seller konfirmasi;
     rate limit; tanpa cache service worker; satu-satunya tulis publik = lapor
@@ -72,7 +95,8 @@ waktu — jangan menggeser launch 19 Des.
 
 | Tugas | Baca dulu |
 |---|---|
-| Memulai sesi | AGENTS.md (file ini) + docs/PRODUCT.md + LESSONS-LEARNED.md |
+| Memulai sesi | AGENTS.md (file ini) + sop/HARD-RULES.md + docs/PRODUCT.md + LESSONS-LEARNED.md |
+| Ritual ECC (PREP/PLAN/review/laporan) | .opencode/command/ecc-*.md + SOP-ECC.md + sop/SWARM-DISCIPLINE.md |
 | Memahami stack & monorepo | docs/TECH-STACK.md |
 | Rencanakan modul | docs/MODULES/<MODUL>.md + docs/ROADMAP.md |
 | Bekerja dengan DB/RPC | docs/DATA-MODEL.md + docs/API-CONTRACTS.md |
@@ -103,7 +127,8 @@ waktu — jangan menggeser launch 19 Des.
 
 (1) `pnpm build` hijau, (2) test hijau termasuk golden test area terkait, (3) RLS
 teruji (tes akses lintas business_id gagal), (4) alur utama dites manual di HP via
-staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui.
+staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui,
+(7) bukti + provenance deploy tercatat di `docs/evidence/<m>/`.
 
 ## Status proyek (perbarui tiap sesi)
 
@@ -118,5 +143,5 @@ staging, (5) status di file ini diperbarui, (6) LESSONS-LEARNED diperbarui.
 - Deploy produksi terakhir 26 Nov 2026: https://gerailo-production.mdimas-jobs.workers.dev — bundle `/assets/index-DgwjxP9i.js` + `/assets/index-mN0Q7tUp.css`, version `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`, health OK, migrasi `0010`–`0013` ter-apply. Bundle dicek mengandung `PELUNASAN`, `STOK_TIDAK_CUKUP`, `Jurnal otomatis aktif`, `Catat COD diterima`; TANPA "Bayar online"/"Buat QRIS/VA". Login produksi via magic link Supabase default (template OTP 6 produksi belum custom); `/auth/callback` sukses.
 - Tag produksi `m4-production-v1` (commit `ecf798a`) → Worker Version ID `2dcaea96-f34b-4d88-aee7-d94fd3390e8e` → bundle `index-DgwjxP9i.js`; rollback Worker via `wrangler versions rollback`, database forward-only (tanpa down-migration).
 - Deploy M3 staging: secrets Worker `LLM_API_KEY`, `ADMIN_EMAILS`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` terdaftar; usaha staging sudah `STARTER`. Android: WebAPK staging `org.chromium.webapk.a31e5d83e0e7d8c17_v2` ter-install via Chrome 157 ⋮ → "Install and create shortcut" → Install; target CDP `standalone: true`. SEND intent ke `ShareActivity` membuka `/share?text=...`, review → koreksi produk → DRAFT. iOS: tidak ada perangkat fisik; jalur salin-tempel diverifikasi lewat clipboard API + `/share` → AI → konfirmasi → DRAFT.
-- Halangan: KYC seller tidak lagi relevan; KYC Gerailo baru diperlukan saat slice billing langganan. Verifikasi Safari/iOS fisik tetap dicatat sebagai catatan founder.
+- Halangan: KYC seller tidak lagi relevan; KYC Gerailo baru diperlukan saat slice billing langganan. Verifikasi Safari/iOS fisik tetap dicatat sebagai catatan founder. 27 Nov: `git`/MSYS hang bila di-spawn tool jcode tanpa console; workaround = `start "" /wait cmd /c "git ..."` atau WMI `Win32_Process.Create`.
 - Sesi lama dibekukan setelah clean tree + `HEAD=origin/main` dikonfirmasi; M5 dilarang keras dimulai di sesi lama (ADR-13).

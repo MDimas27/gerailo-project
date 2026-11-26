@@ -5,10 +5,17 @@ repo `affaan-m/ecc` — yang intinya: agent tidak dibiarkan bebas, tapi dijalank
 dalam **loop berdisiplin dengan konteks yang dijual eksplisit dan memori yang ditulis**.
 Loop ECC: `plan → test → implement → review → verify → remember → improve`.
 
+> **Pembaruan 27 Nov 2026 (mengikat):** ritual sesi dijalankan lewat
+> `.opencode/command/ecc-*.md` — `/ecc-prep` → gate ACC → `/ecc-plan` → gate ACC →
+> EXECUTE (`commands/execute.md`) → `/ecc-review` → `/ecc-laporan`. Aturan keras
+> ada di `sop/HARD-RULES.md`, disiplin swarm di `sop/SWARM-DISCIPLINE.md`.
+> Dokumen ini penjelasan; bila bertentangan, `AGENTS.md` + `sop/HARD-RULES.md`
+> yang menang.
+
 Prinsip kuncinya tiga:
 1. **Konteks dijual, bukan diasumsikan.** Agent membaca docs yang tepat di fase yang tepat.
 2. **Test lebih dulu di area yang tidak boleh salah** (parser, mesin jurnal). Di area lain, boleh cepat tapi tetap ada smoke test.
-3. **Memori ditulis di akhir sesi.** Tanpa `/remember`, sesi berikutnya mulai dari nol.
+3. **Memori ditulis di akhir sesi.** Tanpa `/ecc-laporan`, sesi berikutnya mulai dari nol.
 
 ---
 
@@ -32,16 +39,16 @@ Target fase 0: ketika kamu duduk di sesi pertama, agent tidak perlu menebak apa 
 Satu sesi idealnya 1–3 jam dan mengerjakan **satu modul atau satu potongan modul**.
 Ikuti enam langkah berikut dengan perintah dari folder `commands/`.
 
-### Langkah 1 — `/prep` (muat konteks, 3 menit)
+### Langkah 1 — `/ecc-prep` (muat konteks, 3 menit)
 
-Jalankan `commands/prep.md`. Agent akan membaca `AGENTS.md`, `docs/PRODUCT.md`,
+Jalankan `/ecc-prep` (definisi: `.opencode/command/ecc-prep.md`). Agent akan membaca `AGENTS.md`, `docs/PRODUCT.md`,
 `LESSONS-LEARNED.md`, lalu melaporkan: posisi proyek, modul berikutnya, peringatan
 dari pelajaran lama. **Kamu memverifikasi laporannya benar** sebelum lanjut.
 Jangan pernah mulai coding tanpa langkah ini — inilah yang mencegah agent "hallucinate scope".
 
-### Langkah 2 — `/plan` (rencana modul, 15 menit)
+### Langkah 2 — `/ecc-plan` (rencana modul, 15 menit)
 
-Jalankan `commands/plan.md MODUL_NAMA`. Agent membaca `docs/MODULES/<MODUL>.md`
+Jalankan `/ecc-plan <MODUL>`. Agent membaca `docs/MODULES/<MODUL>.md`
 + skill modul terkait, lalu menulis `plans/W<n>-<MODUL>.md` mengikuti
 `plans/TEMPLATE-PLAN.md`: daftar task berurutan, file yang dibuat/diubah,
 daftar test, DoD, dan risiko. **Kamu review rencananya 5 menit** — corem task yang
@@ -61,9 +68,9 @@ Jalankan `commands/execute.md <NAMA-PLAN>`. Aturan eksekusi (dari ECC):
    atau perbarui plan secara sadar. Ini penangkal scope creep vibe coding.
 5. Di akhir execute: `pnpm build` (web & worker) + test suite hijau di staging.
 
-### Langkah 4 — `/review` (review + verify, 15–30 menit)
+### Langkah 4 — `/ecc-review` (review + verify, 15–30 menit)
 
-Jalankan `commands/review.md`. Agent memeriksa diff sesi ini terhadap `rules/*.md`:
+Jalankan `/ecc-review`. Agent memeriksa diff sesi ini terhadap `rules/*.md`:
 invariant jurnal (RPC + trigger), RLS business_id, tidak ada kredensial/service_role
 di bundle web, tidak ada tulis jurnal/status di luar RPC, uang BIGINT via money.ts.
 Kemudian **verify**: jalankan seluruh test + cek manual alur utama modul di staging
@@ -71,9 +78,9 @@ Kemudian **verify**: jalankan seluruh test + cek manual alur utama modul di stag
 
 Hasil review: `MERGE` / `FIX` (catat di plan) / `REVERT` (kalau pendekatan salah).
 
-### Langkah 5 — `/remember` (simpan memori, 5 menit)
+### Langkah 5 — `/ecc-laporan` (simpan memori, 5 menit)
 
-Jalankan `commands/remember.md`. Agent menambahkan ke `LESSONS-LEARNED.md`:
+Jalankan `/ecc-laporan`. Agent menambahkan ke `LESSONS-LEARNED.md`:
 apa yang berjalan lancar, apa yang makan waktu, keputusan kecil yang diambil,
 dan status modul. Kalau sesi ini **mengubah scope atau keputusan arsitektur**,
 agent juga memperbarui bagian terkait di `docs/` dan menandai SSoT perlu revisi
@@ -81,19 +88,19 @@ agent juga memperbarui bagian terkait di `docs/` dan menandai SSoT perlu revisi
 
 ### Langkah 6 — `improve` (implisit)
 
-Pelajaran dari `/remember` dipakai di `/prep` sesi berikutnya. Loop selesai.
+Pelajaran dari `/ecc-laporan` dipakai di `/ecc-prep` sesi berikutnya. Loop selesai.
 
 ---
 
 ## Contoh transcript sesi (Minggu 2, modul M3)
 
 ```
-Kamu   : /prep
+Kamu   : /ecc-prep
 jcode  : [baca AGENTS.md, PRODUCT, LESSONS-LEARNED]
          Status: M1+M2 selesai (staging). Peringatan dari lessons: "jangan pakai
          float untuk rupiah" dan "parser wajib log ekstraksi".
          Modul berikutnya: M3 Smart Paste. Siap.
-Kamu   : /plan m3-smart-paste
+Kamu   : /ecc-plan m3-smart-paste
 jcode  : [baca docs/MODULES/M3-SMART-PASTE.md, skills/m3-smart-paste/SKILL.md,
          rules/02-parser-safety.md]
          Menulis rencana W2-M3-SMART-PASTE di folder plans/: 9 task, 14 golden test, DoD…
@@ -103,11 +110,11 @@ Kamu   : /execute W2-M3-SMART-PASTE
 jcode  : [migrasi SQL ai_usage_logs + gen types → tulis 15 test (merah) → implement
          parser di Worker → matching katalog → form konfirmasi → commit per task]
          Build hijau, deploy staging.
-Kamu   : /review
+Kamu   : /ecc-review
 jcode  : [diff vs rules] Ditemukan: 1 query tanpa filter business_id → diperbaiki.
          Verify: test 15/15 hijau, build ok.
 Kamu   : [uji manual di HP: paste chat Siti, konfirmasi order] OK.
-Kamu   : /remember
+Kamu   : /ecc-laporan
 jcode  : [tulis LESSONS-LEARNED #7: "label 'ongkir' sering muncul setelah total,
          parser harus cek baris terakhir juga"; update status M3 = 90%]
 ```
@@ -127,8 +134,8 @@ jcode  : [tulis LESSONS-LEARNED #7: "label 'ongkir' sering muncul setelah total,
 
 | Gejala | Penyebab | Penawar |
 |---|---|---|
-| Agent membuat fitur di luar scope | AGENTS.md tidak dibaca / sesi terlalu panjang | Jalankan /prep ulang; mulai sesi baru; tegaskan rules/00 |
+| Agent membuat fitur di luar scope | AGENTS.md tidak dibaca / sesi terlalu panjang | Jalankan /ecc-prep ulang; mulai sesi baru; tegaskan rules/00 |
 | Jurnal tidak seimbang | Golden test belum ditulis / dilewati | Stop; tulis fixture dari docs/ACCOUNTING-RULES.md dulu |
 | Parser "menebak" harga | rules/02 tidak diterapkan | Tambah test negatif; larang fallback harga |
-| Sesi berikutnya lupa keputusan | /remember tidak dijalankan | Wajibkan langkah 5; LESSONS-LEARNED adalah memori |
+| Sesi berikutnya lupa keputusan | /ecc-laporan tidak dijalankan | Wajibkan langkah 5; LESSONS-LEARNED adalah memori |
 | Test hijau tapi aplikasi rusak | Tidak ada verify manual | Langkah 4 wajib uji 5 menit di HP |

@@ -10,5 +10,8 @@ coverage
 .wrangler
 supabase/.temp
 *.tsbuildinfo
-.opencode
+.opencode/*
+!.opencode/.gitignore
+!.opencode/command/
+!.opencode/command/**
 .DS_Store
