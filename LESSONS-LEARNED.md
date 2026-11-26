@@ -220,7 +220,7 @@ diperbarui.
 
 #62 · 26 Nov 2026 · remember · M4 ditutup: `AGENTS.md` M4 `[x]`, LESSONS #59–#61, laporan engineering, plan, dan modul M4 disinkronkan; docs commit `52b6181 Docs: tutup M4 produksi dan smoke HP` di-push `5bb15e3..52b6181 main -> main`, working tree bersih. Tidak ada deviasi SSoT baru: UMP-liabilitas sudah di #54, Midtrans per-seller ditunda di #48, template email produksi masuk backlog. · Tindakan: antrian sesi berikutnya M5 stok sederhana lalu M7 laporan/export; baca `docs/MODULES/M5-STOCK.md` + `M7-REPORTS.md`, `docs/DATA-MODEL.md`, `docs/ACCOUNTING-RULES.md`; prerequisite golden test stok/HPP dan RLS owner tetap hijau, jangan sentuh jurnal tanpa test. iOS fisik tetap catatan founder.
 
-#63 · 26 Nov 2026 · remember/ADR-13 · Sesi M4 ditutup setelah tag `m4-production-v1` di-push di `ecf798a`, clean tree + `HEAD=origin/main` terverifikasi; pindah harness ke sesi baru = keputusan level ADR (`docs/ARCHITECTURE.md` ADR-13). · Utang teknis dari 6 catatan founder: (1) tag produksi `m4-production-v1` → commit `ecf798a`; (2) pemetaan sekilas `m4-production-v1 → Worker Version ID 2dcaea96-f34b-4d88-aee7-d94fd3390e8e → bundle index-DgwjxP9i.js`; (3) ADR-13 pindah harness tercatat; (4) rollback Worker via `wrangler versions rollback`, database forward-only tanpa down-migration; (5) sesi lama dibekukan; (6) M5 dilarang keras dimulai di sesi lama, sesi baru wajib cek tag/version/bundle dulu. · Tindakan: mapping + rollback ditulis di `AGENTS.md` dan `docs/ENGINEERING-COMPLETION-REPORT-TASK-001.md`; jangan mulai M5 di sesi lama.
+#63 · 26 Nov 2026 · closing/ADR-13 · M4 dinyatakan SELESAI — ACC dengan catatan reviewer. Promosi produksi dilakukan atas otorisasi founder berdasarkan Gate #3 + smoke HP `ORD-20261126-003` (3×Sosis @75000 + ongkir 15000, `PELUNASAN` 240000 MANUAL, T1/T2/T3 seimbang, stok akhir 17); tag `m4-production-v1` → commit `ecf798a` → Worker Version ID `2dcaea96-f34b-4d88-aee7-d94fd3390e8e` → bundle `index-DgwjxP9i.js`. · Pertanyaan transparansi lama (Gate #1, #37/#38, provenance `index-BB2ga9MK.js` → `index-CxqO3nNU.js`) DITUTUP sebagai technical debt yang diterima; kompensasi permanen = provenance hash + version ID per deploy (#56). · Utang yang dibawa: (1) `.env` duplikat `VITE_*` (split per env); (2) akun smoke `Dapur Bu Siti` tetap di produksi sebagai bukti & dikecualikan dari uji M7; (3) template OTP 6 produksi masih Magic Link default; (4) pembersihan nilai `metode_bayar` tunggal warisan (constraint `text[]` multi-nilai sudah benar sejak #24/#50). Antrean `M5 → M6 → M7` sudah tercatat di backlog/`docs/ROADMAP.md:18` (M6 di posisi antara M5 dan M7); rollback Worker via `wrangler versions rollback`, DB forward-only tanpa down-migration. Sesi lama beku; M5 TIDAK dimulai di sini.
 
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
@@ -242,6 +242,14 @@ diperbarui.
   (follow-up pasca-promosi; refund tetap manual)
 - **Template email OTP 6 produksi** di dashboard Supabase: produksi masih memakai Magic Link
   default `{{ .ConfirmationURL }}`; ubah ke template `{{ .Token }}` bila ingin alur kode 6 digit
+- **Utang teknis M4 (diterima reviewer):** `.env` memiliki duplikat `VITE_*` (baris 13/14
+  produksi, 20/21 staging); split konfigurasi per environment sebelum modul berikutnya.
+- **Akun smoke produksi** `Dapur Bu Siti` sengaja dipertahankan sebagai bukti promosi
+  `ORD-20261126-003`; dikecualikan dari uji M7.
+- **Pembersihan `metode_bayar` nilai tunggal warisan:** constraint `text[]` multi-nilai sudah
+  benar sejak #24/#50; yang dibersihkan hanya data lama berbentuk string tunggal.
+- **Antrean modul pasca-M4:** `M5 → M6 → M7` sesuai `docs/ROADMAP.md:18` (posisi M6 antara
+  M5 dan M7); jangan mulai M5 di sesi lama.
 
 ## Status deploy production
 
