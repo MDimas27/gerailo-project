@@ -12,7 +12,7 @@
 2. **Batal setelah barang dikirim** → DB hanya mengizinkan `DRAFT`–`SIAP_DIKIRIM`: `packages/supabase/migrations/0009_m4_receive_order.sql:70-90`. UI menyembunyikan tombol lewat `bisaBatal` `apps/web/src/routes/orders-detail.tsx:232,829,846`. pgTAP: `packages/supabase/tests/0009_m4_receive_order_test.sql:349-365`.
 3. **Satu jalur posting uang** → core privat `_post_payment` `packages/supabase/migrations/0005_m4_manual_payments.sql:131-212`; dipanggil `record_payment` `:252` dan `apply_payment_event` `packages/supabase/migrations/0008_m4_midtrans_verifications.sql:164`. Tidak ada jalur webhook kedua; LESSONS #37.
 4. **Webhook lifecycle/raw append-only** → tabel verifikasi + RPC `packages/supabase/migrations/0008_m4_midtrans_verifications.sql:1-51`; urutan Worker `log UNVERIFIED → verify → mark → apply` `apps/worker/src/routes/payments.ts:205-228`; pgTAP adversarial di `packages/supabase/tests/0008_m4_midtrans_verifications_test.sql:104-194`. LESSONS #38 (arsip template billing sejak 25 Nov).
-5. **Jurnal/stok masuk slice 3** → batasan tertulis `plans/W3-M4-ORDERS-PAYMENTS.md:145-147`; banner UI `apps/web/src/routes/orders-detail.tsx:858`; kontrak `docs/API-CONTRACTS.md:43`. Isolasi usaha dijaga `_assert_order_owner` `packages/supabase/migrations/0005_m4_manual_payments.sql:82-110` + pgTAP lintas `business_id`. Catatan 25 Nov: produksi dipromosikan dengan banner ini; jurnal masih menyusul di slice 3.
+5. **Jurnal/stok masuk slice 3** → batasan tertulis `plans/W3-M4-ORDERS-PAYMENTS.md:145-147`; kontrak `docs/API-CONTRACTS.md:43`. Isolasi usaha dijaga `_assert_order_owner` `packages/supabase/migrations/0005_m4_manual_payments.sql:82-110` + pgTAP lintas `business_id`. Banner lama "jurnal menyusul" sudah diganti menjadi "Jurnal otomatis aktif; kiriman gagal dibatalkan lewat reversi." di `apps/web/src/routes/orders-detail.tsx`; Slice 3 sudah lolos CI/HP dan menunggu promosi produksi.
 
 ### Amandemen strategis founder 25 Nov 2026 (menggantikan SUB-SLICE 2 lama)
 - **TIDAK ADA Midtrans per-seller.** Pembayaran buyer→seller tetap manual: no. rekening/
@@ -206,8 +206,8 @@ Riwayat: `pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build` + pgTAP + d
 ---
 
 ## SUB-SLICE 3 — Jurnal T0–T12 + stok KELUAR/HPP + rekap harian minimal
-Status: `[~]` lokal hijau: pgTAP `0010`–`0013` (`Files=13, Tests=434`), `pnpm lint` (0 error), `pnpm typecheck`, `pnpm test` (105), `pnpm build` (`index-BrrhJJ05.js`), Worker bundle dry-run, type drift/secret guard/journal guard/`git diff --check`; belum commit/CI/HP/founder #3.
-Gate keluar: CI hijau + **review founder #3**.
+Status: `[~]` basis hijau: pgTAP `0010`–`0013` (`Files=13, Tests=434`), `pnpm lint` (0 error), `pnpm typecheck`, `pnpm test` (109 setelah 4 golden test batch pra-promosi), `pnpm build` (`index-3SNyYUkr.js`), Worker bundle dry-run, type drift/secret guard/journal guard/`git diff --check`; commit `c3ea691`, CI `45740583748` 4/4, staging `index-BC-7Gz73.js`, HP CEK10–CEK14 20/20. **Gate #3 ACC 26 Nov**; promosi produksi menunggu batch UI/docs terakhir lolos CI.
+Gate keluar: CI hijau + review founder #3 + promosi produksi + `/remember`.
 Jawaban Gate #1 (5 pertanyaan + file:line) sudah ditempelkan ke chat dan diarsipkan di
 `plans/W3-M4-ORDERS-PAYMENTS.md:9-15`.
 
@@ -254,13 +254,23 @@ Jawaban Gate #1 (5 pertanyaan + file:line) sudah ditempelkan ke chat dan diarsip
 Tambahan Review #3: snapshot HPP retur wajib dari `harga_beli` movement KELUAR asli, bukan
 `products.hpp_rata_rata` saat `gagal_kirim` (LESSONS #53); dikunci 2 assertion pgTAP `0012`.
 
+Batch pra-promosi 26 Nov (ACC Gate #3): Jenis pembayaran efektif dihitung dari `nextAction()` —
+non-COD `DIKIRIM` dengan sisa > 0 terkunci `PELUNASAN`, COD terkunci `COD`/`COD`
+(`apps/web/src/lib/order-presentation.ts`); `STOK_TIDAK_CUKUP` ditampilkan apa adanya
+(`apps/web/src/lib/form-error.ts`). Keduanya golden-test. Bukti HP dipindah ke
+`docs/evidence/m4/`. `432 → 434` berasal dari 2 assertion snapshot HPP yang ditambahkan ke
+`0012` (plan `39 → 41`) setelah angka 432 dicatat di tengah sesi; 434 yang kanonik.
+Provenance deploy: CI `45351527629` (`84b0c8f`) → `index-BB2ga9MK.js`; CI `45352513863`
+(`1ab17af`, docs-only) → deploy ulang bundle yang sama; CI `45519222493` (`2fa0c3a`) →
+`index-CxqO3nNU.js`.
+
 ### Skrip retest HP lanjutan (CEK 10+ — staging, setelah CI 4/4)
 Prasyarat origin: `https://gerailo-staging.mdimas-jobs.workers.dev`.
 1. `adb devices` → pastikan device `e8c955c3`; `adb forward tcp:9223 localabstract:chrome_devtools_remote`.
 2. Cek target HP: `curl http://127.0.0.1:9223/json/version` wajib mengandung `Android-Package`.
 3. CLEAR SITE DATA per-origin staging sebelum tes (SW cache per-origin):
    `cdp = await context.newCDPSession(page); await cdp.send("Storage.clearDataForOrigin", { origin: "https://gerailo-staging.mdimas-jobs.workers.dev", storageTypes: "all" });`
-   lalu reload dan cek HTML memuat `/assets/index-BrrhJJ05.js`; aset mengandung
+   lalu reload dan cek HTML memuat `/assets/index-BC-7Gz73.js`; aset mengandung
    "Lapor gagal kirim", "Jurnal otomatis aktif", "Catat COD diterima", TANPA
    "Bayar online"/"Buat QRIS/VA".
 4. **CEK10 `gagal_kirim`/reversi**: buat order transfer DP `100.000`, 3×`75.000` + ongkir
@@ -279,16 +289,16 @@ Prasyarat origin: `https://gerailo-staging.mdimas-jobs.workers.dev`.
 8. **CEK14 Bayar online absen**: di detail DIKONFIRMASI/DP_DITERIMA tidak ada tombol
    "Bayar online"/"Buat QRIS/VA", tetapi "Catat pembayaran" manual masih berfungsi dan
    memposting T1/T4; `metode_bayar` array COD/TRANSFER tetap tampil benar.
-9. Rekam nomor order + screenshot per CEK; production TIDAK dipromosikan sampai Review #3
-   ACC dan CEK10–CEK14 lulus.
+9. Rekam nomor order + screenshot per CEK; CEK10–CEK14 lulus 20/20 dan Review #3 ACC.
+   Produksi dipromosikan hanya setelah batch pra-promosi lolos CI 4/4.
 
 ### Gate keluar 3 / Definition of Done
-`pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build`, semua pgTAP hijau, drift types hijau, grep bundle hijau, CI 4/4, manual HP terverifikasi. `AGENTS.md`, `LESSONS-LEARNED.md`, modul M4, API-CONTRACTS, DATA-MODEL diperbarui; M4 baru ditandai `[x]` setelah review founder #3 + /remember.
+`pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build`, semua pgTAP hijau, drift types hijau, grep bundle hijau, CI 4/4, manual HP terverifikasi. `AGENTS.md`, `LESSONS-LEARNED.md`, modul M4, API-CONTRACTS, DATA-MODEL diperbarui; M4 baru ditandai `[x]` setelah promosi produksi + `/remember`.
 
 ## Risiko & mitigasi
 | Risiko | Mitigasi |
 |---|---|
-| Slice 1/2 belum memposting jurnal | Produksi tetap menampilkan banner sampai slice 3 di-deploy; gate #3 belum hijau. |
+| Slice 1/2 belum memposting jurnal | Sudah ditutup di Slice 3; banner lama diganti, jurnal otomatis aktif, produksi tinggal dipromosikan. |
 | KYC Midtrans | Tidak relevan untuk M4; Midtrans per-seller ditunda. KYC Gerailo hanya saat slice billing langganan. |
 | `service_role` meluas ke milestone lain | LESSONS #35 mencatat scoped exception; DB membatasi 2 RPC; CI grep; approval gate baru untuk penggunaan lain. |
 | `gross_amount` Midtrans desimal | `parseGatewayAmount` + regex `^\d+(\.00)?$` di TS dan SQL; BIGINT di kedua sisi. |
@@ -302,3 +312,4 @@ Prasyarat origin: `https://gerailo-staging.mdimas-jobs.workers.dev`.
 - M9 katalog publik + `order_leads`.
 - **Stok per varian tertunda secara eksplisit:** `order_items` masih product-level sejak M3; belum ada stok/varian-level. Jangan hilang diam-diam — aktifkan hanya saat order ber-varian didukung.
 - iOS fisik 5 menit (perangkat belum tersedia), edit profil/pengaturan M1.
+- Reminder detail order `UMP tertahan Rp X — kembalikan & catat refund` follow-up pasca-promosi (ACC founder Gate #3).

@@ -91,6 +91,10 @@ export function pesanAksi(
 
   const teks = teksError(error);
 
+  if (teks.includes("STOK_TIDAK_CUKUP")) {
+    return teks;
+  }
+
   for (const [kode, pesan] of PEMETAAN_RPC) {
     if (teks.includes(kode)) {
       return pesan;

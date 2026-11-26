@@ -5,6 +5,7 @@ import {
   labelStatus,
   labelWorkLane,
   nextAction,
+  pembayaranEfektif,
   ringkasOrder,
   workLane,
   type OrderView,
@@ -98,6 +99,35 @@ describe("nextAction", () => {
 
   it("BATAL terminal", () => {
     expect(nextAction(view("BATAL", 100000n, 0n)).kind).toBe("TIDAK_ADA");
+  });
+});
+
+describe("pembayaranEfektif", () => {
+  it("mengunci COD ke jenis dan kanal COD", () => {
+    expect(
+      pembayaranEfektif(view("DIKIRIM", 100000n, 0n, ["COD"]), {
+        jenis: "DP",
+        kanal: "MANUAL",
+      }),
+    ).toEqual({ jenis: "COD", kanal: "COD" });
+  });
+
+  it("memilih pelunasan saat DIKIRIM masih ada sisa", () => {
+    expect(
+      pembayaranEfektif(view("DIKIRIM", 70000n, 30000n), {
+        jenis: "DP",
+        kanal: "QRIS",
+      }),
+    ).toEqual({ jenis: "PELUNASAN", kanal: "QRIS" });
+  });
+
+  it("tidak memaksa pelunasan saat DP masih diperbolehkan", () => {
+    expect(
+      pembayaranEfektif(view("DIKONFIRMASI", 100000n, 0n), {
+        jenis: "DP",
+        kanal: "MANUAL",
+      }),
+    ).toEqual({ jenis: "DP", kanal: "MANUAL" });
   });
 });
 

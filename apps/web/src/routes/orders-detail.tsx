@@ -26,7 +26,7 @@ import {
 import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
 import { fieldErrorsFrom, pesanAksi } from "@/lib/form-error";
-import { adalahCod, ringkasOrder } from "@/lib/order-presentation";
+import { pembayaranEfektif, ringkasOrder } from "@/lib/order-presentation";
 import { rpcAmount } from "@/lib/rpc-amount";
 import { supabase } from "@/lib/supabase";
 
@@ -188,15 +188,19 @@ export function OrderDetailPage() {
   const bisaBatal = ["DRAFT", "DIKONFIRMASI", "DP_DITERIMA", "SIAP_DIKIRIM"].includes(order.status);
   const bisaTerima = order.status === "DIKIRIM" && sisa === 0n;
   const bisaGagalKirim = order.status === "DIKIRIM";
-  const modeCod =
-    order.status === "DIKIRIM" && adalahCod(order.metode_bayar) && bisaBayar;
-  const modePelunasan = order.status === "DP_DITERIMA" && bisaBayar;
-  const jenisEfektif: PaymentJenis = modeCod
-    ? "COD"
-    : modePelunasan
-      ? "PELUNASAN"
-      : formBayar.jenis;
-  const kanalEfektif: PaymentKanal = modeCod ? "COD" : formBayar.kanal;
+  const pembayaran = pembayaranEfektif(
+    {
+      status: order.status,
+      sisa,
+      sudah_dibayar: order.sudah_dibayar,
+      metode_bayar: order.metode_bayar,
+    },
+    { jenis: formBayar.jenis, kanal: formBayar.kanal },
+  );
+  const modeCod = bisaBayar && pembayaran.jenis === "COD";
+  const modePelunasan = bisaBayar && pembayaran.jenis === "PELUNASAN";
+  const jenisEfektif: PaymentJenis = pembayaran.jenis;
+  const kanalEfektif: PaymentKanal = pembayaran.kanal;
   const jenisOpsi: PaymentJenis[] =
     modeCod || modePelunasan ? [] : JENIS_OPSI.filter((jenis) => jenis !== "COD");
   const kanalOpsi: PaymentKanal[] = modeCod
@@ -253,7 +257,7 @@ export function OrderDetailPage() {
 
       if (formBayar.bukti) {
         const namaAman = formBayar.bukti.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        buktiPath = `${currentBusiness.id}/${order.id}/${Date.now()}-${namaAman}`;
+        buktiPath = `${currentBusiness.id}/${order.id}/${formBayar.bukti.lastModified}-${namaAman}`;
         const { error: uploadError } = await supabase.storage
           .from("bukti-pembayaran")
           .upload(buktiPath, formBayar.bukti, { upsert: false });

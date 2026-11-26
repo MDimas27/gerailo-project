@@ -1,0 +1,483 @@
+{
+  "stamp": "392026",
+  "shotDir": "C:/Users/mdima/AppData/Local/Temp/opencode/pwa-smoke",
+  "results": [
+    {
+      "nama": "produk fixture dibuat",
+      "lulus": true,
+      "detail": "CEK10-14 Prepaid 392026 | CEK11 COD 392026 | CEK13 Stok Satu 392026"
+    },
+    {
+      "nama": "CEK10 status BATAL",
+      "lulus": true,
+      "detail": "BATAL"
+    },
+    {
+      "nama": "CEK10 rekap setelah reversi",
+      "lulus": true,
+      "detail": "{\"kas\":\"100000\",\"piutang\":\"0\",\"ump\":\"100000\",\"pendapatan\":\"0\",\"hpp\":\"0\"}"
+    },
+    {
+      "nama": "CEK10 status DIKIRIM sebelum gagal",
+      "lulus": true,
+      "detail": "DIKIRIM"
+    },
+    {
+      "nama": "CEK10 stok KELUAR lama + MASUK snapshot",
+      "lulus": true,
+      "detail": "[{\"jenis\":\"KELUAR\",\"qty\":-3,\"harga_beli\":40000,\"alasan\":\"pengiriman order\"},{\"jenis\":\"MASUK\",\"qty\":3,\"harga_beli\":40000,\"alasan\":\"pengembalian kiriman gagal\"}]"
+    },
+    {
+      "nama": "CEK10 T1 tidak direversi",
+      "lulus": true,
+      "detail": "[{\"kejadian\":\"T1\",\"reversi\":false},{\"kejadian\":\"T2\",\"reversi\":false},{\"kejadian\":\"T3\",\"reversi\":false},{\"kejadian\":\"T4\",\"reversi\":false},{\"kejadian\":\"T11\",\"reversi\":true},{\"kejadian\":\"T11\",\"reversi\":true},{\"kejadian\":\"T11\",\"reversi\":true}]"
+    },
+    {
+      "nama": "CEK11 status SELESAI",
+      "lulus": true,
+      "detail": "SELESAI"
+    },
+    {
+      "nama": "CEK11 metode COD array",
+      "lulus": true,
+      "detail": "[\"COD\"]"
+    },
+    {
+      "nama": "CEK11 T5 sekali, T4 tidak ada",
+      "lulus": true,
+      "detail": "[{\"kejadian\":\"T5\",\"reversi\":false},{\"kejadian\":\"T3\",\"reversi\":false}]"
+    },
+    {
+      "nama": "CEK11 pembayaran COD sekali",
+      "lulus": true,
+      "detail": "[{\"jenis\":\"COD\",\"jumlah\":165000,\"kanal\":\"COD\"}]"
+    },
+    {
+      "nama": "CEK12 transfer lunas tetap DIKIRIM",
+      "lulus": true,
+      "detail": "DIKIRIM"
+    },
+    {
+      "nama": "CEK12 CTA terima tersedia",
+      "lulus": true,
+      "detail": "1"
+    },
+    {
+      "nama": "CEK12 SELESAI tanpa jurnal/uang baru",
+      "lulus": true,
+      "detail": "{\"sebelum\":3,\"sesudah\":3,\"payments\":1}"
+    },
+    {
+      "nama": "CEK13 error STOK_TIDAK_CUKUP",
+      "lulus": true,
+      "detail": "{\"code\":\"22023\",\"details\":null,\"hint\":null,\"message\":\"STOK_TIDAK_CUKUP: CEK13 Stok Satu 392026 — tersedia 1, butuh 2\"}"
+    },
+    {
+      "nama": "CEK13 status tetap DIKONFIRMASI",
+      "lulus": true,
+      "detail": "DIKONFIRMASI"
+    },
+    {
+      "nama": "CEK13 tanpa jurnal/movement baru",
+      "lulus": true,
+      "detail": "{\"entries\":[0,0],\"movements\":[0,0]}"
+    },
+    {
+      "nama": "CEK14 Bayar online absen",
+      "lulus": true,
+      "detail": "[\"Catat pembayaran\",\"Tandai siap dikirim\",\"Tandai dikirim\",\"Batalkan order\"]"
+    },
+    {
+      "nama": "CEK14 QRIS/VA absen",
+      "lulus": true,
+      "detail": "[\"Catat pembayaran\",\"Tandai siap dikirim\",\"Tandai dikirim\",\"Batalkan order\"]"
+    },
+    {
+      "nama": "CEK14 manual T1 diposting",
+      "lulus": true,
+      "detail": "{\"entries\":[{\"kejadian\":\"T1\",\"reversi\":false}],\"payments\":[{\"jenis\":\"DP\",\"jumlah\":30000,\"kanal\":\"MANUAL\"}]}"
+    },
+    {
+      "nama": "CEK14 status DP_DITERIMA",
+      "lulus": true,
+      "detail": "DP_DITERIMA"
+    }
+  ],
+  "readme": {
+    "CEK10": {
+      "order": "ORD-20261126-007",
+      "id": "a61e98b8-f59b-4609-8873-f75a1ebb8c51",
+      "sebelum": {
+        "order": {
+          "id": "a61e98b8-f59b-4609-8873-f75a1ebb8c51",
+          "nomor": "ORD-20261126-007",
+          "status": "DIKIRIM",
+          "dp": 100000,
+          "metode_bayar": [
+            "TRANSFER"
+          ],
+          "created_at": "2026-11-26T06:10:04.638685+00:00"
+        },
+        "entries": [
+          {
+            "kejadian": "T1",
+            "reversi": false
+          },
+          {
+            "kejadian": "T2",
+            "reversi": false
+          },
+          {
+            "kejadian": "T3",
+            "reversi": false
+          },
+          {
+            "kejadian": "T4",
+            "reversi": false
+          }
+        ],
+        "payments": [
+          {
+            "jenis": "DP",
+            "jumlah": 100000,
+            "kanal": "MANUAL"
+          },
+          {
+            "jenis": "PELUNASAN",
+            "jumlah": 140000,
+            "kanal": "MANUAL"
+          }
+        ],
+        "movements": [
+          {
+            "jenis": "KELUAR",
+            "qty": -3,
+            "harga_beli": 40000,
+            "alasan": "pengiriman order"
+          }
+        ],
+        "rekap": {
+          "kas": "240000",
+          "piutang": "0",
+          "ump": "0",
+          "pendapatan": "240000",
+          "hpp": "120000"
+        }
+      },
+      "sesudah": {
+        "order": {
+          "id": "a61e98b8-f59b-4609-8873-f75a1ebb8c51",
+          "nomor": "ORD-20261126-007",
+          "status": "BATAL",
+          "dp": 100000,
+          "metode_bayar": [
+            "TRANSFER"
+          ],
+          "created_at": "2026-11-26T06:10:04.638685+00:00"
+        },
+        "entries": [
+          {
+            "kejadian": "T1",
+            "reversi": false
+          },
+          {
+            "kejadian": "T2",
+            "reversi": false
+          },
+          {
+            "kejadian": "T3",
+            "reversi": false
+          },
+          {
+            "kejadian": "T4",
+            "reversi": false
+          },
+          {
+            "kejadian": "T11",
+            "reversi": true
+          },
+          {
+            "kejadian": "T11",
+            "reversi": true
+          },
+          {
+            "kejadian": "T11",
+            "reversi": true
+          }
+        ],
+        "payments": [
+          {
+            "jenis": "DP",
+            "jumlah": 100000,
+            "kanal": "MANUAL"
+          },
+          {
+            "jenis": "PELUNASAN",
+            "jumlah": 140000,
+            "kanal": "MANUAL"
+          }
+        ],
+        "movements": [
+          {
+            "jenis": "KELUAR",
+            "qty": -3,
+            "harga_beli": 40000,
+            "alasan": "pengiriman order"
+          },
+          {
+            "jenis": "MASUK",
+            "qty": 3,
+            "harga_beli": 40000,
+            "alasan": "pengembalian kiriman gagal"
+          }
+        ],
+        "rekap": {
+          "kas": "100000",
+          "piutang": "0",
+          "ump": "100000",
+          "pendapatan": "0",
+          "hpp": "0"
+        }
+      }
+    },
+    "CEK11": {
+      "order": "ORD-20261126-008",
+      "id": "b269677c-2487-438f-83f1-c8c0548f0bc5",
+      "snap": {
+        "order": {
+          "id": "b269677c-2487-438f-83f1-c8c0548f0bc5",
+          "nomor": "ORD-20261126-008",
+          "status": "SELESAI",
+          "dp": 0,
+          "metode_bayar": [
+            "COD"
+          ],
+          "created_at": "2026-11-26T06:10:17.56168+00:00"
+        },
+        "entries": [
+          {
+            "kejadian": "T5",
+            "reversi": false
+          },
+          {
+            "kejadian": "T3",
+            "reversi": false
+          }
+        ],
+        "payments": [
+          {
+            "jenis": "COD",
+            "jumlah": 165000,
+            "kanal": "COD"
+          }
+        ],
+        "movements": [
+          {
+            "jenis": "KELUAR",
+            "qty": -2,
+            "harga_beli": 40000,
+            "alasan": "pengiriman order"
+          }
+        ],
+        "rekap": {
+          "kas": "165000",
+          "piutang": "0",
+          "ump": "0",
+          "pendapatan": "165000",
+          "hpp": "80000"
+        }
+      }
+    },
+    "CEK12": {
+      "order": "ORD-20261126-009",
+      "id": "6fbcd1e6-7dc1-4513-8397-1b1a42e63d62",
+      "setelahBayar": {
+        "order": {
+          "id": "6fbcd1e6-7dc1-4513-8397-1b1a42e63d62",
+          "nomor": "ORD-20261126-009",
+          "status": "DIKIRIM",
+          "dp": 0,
+          "metode_bayar": [
+            "TRANSFER"
+          ],
+          "created_at": "2026-11-26T06:10:27.148138+00:00"
+        },
+        "entries": [
+          {
+            "kejadian": "T2",
+            "reversi": false
+          },
+          {
+            "kejadian": "T3",
+            "reversi": false
+          },
+          {
+            "kejadian": "T4",
+            "reversi": false
+          }
+        ],
+        "payments": [
+          {
+            "jenis": "PELUNASAN",
+            "jumlah": 90000,
+            "kanal": "MANUAL"
+          }
+        ],
+        "movements": [
+          {
+            "jenis": "KELUAR",
+            "qty": -1,
+            "harga_beli": 40000,
+            "alasan": "pengiriman order"
+          }
+        ],
+        "rekap": {
+          "kas": "90000",
+          "piutang": "0",
+          "ump": "0",
+          "pendapatan": "90000",
+          "hpp": "40000"
+        }
+      },
+      "setelahSelesai": {
+        "order": {
+          "id": "6fbcd1e6-7dc1-4513-8397-1b1a42e63d62",
+          "nomor": "ORD-20261126-009",
+          "status": "SELESAI",
+          "dp": 0,
+          "metode_bayar": [
+            "TRANSFER"
+          ],
+          "created_at": "2026-11-26T06:10:27.148138+00:00"
+        },
+        "entries": [
+          {
+            "kejadian": "T2",
+            "reversi": false
+          },
+          {
+            "kejadian": "T3",
+            "reversi": false
+          },
+          {
+            "kejadian": "T4",
+            "reversi": false
+          }
+        ],
+        "payments": [
+          {
+            "jenis": "PELUNASAN",
+            "jumlah": 90000,
+            "kanal": "MANUAL"
+          }
+        ],
+        "movements": [
+          {
+            "jenis": "KELUAR",
+            "qty": -1,
+            "harga_beli": 40000,
+            "alasan": "pengiriman order"
+          }
+        ],
+        "rekap": {
+          "kas": "90000",
+          "piutang": "0",
+          "ump": "0",
+          "pendapatan": "90000",
+          "hpp": "40000"
+        }
+      },
+      "tombolSelesai": 1
+    },
+    "CEK13": {
+      "order": "ORD-20261126-010",
+      "id": "f5cd5284-d633-459d-b2cc-774cbff7662e",
+      "sebelum": {
+        "order": {
+          "id": "f5cd5284-d633-459d-b2cc-774cbff7662e",
+          "nomor": "ORD-20261126-010",
+          "status": "DIKONFIRMASI",
+          "dp": 0,
+          "metode_bayar": [
+            "TRANSFER"
+          ],
+          "created_at": "2026-11-26T06:10:39.897453+00:00"
+        },
+        "entries": [],
+        "payments": [],
+        "movements": [],
+        "rekap": {
+          "kas": "0",
+          "piutang": "0",
+          "ump": "0",
+          "pendapatan": "0",
+          "hpp": "0"
+        }
+      },
+      "sesudah": {
+        "order": {
+          "id": "f5cd5284-d633-459d-b2cc-774cbff7662e",
+          "nomor": "ORD-20261126-010",
+          "status": "DIKONFIRMASI",
+          "dp": 0,
+          "metode_bayar": [
+            "TRANSFER"
+          ],
+          "created_at": "2026-11-26T06:10:39.897453+00:00"
+        },
+        "entries": [],
+        "payments": [],
+        "movements": [],
+        "rekap": {
+          "kas": "0",
+          "piutang": "0",
+          "ump": "0",
+          "pendapatan": "0",
+          "hpp": "0"
+        }
+      },
+      "rpcGagal": {
+        "url": "https://wdpkhhvxroxfiqkikinb.supabase.co/rest/v1/rpc/ship_order",
+        "status": 400,
+        "text": "{\"code\":\"22023\",\"details\":null,\"hint\":null,\"message\":\"STOK_TIDAK_CUKUP: CEK13 Stok Satu 392026 — tersedia 1, butuh 2\"}"
+      }
+    },
+    "CEK14": {
+      "order": "ORD-20261126-011",
+      "id": "f3a0fc05-987d-4578-ae36-663623960590",
+      "snap": {
+        "order": {
+          "id": "f3a0fc05-987d-4578-ae36-663623960590",
+          "nomor": "ORD-20261126-011",
+          "status": "DP_DITERIMA",
+          "dp": 0,
+          "metode_bayar": [
+            "TRANSFER"
+          ],
+          "created_at": "2026-11-26T06:10:48.30669+00:00"
+        },
+        "entries": [
+          {
+            "kejadian": "T1",
+            "reversi": false
+          }
+        ],
+        "payments": [
+          {
+            "jenis": "DP",
+            "jumlah": 30000,
+            "kanal": "MANUAL"
+          }
+        ],
+        "movements": [],
+        "rekap": {
+          "kas": "30000",
+          "piutang": "0",
+          "ump": "30000",
+          "pendapatan": "0",
+          "hpp": "0"
+        }
+      }
+    }
+  }
+}

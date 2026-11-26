@@ -52,6 +52,13 @@ describe("pesanAksi", () => {
     );
   });
 
+  it("menampilkan pesan stok tidak cukup apa adanya", () => {
+    const pesan =
+      "STOK_TIDAK_CUKUP: CEK13 Stok Satu 392026 — tersedia 1, butuh 2";
+
+    expect(pesanAksi(new Error(pesan))).toBe(pesan);
+  });
+
   it("tidak membocorkan pesan teknis yang tidak dikenal", () => {
     expect(pesanAksi(new Error("PostgrestError: detail teknis"))).toBe(
       "Aksi gagal. Coba lagi.",

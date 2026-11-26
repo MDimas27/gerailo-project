@@ -202,6 +202,16 @@ diperbarui.
 
 #53 · 26 Nov 2026 · akuntansi · Founder menegaskan snapshot HPP retur: `gagal_kirim` wajib memakai `harga_beli` dari movement KELUAR saat pengiriman, BUKAN `products.hpp_rata_rata` saat gagal (pembelian di antaranya mengubah rata-rata). · Tindakan: `0012_m4_failed_shipment.sql` mengambil `keluar.harga_beli` via join `stock_movements`; pgTAP `0012` menambah 2 assertion (`snapshot = KELUAR`, `snapshot != moving average`) dengan skenario beli 10@80000 setelah kirim 1@50000; total 2 file baru = 55 test. Catat sebagai keputusan lifecycle di sini; jangan pakai rata-rata terkini untuk retur.
 
+#54 · 26 Nov 2026 · gate · Founder ACC Gate #3. Bukti terkuat: RED probe guard, HPP snapshot + 2 assertion, CEK12 COD-only di HP, disiplin commit→CI→staging→HP, dan caveats jujur. UMP tertahan DISETUJUI sebagai liabilitas; refund dicatat manual saat terjadi. · Tindakan: promosi produksi hanya setelah satu batch UI/docs kecil lolos CI 4/4; backlog reminder `UMP tertahan Rp X — kembalikan & catat refund`.
+
+#55 · 26 Nov 2026 · UX · Detail `DIKIRIM` non-COD dengan sisa > 0 lebih dulu mengirim `jenis: DP`, sehingga `record_payment` menolak `TRANSISI_TIDAK_VALID`; `STOK_TIDAK_CUKUP` juga tersamarkan jadi `Aksi gagal. Coba lagi.`. · Tindakan: `pembayaranEfektif()` mengunci `PELUNASAN` (COD → `COD`/`COD`) dari `nextAction()`; `pesanAksi()` mengembalikan teks stok apa adanya; keduanya golden-test.
+
+#56 · 26 Nov 2026 · deploy · Provenance dua hash staging: CI `45351527629` (`84b0c8f`) deploy `index-BB2ga9MK.js`; CI `45352513863` (`1ab17af`, docs-only) deploy ulang bundle identik; CI `45519222493` (`2fa0c3a`) baru deploy `index-CxqO3nNU.js`. · Tindakan: beda hash quality job (`index-zbsBKyFy.js`) vs deploy-staging bukan anomali — env build berbeda; yang di HP adalah hash deploy-staging.
+
+#57 · 26 Nov 2026 · verifikasi · Delta pgTAP `432 → 434` bukan regresi: angka 432 dicatat di tengah sesi sebelum 2 assertion snapshot HPP di `0012` (`plan 39 → 41`). 434 adalah angka kanonik. · Tindakan: jangan lagi mengutip 432 sebagai hasil akhir; gunakan 434 di laporan/AGENTS.
+
+#58 · 26 Nov 2026 · bukti · Retest HP CEK10–CEK14 PASS 20/20 pada device `e8c955c3`, CDP 9223, bundle staging `index-BC-7Gz73.js`, SW/cache dibersihkan. · Tindakan: screenshot + `retest-results.json` disimpan di `docs/evidence/m4/`; `plans/W3-M4-ORDERS-PAYMENTS.md:263` diperbaiki dari `index-BrrhJJ05.js` ke hash yang benar.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
@@ -218,6 +228,8 @@ diperbarui.
 - **Edit pengaturan usaha** (paket, notifikasi, dsb) — M1 sisa
 - **React Fast Refresh warning** di `apps/web/src/lib/auth.tsx:61` (helper diekspor
   bareng komponen) — refactor kecil, bukan blocker M3
+- **Reminder UMP tertahan** di detail order: `UMP tertahan Rp X — kembalikan & catat refund`
+  (follow-up pasca-promosi; refund tetap manual)
 
 ## Status deploy production
 

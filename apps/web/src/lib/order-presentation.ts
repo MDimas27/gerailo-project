@@ -1,3 +1,5 @@
+import type { PaymentJenis, PaymentKanal } from "@gerailo/shared";
+
 import type { OrderStatus } from "@/hooks/use-orders";
 
 export type WorkLane = "BARU" | "DIPROSES" | "SIAP_DIKIRIM" | "SELESAI";
@@ -21,6 +23,11 @@ export type RingkasanOrder = {
   laneLabel: string;
   pembayaran: "Belum dibayar" | "DP diterima" | "Lunas";
   aksi: AksiUtama;
+};
+
+export type PembayaranEfektif = {
+  jenis: PaymentJenis;
+  kanal: PaymentKanal;
 };
 
 export function labelStatus(status: OrderStatus): string {
@@ -162,6 +169,28 @@ export function nextAction(order: OrderView): AksiUtama {
     case "BATAL":
       return aksi("TIDAK_ADA", "Tidak ada aksi", "Pesanan sudah di kondisi akhir.");
   }
+}
+
+export function pembayaranEfektif(
+  order: OrderView,
+  pilihan: PembayaranEfektif,
+): PembayaranEfektif {
+  if (nextAction(order).kind !== "BAYAR") {
+    return pilihan;
+  }
+
+  if (isCod(order)) {
+    return { jenis: "COD", kanal: "COD" };
+  }
+
+  if (order.status === "DIKIRIM" || order.status === "DP_DITERIMA") {
+    return {
+      jenis: "PELUNASAN",
+      kanal: pilihan.kanal === "COD" ? "MANUAL" : pilihan.kanal,
+    };
+  }
+
+  return pilihan;
 }
 
 export function ringkasOrder(order: OrderView): RingkasanOrder {
