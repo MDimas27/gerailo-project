@@ -294,7 +294,7 @@ Prasyarat origin: `https://gerailo-staging.mdimas-jobs.workers.dev`.
    CI `45788400727` 4/4, staging `index-Zbfd4X71.js`, produksi `index-DgwjxP9i.js`.
 
 ### Gate keluar 3 / Definition of Done
-`pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build`, semua pgTAP hijau, drift types hijau, grep bundle hijau, CI 4/4, manual HP terverifikasi. `AGENTS.md`, `LESSONS-LEARNED.md`, modul M4, API-CONTRACTS, DATA-MODEL diperbarui; M4 ditandai `[x]` setelah promosi produksi + smoke HP produksi `ORD-20261126-003`. `/remember` masih menyusul.
+`pnpm lint` + `pnpm typecheck` + `pnpm test` + `pnpm build`, semua pgTAP hijau, drift types hijau, grep bundle hijau, CI 4/4, manual HP terverifikasi. `AGENTS.md`, `LESSONS-LEARNED.md`, modul M4, API-CONTRACTS, DATA-MODEL diperbarui; M4 ditandai `[x]` setelah promosi produksi + smoke HP produksi `ORD-20261126-003`. `/remember` selesai 26 Nov (LESSONS #62).
 
 ### Promosi & smoke produksi 26 Nov
 - Commit `5bb15e3`, CI `45788400727` 4/4, staging `index-Zbfd4X71.js`.

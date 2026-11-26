@@ -218,6 +218,8 @@ diperbarui.
 
 #61 · 26 Nov 2026 · auth/device · OTP produksi awalnya gagal karena Chrome Android tidak bisa resolve host Supabase (`ERR_NAME_NOT_RESOLVED`) walau `adb shell ping` berhasil; permintaan di-proxy lewat CDP `Fetch` + Node `fetch` mengungkap email produksi memakai template default **Magic Link**, bukan kode 6 digit (free tier tidak bisa push template custom tanpa SMTP). · Tindakan: magic link dibuka di Chrome HP yang sama dan `/auth/callback` berhasil membuat sesi; gunakan tab existing dari `/json/list` karena `page.goto` langsung sering gagal. Playwright `connectOverCDP` sempat hang setelah target kosong; raw CDP `Runtime.evaluate` + proxy `Fetch` lebih stabil.
 
+#62 · 26 Nov 2026 · remember · M4 ditutup: `AGENTS.md` M4 `[x]`, LESSONS #59–#61, laporan engineering, plan, dan modul M4 disinkronkan; docs commit `52b6181 Docs: tutup M4 produksi dan smoke HP` di-push `5bb15e3..52b6181 main -> main`, working tree bersih. Tidak ada deviasi SSoT baru: UMP-liabilitas sudah di #54, Midtrans per-seller ditunda di #48, template email produksi masuk backlog. · Tindakan: antrian sesi berikutnya M5 stok sederhana lalu M7 laporan/export; baca `docs/MODULES/M5-STOCK.md` + `M7-REPORTS.md`, `docs/DATA-MODEL.md`, `docs/ACCOUNTING-RULES.md`; prerequisite golden test stok/HPP dan RLS owner tetap hijau, jangan sentuh jurnal tanpa test. iOS fisik tetap catatan founder.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
