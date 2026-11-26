@@ -220,6 +220,8 @@ diperbarui.
 
 #62 · 26 Nov 2026 · remember · M4 ditutup: `AGENTS.md` M4 `[x]`, LESSONS #59–#61, laporan engineering, plan, dan modul M4 disinkronkan; docs commit `52b6181 Docs: tutup M4 produksi dan smoke HP` di-push `5bb15e3..52b6181 main -> main`, working tree bersih. Tidak ada deviasi SSoT baru: UMP-liabilitas sudah di #54, Midtrans per-seller ditunda di #48, template email produksi masuk backlog. · Tindakan: antrian sesi berikutnya M5 stok sederhana lalu M7 laporan/export; baca `docs/MODULES/M5-STOCK.md` + `M7-REPORTS.md`, `docs/DATA-MODEL.md`, `docs/ACCOUNTING-RULES.md`; prerequisite golden test stok/HPP dan RLS owner tetap hijau, jangan sentuh jurnal tanpa test. iOS fisik tetap catatan founder.
 
+#63 · 26 Nov 2026 · remember/ADR-13 · Sesi M4 ditutup setelah tag `m4-production-v1` di-push di `ecf798a`, clean tree + `HEAD=origin/main` terverifikasi; pindah harness ke sesi baru = keputusan level ADR (`docs/ARCHITECTURE.md` ADR-13). · Utang teknis dari 6 catatan founder: (1) tag produksi `m4-production-v1` → commit `ecf798a`; (2) pemetaan sekilas `m4-production-v1 → Worker Version ID 2dcaea96-f34b-4d88-aee7-d94fd3390e8e → bundle index-DgwjxP9i.js`; (3) ADR-13 pindah harness tercatat; (4) rollback Worker via `wrangler versions rollback`, database forward-only tanpa down-migration; (5) sesi lama dibekukan; (6) M5 dilarang keras dimulai di sesi lama, sesi baru wajib cek tag/version/bundle dulu. · Tindakan: mapping + rollback ditulis di `AGENTS.md` dan `docs/ENGINEERING-COMPLETION-REPORT-TASK-001.md`; jangan mulai M5 di sesi lama.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

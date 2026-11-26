@@ -238,6 +238,8 @@ Two UI caveats were found during the run and did not block the checks: at `DIKIR
 - Pre-promotion CI: `https://github.com/MDimas27/gerailo-project/actions/runs/45788400727` (4/4).
 - Staging: `https://gerailo-staging.mdimas-jobs.workers.dev` — latest bundle `index-Zbfd4X71.js`.
 - Production: `https://gerailo-production.mdimas-jobs.workers.dev` — bundle `index-DgwjxP9i.js`, version `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`.
+- Tag produksi `m4-production-v1` (commit `ecf798a`) → Worker Version ID `2dcaea96-f34b-4d88-aee7-d94fd3390e8e` → bundle `index-DgwjxP9i.js`.
+- Rollback: Worker via `wrangler versions rollback`; migrasi database hanya maju, TANPA down-migration.
 
 ## Agent Self-Assessment
 
