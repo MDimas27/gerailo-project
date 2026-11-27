@@ -1,0 +1,108 @@
+name: Production
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Validate Worker bundle
+        run: pnpm --filter @gerailo/worker build:bundle
+
+      - name: Guard browser bundle
+        run: |
+          if grep -rE "service_role|LLM_API_KEY|SUPABASE_SERVICE_ROLE|MIDTRANS_(SERVER_KEY|SIGNATURE_SECRET_KEY|PREVIOUS_SIGNATURE_SECRET_KEY|SECRET|API_KEY)" apps/web/dist; then
+            echo "Kredensial server terdeteksi di bundle browser"
+            exit 1
+          fi
+
+      - name: Fail on direct journal writes outside migrations
+        run: |
+          if grep -rEi --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --exclude-dir=node_modules '(update|insert|delete)[[:space:]]+(into[[:space:]]+)?(public\.)?journal_(entries|lines)' apps packages; then
+            echo "Tulis jurnal langsung dari aplikasi dilarang; gunakan post_journal"
+            exit 1
+          fi
+
+  deploy-production:
+    needs: quality
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_WORKER_URL: ${{ vars.VITE_WORKER_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Push migrations to production
+        if: env.SUPABASE_DB_URL != ''
+        # db.<ref>.supabase.co hanya punya AAAA (IPv6); runner GitHub IPv4-only.
+        # Alihkan ke session pooler Sydney (IPv4). Jika secret sudah pooler, sed no-op.
+        run: |
+          set -euo pipefail
+          DB_URL="$SUPABASE_DB_URL"
+          if [[ "$DB_URL" =~ @db\.([a-z0-9]+)\.supabase\.co: ]]; then
+            REF="${BASH_REMATCH[1]}"
+            DB_URL="$(printf '%s' "$DB_URL" | sed -E -e "s#@db\.${REF}\.supabase\.co:#@aws-0-ap-southeast-2.pooler.supabase.com:#" -e "s#//postgres:#//postgres.${REF}:#")"
+          fi
+          supabase db push --db-url "$DB_URL" --workdir packages --yes
+
+      - name: Build web assets
+        run: pnpm --filter @gerailo/web build
+
+      - name: Deploy production
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/worker
+          command: deploy --env production
