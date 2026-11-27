@@ -43,5 +43,6 @@ bukan narasi: angka dan status harus bisa diperiksa ulang.
 
 ## Referensi
 
-- Contoh nyata: `docs/evidence/m4/` (CEK10–CEK14, 20/20 PASS).
+- Contoh nyata: `docs/evidence/m4/` (CEK10–CEK14, 20/20 PASS) dan
+  `docs/evidence/m5/` + `docs/evidence/m5/production/` (CEK1–CEK5b, 8/8 PASS).
 - `.opencode/command/ecc-laporan.md` — langkah menulis evidence saat menutup sesi.

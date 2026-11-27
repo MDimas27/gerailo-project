@@ -1,10 +1,12 @@
 # M5 — Stok Sederhana (+ HPP Rata-rata Bergerak)
 
 ## Status
-- **SELESAI STAGING 27 Nov 2026** (promosi produksi menunggu ACC): pgTAP `Files=14, Tests=458`
-  (plan(24) MERAH 4 gagal sebelum migrasi `0014_m5_stock.sql`), Vitest 128, lint/typecheck/build
-  hijau. CI `45931832498` 4/4, staging `index-UaU8g1fa.js`; smoke HP `e8c955c3` CEK1–CEK5b 8/8;
-  evidence `docs/evidence/m5/`.
+- **SELESAI PRODUKSI 27 Nov 2026** (tag `m5-production-v1` → commit `ffbc7c7`): pgTAP
+  `Files=14, Tests=458` (plan(24) MERAH 4 gagal sebelum migrasi `0014_m5_stock.sql`),
+  Vitest 128, lint/typecheck/build hijau. CI produksi `45966741343` 4/4, migrasi `0014`
+  ter-apply, Worker Version `023a5055-2957-4e24-b104-f5fcbcb7813c`, bundle
+  `index-DpG1p5iU.js`; smoke HP `e8c955c3` staging 8/8 + produksi 8/8 (CEK5 order penuh
+  via UI); evidence `docs/evidence/m5/` + `docs/evidence/m5/production/`.
 - **Slice**: W3 M5 (rencana: `plans/W3-M5-STOCK.md`, ACC GATE PLAN 27 Nov 2026).
 - **Basis existing**: `stock_movements`, view `v_stock_balance`, `products.hpp_rata_rata`,
   `record_stock_move` (MASUK/PENYESUAIAN), `ship_order` (KELUAR + cek stok),

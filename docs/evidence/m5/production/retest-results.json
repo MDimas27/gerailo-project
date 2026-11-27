@@ -1,0 +1,60 @@
+{
+  "stamp": "1624",
+  "shotDir": "docs/evidence/m5/production",
+  "device": "e8c955c3",
+  "bundle": "/assets/index-DpG1p5iU.js",
+  "ciRun": "45966741343",
+  "versionId": "023a5055-2957-4e24-b104-f5fcbcb7813c",
+  "results": [
+    {
+      "nama": "bundle produksi",
+      "lulus": true,
+      "detail": "/assets/index-DpG1p5iU.js"
+    },
+    {
+      "nama": "CEK1 MASUK + HPP",
+      "lulus": true,
+      "detail": "saldo 20 pcs, HPP Rp11.000"
+    },
+    {
+      "nama": "CEK2 blokir stok minus",
+      "lulus": true,
+      "detail": "penyesuaian -25 ditolak di UI"
+    },
+    {
+      "nama": "CEK3 penyesuaian valid",
+      "lulus": true,
+      "detail": "saldo 18 pcs, HPP tetap Rp11.000"
+    },
+    {
+      "nama": "CEK4 drawer riwayat",
+      "lulus": true,
+      "detail": "drawer menampilkan MASUK + PENYESUAIAN + alasan"
+    },
+    {
+      "nama": "CEK5a order DIKIRIM",
+      "lulus": true,
+      "detail": "order 2f2e9f60-735e-4a5b-aabe-c4bbb629f13c DIKIRIM via UI"
+    },
+    {
+      "nama": "CEK5 saldo setelah kirim",
+      "lulus": true,
+      "detail": "saldo 13 pcs (terverifikasi), HPP Rp11.000 (terverifikasi)"
+    },
+    {
+      "nama": "CEK5b KELUAR di riwayat",
+      "lulus": true,
+      "detail": "movement KELUAR -5 tercatat"
+    }
+  ],
+  "readme": {
+    "CEK2": {
+      "productId": "37a27ca2-0781-44e6-9ffb-8e0c343a5418",
+      "nama": "SMOKE M5 1624"
+    },
+    "CEK5": {
+      "productId": "37a27ca2-0781-44e6-9ffb-8e0c343a5418",
+      "orderId": "2f2e9f60-735e-4a5b-aabe-c4bbb629f13c"
+    }
+  }
+}

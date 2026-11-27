@@ -1,6 +1,6 @@
 # W3-M5-STOCK.md — Rencana Kerja M5 Stok Sederhana (+ HPP Rata-rata Bergerak)
 
-> W3-M5 · dibuat oleh `/ecc-plan` pada 27 Nov 2026 · status: **DIEKSEKUSI + SELESAI STAGING 27 Nov 2026** (promosi produksi menunggu ACC)
+> W3-M5 · dibuat oleh `/ecc-plan` pada 27 Nov 2026 · status: **SELESAI PRODUKSI 27 Nov 2026** (tag `m5-production-v1`)
 > Prasyarat: M4 sudah di produksi (`m4-production-v1`, commit `ecf798a`, Worker Version `2dcaea96-f34b-4d88-aee7-d94fd3390e8e`, bundle `index-DgwjxP9i.js`). Gate PREP M5 (Q1–Q5) telah ditetapkan founder.
 
 ## Tujuan sesi
@@ -111,8 +111,14 @@ Setelah sesi ini selesai, staging memiliki modul **M5 Stok Sederhana** yang utuh
 - **Smoke HP** `e8c955c3`, CDP 9223 (`Android-Package` terverifikasi): CEK1 halaman stok, CEK2 MASUK 10@10.000 + 10@12.000 → saldo 20/HPP Rp11.000, CEK3a tolak −25 `STOK_TIDAK_CUKUP`, CEK3b penyesuaian −2 → saldo 18/HPP tetap 11.000, CEK4 drawer riwayat, CEK5 kirim 5 → saldo 13 + KELUAR −5 — **8/8 PASS**.
 - **Evidence**: `docs/evidence/m5/retest-results.json` + `CEK1`–`CEK5b` screenshot.
 
+## Promosi produksi 27 Nov 2026
+- Jalur CI baru `production.yml` (`workflow_dispatch`, environment `production`) — commit `ffbc7c7`; run `45966741343` 4/4 (`quality` + `deploy-production`); migrasi `0014_m5_stock.sql` ter-apply.
+- Worker `gerailo-production` Version ID `023a5055-2957-4e24-b104-f5fcbcb7813c`, bundle `/assets/index-DpG1p5iU.js`, health `{"status":"ok","service":"gerailo-worker"}`; tag `m5-production-v1` → `ffbc7c7`.
+- Smoke produksi `e8c955c3` **8/8 PASS**: CEK1 20/HPP 11.000; CEK2 tolak −25; CEK3 −2 → 18; CEK4 drawer; CEK5 **order penuh via UI** (COD → konfirmasi → siap kirim → kirim) → saldo 13 + KELUAR −5; evidence `docs/evidence/m5/production/`.
+- Rollback: Worker ke `2dcaea96-f34b-4d88-aee7-d94fd3390e8e` (M4); `0014` additive-only, DB forward-only.
+
 ## Deviasi dari plan (diisi saat berjalan, dengan alasan)
-- **CEK5**: order 5 pcs dibuat/dikonfirmasi/dikirim via RPC dengan JWT sesi perangkat (bukan menekan tombol di layar pesanan), lalu saldo/HPP/KELUAR diverifikasi di UI `/stock` + drawer di HP. Alasan: menghindari rantai selector UI order yang rapuh saat smoke; backend & sesi tetap perangkat yang sama. Tidak ada perubahan kode karena deviasi ini.
+- **CEK5 staging**: order 5 pcs dibuat/dikonfirmasi/dikirim via RPC dengan JWT sesi perangkat (bukan tombol UI). **Ditutup di produksi**: CEK5 produksi dijalankan lewat alur UI penuh (COD → konfirmasi → siap kirim → kirim) dan PASS; pelajaran dicatat di LESSONS #67.
 - **`stock_moves` T8**: UI hanya menampilkan panel prefill T8 (qty/harga/total MASUK terakhir) + peringatan divergensi; form posting T8 tetap BACKLOG sesuai Q2/Q4.
 - Tidak ada deviasi pada migrasi/guard: `0014` hanya menambah cek saldo di `record_stock_move`.
 
