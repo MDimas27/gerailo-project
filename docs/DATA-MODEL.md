@@ -43,11 +43,14 @@
 - Piutang & UMP **bukan tabel** — saldo akun 1-1030 dan 2-2010 dari jurnal (sengaja,
   agar laporan tak bisa beda dengan buku besar).
 - `stock_movements` KELUAR selalu dibuat oleh `ship_order` untuk order DIKIRIM dan unik per
-  order+produk; `record_stock_move` dari klien menolak KELUAR. PENYESUAIAN wajib alasan.
+  order+produk; `record_stock_move` dari klien menolak KELUAR. PENYESUAIAN wajib alasan dan
+  DITOLAK bila membuat saldo < 0 (`STOK_TIDAK_CUKUP`); MASUK tanpa `harga_beli` menambah
+  saldo tanpa mengubah `hpp_rata_rata`.
   `gagal_kirim` membuat MASUK pengembalian dengan `harga_beli` = **snapshot `harga_beli`
   dari baris KELUAR saat barang dikirim**, bukan moving average saat ini; alasan
   `pengembalian kiriman gagal`. `record_stock_move` MASUK tetap menghitung ulang rata-rata
-  dengan harga snapshot tersebut. T8 tidak otomatis:
+  dengan harga snapshot tersebut (mis. pool `30 @15.500` + retur `5 @11.000` →
+  `round(520.000/35) = 14.857`). T8 tidak otomatis:
   template manual, prefill dari MASUK terakhir + risiko divergensi ledger-vs-stok.
 - Index wajib: journal_lines (business_id, account_id, tanggal); orders (business_id,
   status) + UNIQUE (business_id, nomor) + UNIQUE (share_token); products (business_id +
