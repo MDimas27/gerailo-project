@@ -117,6 +117,63 @@ export function toRpcAmount(input: MoneyInput): string {
   return parseRupiah(input).toString();
 }
 
+function toStockQty(value: number | bigint): bigint {
+  if (typeof value === "bigint") {
+    if (value < 0n) {
+      throw new TypeError("Kuantitas stok tidak boleh negatif");
+    }
+
+    return value;
+  }
+
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new TypeError("Kuantitas stok harus integer non-negatif");
+  }
+
+  return BigInt(value);
+}
+
+/**
+ * Rata-rata bergerak HPP per produk (docs/ACCOUNTING-RULES.md, M5).
+ *
+ * Rumus: (stok_lama x hpp_lama + qty_masuk x harga_beli) / (stok_lama + qty_masuk).
+ * **Pembulatan half-up, aritmetika integer aman** — tanpa float dan tanpa
+ * `Number()`, sehingga hasilnya identik dengan `round(numeric)` Postgres untuk
+ * nilai non-negatif (mis. `1@10.000 + 1@11.001 → 10.501`).
+ */
+export function calculateMovingAverageHpp(
+  stokLama: number | bigint,
+  hppLama: MoneyInput,
+  qtyMasuk: number | bigint,
+  hargaBeli: MoneyInput,
+): bigint {
+  const oldQty = toStockQty(stokLama);
+  const inQty = toStockQty(qtyMasuk);
+  const harga = parseRupiah(hargaBeli);
+
+  if (inQty === 0n) {
+    return parseRupiah(hppLama);
+  }
+
+  const totalQty = oldQty + inQty;
+
+  if (oldQty === 0n) {
+    return assertInt8(harga);
+  }
+
+  const hpp = parseRupiah(hppLama);
+  const totalNilai = oldQty * hpp + inQty * harga;
+
+  return assertInt8((totalNilai + totalQty / 2n) / totalQty);
+}
+
+/** Label HPP untuk UI: 0 berarti belum di-set, selain itu rupiah. */
+export function formatHppLabel(input: MoneyInput): string {
+  const value = parseRupiah(input);
+
+  return value <= 0n ? "HPP belum di-set" : formatRupiah(value);
+}
+
 const GATEWAY_AMOUNT_PATTERN = /^\d+(\.00)?$/;
 
 /** Parse `gross_amount` gateway yang hanya boleh integer rupiah atau `.00`. */

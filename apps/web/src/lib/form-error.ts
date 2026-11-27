@@ -26,6 +26,13 @@ const PEMETAAN_RPC: ReadonlyArray<readonly [string, string]> = [
   ["ONGKIR_TIDAK_VALID", "Ongkir tidak valid."],
   ["DP_TIDAK_VALID", "DP tidak valid."],
   ["QTY_TIDAK_VALID", "Jumlah produk tidak valid."],
+  [
+    "KELUAR_HANYA_VIA_ORDER",
+    "Stok keluar hanya bisa lewat pengiriman pesanan.",
+  ],
+  ["ALASAN_WAJIB", "Alasan penyesuaian wajib diisi."],
+  ["HARGA_BELI_TIDAK_VALID", "Harga beli tidak valid."],
+  ["TIPE_MUTASI_TIDAK_VALID", "Jenis mutasi stok tidak valid."],
   ["ITEM_KOSONG", "Pilih minimal satu produk."],
   [
     "JENIS_PEMBAYARAN_TIDAK_VALID",
