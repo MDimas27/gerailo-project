@@ -1,10 +1,14 @@
 # M5 — Stok Sederhana (+ HPP Rata-rata Bergerak)
 
 ## Status
-- **Slice aktif**: W3 M5 (rencana: `plans/W3-M5-STOCK.md`, ACC GATE PLAN 27 Nov 2026).
+- **SELESAI STAGING 27 Nov 2026** (promosi produksi menunggu ACC): pgTAP `Files=14, Tests=458`
+  (plan(24) MERAH 4 gagal sebelum migrasi `0014_m5_stock.sql`), Vitest 128, lint/typecheck/build
+  hijau. CI `45931832498` 4/4, staging `index-UaU8g1fa.js`; smoke HP `e8c955c3` CEK1–CEK5b 8/8;
+  evidence `docs/evidence/m5/`.
+- **Slice**: W3 M5 (rencana: `plans/W3-M5-STOCK.md`, ACC GATE PLAN 27 Nov 2026).
 - **Basis existing**: `stock_movements`, view `v_stock_balance`, `products.hpp_rata_rata`,
   `record_stock_move` (MASUK/PENYESUAIAN), `ship_order` (KELUAR + cek stok),
-  `gagal_kirim` (MASUK retur dengan snapshot HPP KELUAR). UI stok penuh belum ada.
+  `gagal_kirim` (MASUK retur dengan snapshot HPP KELUAR).
 
 ## Tujuan & nilai
 Stok yang dipercaya: berkurang tepat saat barang dikirim, masuk saat pembelian,

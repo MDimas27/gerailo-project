@@ -1,0 +1,60 @@
+{
+  "stamp": "1032",
+  "shotDir": "docs/evidence/m5",
+  "device": "e8c955c3",
+  "bundle": "/assets/index-UaU8g1fa.js",
+  "ciRun": "45931832498",
+  "versionId": "",
+  "results": [
+    {
+      "nama": "bundle",
+      "lulus": true,
+      "detail": "/assets/index-UaU8g1fa.js"
+    },
+    {
+      "nama": "CEK1 halaman stok",
+      "lulus": true,
+      "detail": "judul + peringatan blokir + ringkasan tampil"
+    },
+    {
+      "nama": "CEK2 pembelian + HPP",
+      "lulus": true,
+      "detail": "saldo 20 pcs, HPP Rp11.000"
+    },
+    {
+      "nama": "CEK3a blokir stok minus",
+      "lulus": true,
+      "detail": "penyesuaian -25 ditolak, saldo tetap 20"
+    },
+    {
+      "nama": "CEK3b penyesuaian valid",
+      "lulus": true,
+      "detail": "saldo 18 pcs, HPP tetap Rp11.000"
+    },
+    {
+      "nama": "CEK4 drawer riwayat",
+      "lulus": true,
+      "detail": "drawer menampilkan MASUK + PENYESUAIAN + alasan"
+    },
+    {
+      "nama": "CEK5 kirim 5 pcs",
+      "lulus": true,
+      "detail": "saldo 18 - 5 = 13 pcs, HPP tetap Rp11.000 (KELUAR -5 terverifikasi)"
+    },
+    {
+      "nama": "CEK5b drawer KELUAR",
+      "lulus": true,
+      "detail": "movement KELUAR -5 tercatat"
+    }
+  ],
+  "readme": {
+    "CEK2": {
+      "productId": "cb9faa4a-1774-48c3-bb6d-f7a63603752c",
+      "nama": "M5 Smoke 1032"
+    },
+    "CEK5": {
+      "orderId": "ba557926-9f67-42d5-b3c2-ac4415d49034",
+      "productId": "cb9faa4a-1774-48c3-bb6d-f7a63603752c"
+    }
+  }
+}

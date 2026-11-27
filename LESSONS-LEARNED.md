@@ -226,6 +226,10 @@ diperbarui.
 
 #65 · 27 Nov 2026 · harness · Percobaan harness jcode: spawn git/MSYS dari tool butuh console nyata; `git.exe` menggantung bila tanpa console (berisiko `index.lock`); workaround `start "" /wait cmd /c "git ..."` berfungsi tetapi tidak memenuhi syarat ECC (output & exit code harus tertangkap mulus, otomatis, tanpa jendela console baru). · Tindakan: keputusan founder kembali ke OpenCode CLI untuk seluruh siklus ECC; catatan disimpan bila jcode dicoba lagi setelah bug spawn fix. Commit `a0d518e` tetap 1 di depan `origin/main` dan di-push dari terminal; tidak ada commit lain dari jcode; AGENTS kembali netral-harness.
 
+#66 · 27 Nov 2026 · M5 · Stok sederhana selesai test-first: `0014_m5_stock_test.sql` plan(24) MERAH 4 gagal (7-8, 11, 13) sebelum migrasi `0014_m5_stock.sql`, lalu HIJAU; angka kanonik CI hijau `Files=14, Tests=458` (434 → 458). Guard baru menolak `PENYESUAIAN` negatif yang membuat saldo < 0 dengan `STOK_TIDAK_CUKUP: <nama> — tersedia X, butuh Y` (22023) tanpa mengubah signature lean. G6 retur: snapshot `harga_beli` KELUAR 11000 + pool HPP ter-update `14857` (`round(520000/35)`) + saldo `35`. K5: `MASUK` tanpa harga saat saldo 0 → HPP tetap 0, UI "HPP belum di-set". · Tindakan: CI `45931832498` 4/4, staging `index-UaU8g1fa.js`, smoke HP `e8c955c3` CEK1–CEK5b 8/8, evidence `docs/evidence/m5/`; promosi produksi M5 menunggu ACC.
+
+#67 · 27 Nov 2026 · tooling/env · `supabase` CLI gagal parse `.env` root (`unexpected character "-" in variable name`) karena baris catatan + token Cloudflare ditulis tanpa quoting seperti variabel, sehingga semua perintah CLI berhenti sebelum jalan. · Tindakan: jalankan dari root dengan `--workdir packages` (CLI membaca `.env` workdir Supabase); Docker Desktop harus Start untuk pgTAP lokal; jangan pernah echo isi `.env`. Perbaikan permanen tetap utang split `.env` per environment (#63).
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
