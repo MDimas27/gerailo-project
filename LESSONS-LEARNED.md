@@ -224,6 +224,8 @@ diperbarui.
 
 #64 · 27 Nov 2026 · proses · Paket migrasi ECC 6 butir diterapkan: bagian PROSES WAJIB + gate ACC di `AGENTS.md`, slash command `.opencode/command/ecc-prep|plan|review|laporan.md`, `sop/HARD-RULES.md` (core posting `_post_payment`, larangan enum tanpa ADR, RED probe, snapshot HPP, pgTAP 434, provenance deploy), `sop/SWARM-DISCIPLINE.md`, golden matrix wajib di `plans/TEMPLATE-PLAN.md`, dan `docs/evidence/README.md` lanjutan format m4. · Fakta: penomoran LESSONS sudah mencapai #63 sebelum sesi ini, jadi entri baru mulai #64 (bukan #63). · Tindakan: sesi M5 dimulai dengan `/ecc-prep` + 5 pertanyaan gate, ACC dulu baru `/ecc-plan`; jalur migrasi/RPC/jurnal/RLS/uang tetap satu penulis serial.
 
+#65 · 27 Nov 2026 · harness · Percobaan harness jcode: spawn git/MSYS dari tool butuh console nyata; `git.exe` menggantung bila tanpa console (berisiko `index.lock`); workaround `start "" /wait cmd /c "git ..."` berfungsi tetapi tidak memenuhi syarat ECC (output & exit code harus tertangkap mulus, otomatis, tanpa jendela console baru). · Tindakan: keputusan founder kembali ke OpenCode CLI untuk seluruh siklus ECC; catatan disimpan bila jcode dicoba lagi setelah bug spawn fix. Commit `a0d518e` tetap 1 di depan `origin/main` dan di-push dari terminal; tidak ada commit lain dari jcode; AGENTS kembali netral-harness.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;
