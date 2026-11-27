@@ -69,8 +69,8 @@ export function getStockLevelStatus(input: {
 export type StockMovementLike = {
   id: string;
   jenis: string;
-  qty: number | string;
-  harga_beli: string | number | null;
+  qty: number | string | bigint;
+  harga_beli: string | number | bigint | null;
   created_at: string;
 };
 
@@ -113,11 +113,17 @@ export function deriveT8Prefill(
     return null;
   }
 
+  const hargaTerbaru = terbaru.harga_beli;
+
+  if (hargaTerbaru === null) {
+    return null;
+  }
+
   const qty =
     typeof terbaru.qty === "bigint"
       ? terbaru.qty
       : BigInt(Math.trunc(Number(terbaru.qty)));
-  const hargaBeli = parseRupiah(terbaru.harga_beli);
+  const hargaBeli = parseRupiah(hargaTerbaru);
 
   return {
     movementId: terbaru.id,

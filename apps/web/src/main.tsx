@@ -17,6 +17,8 @@ import { PastePage } from "./routes/paste.js";
 import { ProductFormPage } from "./routes/product-form.js";
 import { ProductsPage } from "./routes/products.js";
 import { SharePage } from "./routes/share.js";
+import { StockAdjustPage } from "./routes/stock-adjust.js";
+import { StockPage } from "./routes/stock.js";
 import { AuthProvider, RequireAuth } from "./lib/auth.js";
 import "./index.css";
 
@@ -127,6 +129,22 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <ProductFormPage mode="edit" />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/stock",
+    element: (
+      <RequireAuth>
+        <StockPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/stock/adjust",
+    element: (
+      <RequireAuth>
+        <StockAdjustPage />
       </RequireAuth>
     ),
   },

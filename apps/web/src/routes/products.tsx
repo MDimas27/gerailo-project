@@ -116,6 +116,9 @@ export function ProductsPage() {
             Katalog &amp; Stok Produk
           </h1>
           <p className="text-sm text-muted">Pantau persediaan &amp; update stok jualan</p>
+          <Link className="text-xs font-semibold text-primary" to="/stock">
+            Catat stok &amp; HPP →
+          </Link>
         </div>
         <Link
           className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-control bg-primary px-4 text-sm font-semibold text-white"

@@ -68,12 +68,20 @@ export function HomePage() {
         <p className="mt-1 text-sm text-muted">
           19 akun COA dan pengaturan usaha sudah dibuat otomatis.
         </p>
-        <Link
-          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-control bg-primary px-4 text-sm font-semibold text-white"
-          to="/products"
-        >
-          Kelola produk &amp; stok
-        </Link>
+        <div className="mt-4 flex flex-col gap-2">
+          <Link
+            className="inline-flex min-h-11 items-center justify-center rounded-control bg-primary px-4 text-sm font-semibold text-white"
+            to="/products"
+          >
+            Kelola produk &amp; stok
+          </Link>
+          <Link
+            className="inline-flex min-h-11 items-center justify-center rounded-control border border-border bg-surface px-4 text-sm font-semibold text-ink"
+            to="/stock"
+          >
+            Catat stok &amp; HPP
+          </Link>
+        </div>
       </section>
 
       <section className="rounded-card border border-dashed border-border p-5">
