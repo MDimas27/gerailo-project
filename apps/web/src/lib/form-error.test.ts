@@ -59,6 +59,21 @@ describe("pesanAksi", () => {
     expect(pesanAksi(new Error(pesan))).toBe(pesan);
   });
 
+  it("menerjemahkan error RPC stok menjadi instruksi perbaikan", () => {
+    expect(pesanAksi(new Error("KELUAR_HANYA_VIA_ORDER"))).toBe(
+      "Stok keluar hanya bisa lewat pengiriman pesanan.",
+    );
+    expect(pesanAksi(new Error("ALASAN_WAJIB"))).toBe(
+      "Alasan penyesuaian wajib diisi.",
+    );
+    expect(pesanAksi(new Error("HARGA_BELI_TIDAK_VALID"))).toBe(
+      "Harga beli tidak valid.",
+    );
+    expect(pesanAksi(new Error("TIPE_MUTASI_TIDAK_VALID"))).toBe(
+      "Jenis mutasi stok tidak valid.",
+    );
+  });
+
   it("tidak membocorkan pesan teknis yang tidak dikenal", () => {
     expect(pesanAksi(new Error("PostgrestError: detail teknis"))).toBe(
       "Aksi gagal. Coba lagi.",

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  calculateMovingAverageHpp,
+  formatHppLabel,
   formatRupiah,
   moneyAdd,
   moneyMultiply,
@@ -110,5 +112,33 @@ describe("toGatewayAmount", () => {
 
   it("menolak nilai di luar presisi number", () => {
     expect(() => toGatewayAmount("9007199254740993")).toThrow();
+  });
+});
+
+describe("calculateMovingAverageHpp", () => {
+  it("menghitung rata-rata bergerak 10@10.000 + 10@12.000 = 11.000", () => {
+    expect(calculateMovingAverageHpp(10, 10_000n, 10, 12_000n)).toBe(11_000n);
+  });
+
+  it("membulatkan half-up pada batas .5 seperti round(numeric) Postgres", () => {
+    expect(calculateMovingAverageHpp(1, 10_000n, 1, 11_001n)).toBe(10_501n);
+  });
+
+  it("membulatkan ke rupiah terdekat pada pembagian tidak bulat", () => {
+    expect(calculateMovingAverageHpp(10, 10_000n, 7, 11_000n)).toBe(10_412n);
+  });
+
+  it("menetapkan harga beli saat stok lama kosong", () => {
+    expect(calculateMovingAverageHpp(0, 0n, 5, 8_000n)).toBe(8_000n);
+  });
+});
+
+describe("formatHppLabel", () => {
+  it("menampilkan label khusus saat HPP belum di-set", () => {
+    expect(formatHppLabel(0n)).toBe("HPP belum di-set");
+  });
+
+  it("memformat HPP terisi sebagai rupiah", () => {
+    expect(formatHppLabel(11_000n)).toBe("Rp11.000");
   });
 });
