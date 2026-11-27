@@ -40,10 +40,12 @@
   ulang dari `products.harga_beli` atau rata-rata bergerak terkini.
 - Test kanonik: KELUAR qty −3 `harga_beli=50000` → MASUK +3 harus memakai 50000.
 
-## 5. pgTAP 434 kanonik
+## 5. Angka pgTAP kanonik = angka pada CI hijau terakhir
 
-- Angka acuan saat ini: `Files=13, Tests=434` (bukan 432 — 432 adalah angka
-  tengah sesi sebelum 2 assertion snapshot HPP di `0012`).
+- Angka acuan = angka pgTAP pada CI hijau TERAKHIR, dan WAJIB dicatat di
+  `LESSONS-LEARNED.md` saat berubah (jangan mengutip angka basi antar migrasi).
+- Riwayat penting: 434 adalah angka kanonik saat penutupan M4 (bukan 432 — 432
+  adalah angka tengah sesi sebelum 2 assertion snapshot HPP di `0012`).
 - Setiap perubahan jumlah test wajib dijelaskan di `LESSONS-LEARNED.md`; jangan
   mengutip angka lama sebagai hasil akhir.
 - Test suite hijau = syarat commit; angka baru dicatat di laporan.

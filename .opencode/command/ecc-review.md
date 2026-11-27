@@ -21,7 +21,8 @@ EXECUTE.
 - [ ] **Setiap guard punya bukti MERAH** (probe/test gagal sebelum guard).
 - [ ] **Retur HPP** membaca snapshot `stock_movements.harga_beli` (KELUAR),
       bukan harga produk terkini.
-- [ ] **pgTAP 434 kanonik** atau selisih dijelaskan di LESSONS.
+- [ ] **Angka pgTAP kanonik** = angka pada CI hijau terakhir, dicatat di
+      LESSONS (selisih wajib dijelaskan).
 - [ ] **Provenance deploy**: CI run id, hash bundle, Worker Version ID, tag.
 
 ## 3. Audit rules/00 + domain

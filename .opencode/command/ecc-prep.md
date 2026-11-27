@@ -21,7 +21,8 @@ dan status di `AGENTS.md`).
 boleh disentuh, definisi selesai.
 
 **B. Posisi proyek** — modul selesai/aktif, plan terakhir, angka test kanonik
-(pgTAP `Files=13, Tests=434`; Vitest 109; status staging/produksi terakhir).
+(angka pgTAP pada CI hijau terakhir, dicatat di LESSONS; Vitest; status
+staging/produksi terakhir).
 
 **C. Peringatan** — entri LESSONS-LEARNED (#..) dan HARD-RULES yang paling
 berisiko dilanggar sesi ini.
