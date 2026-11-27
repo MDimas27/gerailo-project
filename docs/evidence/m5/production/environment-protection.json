@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-11-27T09:45:00Z",
+  "environment": "production",
+  "requiredReviewers": ["MDimas27"],
+  "preventSelfReview": false,
+  "canAdminsBypass": false,
+  "deploymentBranchPolicy": {
+    "protectedBranches": false,
+    "customBranchPolicies": true,
+    "allowedBranches": ["main"]
+  },
+  "workflow": {
+    "file": ".github/workflows/production.yml",
+    "trigger": "workflow_dispatch",
+    "refGuard": "github.ref == 'refs/heads/main'",
+    "jobs": ["quality", "deploy-production"]
+  },
+  "source": {
+    "environmentApi": "GET /repos/MDimas27/gerailo-project/environments/production",
+    "branchPoliciesApi": "GET /repos/MDimas27/gerailo-project/environments/production/deployment-branch-policies"
+  }
+}
