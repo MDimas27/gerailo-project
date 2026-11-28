@@ -99,14 +99,14 @@ isOneToOne: true
                   ]
                 },"customers": {
                   Row: {
-                    "alamat": string | null,"business_id": string,"catatan": string | null,"created_at": string,"id": string,"nama": string,"telepon": string,"updated_at": string
+                    "aktif": boolean,"alamat": string | null,"business_id": string,"catatan": string | null,"created_at": string,"id": string,"nama": string,"telepon": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "alamat"?: string | null,"business_id": string,"catatan"?: string | null,"created_at"?: string,"id"?: string,"nama": string,"telepon": string,"updated_at"?: string
+                    "aktif"?: boolean,"alamat"?: string | null,"business_id": string,"catatan"?: string | null,"created_at"?: string,"id"?: string,"nama": string,"telepon": string,"updated_at"?: string
                   }
                   Update: {
-                    "alamat"?: string | null,"business_id"?: string,"catatan"?: string | null,"created_at"?: string,"id"?: string,"nama"?: string,"telepon"?: string,"updated_at"?: string
+                    "aktif"?: boolean,"alamat"?: string | null,"business_id"?: string,"catatan"?: string | null,"created_at"?: string,"id"?: string,"nama"?: string,"telepon"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -588,6 +588,9 @@ isOneToOne: false
 "_order_total":
 { Args: { "p_order_id": string }; Returns: number
                            },
+"_pelanggan_business_owner":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "_post_payment":
 { Args: { "p_biaya_gateway"?: number,"p_bukti_path"?: string,"p_jenis": string,"p_jumlah": number,"p_kanal": string,"p_order_id": string }; Returns: string
                            },
@@ -624,6 +627,9 @@ isOneToOne: false
 "gagal_kirim":
 { Args: { "p_order_id": string }; Returns: undefined
                            },
+"hapus_customer":
+{ Args: { "p_customer_id": string }; Returns: undefined
+                           },
 "log_parser_extraction":
 { Args: { "p_skor": number,"p_teks_asli"?: string }; Returns: string
                            },
@@ -654,11 +660,20 @@ isOneToOne: false
 "record_stock_move":
 { Args: { "p_order_id"?: string,"p_product_id": string,"p_qty": number,"p_reason"?: string,"p_type": string,"p_unit_price"?: number }; Returns: string
                            },
+"set_customer_aktif":
+{ Args: { "p_aktif": boolean,"p_customer_id": string }; Returns: undefined
+                           },
 "set_shipping":
 { Args: { "p_kurir": string,"p_order_id": string,"p_resi": string }; Returns: undefined
                            },
 "ship_order":
 { Args: { "p_biaya_kurir"?: number,"p_kurir_nama"?: string,"p_nomor_resi"?: string,"p_order_id": string }; Returns: undefined
+                           },
+"update_customer":
+{ Args: { "p_alamat"?: string,"p_catatan"?: string,"p_customer_id": string,"p_nama": string,"p_telepon": string }; Returns: undefined
+                           },
+"upsert_customer":
+{ Args: { "p_alamat"?: string,"p_catatan"?: string,"p_nama": string,"p_telepon": string }; Returns: string
                            }
           }
           Enums: {
