@@ -91,7 +91,7 @@ kosong → { totalBelanja: 0n, frekuensi: 0, tanggalTerakhir: null }
 - **MERAH → HIJAU Vitest**: module helper belum ada → **165 test hijau** (stats 3,
   filter/badge 3, pesan 1 test berisi 2 assert).
 - **CI staging**: `46130448964` 4/4; bundle `/assets/index-BNDjihVf.js`; migrasi `0016` ter-apply.
-- **Smoke HP** `e8c955c3` **8/8** (bundle + CEK1–CEK7): list/cari, tambah, edit,
+- **Smoke HP** `e8c955c3` **8/8 CEK1–CEK8** (CEK8 = bundle sama dengan CI): list/cari, tambah, edit,
   arsip+toggle+sembunyi default, autocomplete+badge arsip (tersembunyi default,
   muncul saat toggle), hapus tanpa order sukses + FK `23503`/409 → UI "Gunakan
   Arsipkan", stats 1.230.000/8 = hitung REST, piutang+UMP 745.000 tidak berubah.

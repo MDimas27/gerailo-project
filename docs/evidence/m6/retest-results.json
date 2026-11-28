@@ -7,11 +7,6 @@
     "versionId":  "",
     "results":  [
                     {
-                        "nama":  "bundle",
-                        "lulus":  true,
-                        "detail":  "/assets/index-BNDjihVf.js"
-                    },
-                    {
                         "nama":  "CEK1 list pelanggan",
                         "lulus":  true,
                         "detail":  "halaman list + input pencarian tampil"
@@ -19,7 +14,7 @@
                     {
                         "nama":  "CEK2 tambah pelanggan",
                         "lulus":  true,
-                        "detail":  "tersimpan pelanggan baru; telepon ternormalisasi 628…; aktif=true"
+                        "detail":  "tersimpan pelanggan baru; telepon ternormalisasi 628â€¦; aktif=true"
                     },
                     {
                         "nama":  "CEK3 edit profil",
@@ -45,6 +40,11 @@
                         "nama":  "CEK7 stats + M7 tetap",
                         "lulus":  true,
                         "detail":  "UI total=1230000 hitung=1230000 freqUI=8/8 piutangUI=745000/745000"
+                    },
+                    {
+                        "nama":  "CEK8 bundle staging (sama dengan CI)",
+                        "lulus":  true,
+                        "detail":  "/assets/index-BNDjihVf.js"
                     }
                 ],
     "readme":  {

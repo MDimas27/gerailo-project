@@ -3,7 +3,7 @@
 ## Status
 - **SELESAI STAGING 28 Nov 2026** (promosi produksi menunggu ACC): pgTAP RED 0/24 →
   `Files=16, Tests=499`; Vitest 165; CI staging `46130448964` 4/4, bundle
-  `index-BNDjihVf.js`; smoke HP `e8c955c3` 8/8 (PII masked). Skema baru hanya
+  `index-BNDjihVf.js`; smoke HP `e8c955c3` 8/8 CEK1–CEK8 (PII masked). Skema baru hanya
   `customers.aktif` (arsip; FK RESTRICT tetap menolak hapus ber-order); view M7
   tidak difilter `aktif`.
 
