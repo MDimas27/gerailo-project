@@ -142,6 +142,12 @@ isOneToOne: false
       referencedRelation: "orders"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "journal_entries_order_id_fkey"
+      columns: ["order_id"]
+isOneToOne: false
+      referencedRelation: "v_piutang_ump"
+      referencedColumns: ["order_id"]
+    },{
       foreignKeyName: "journal_entries_reversi_dari_id_fkey"
       columns: ["reversi_dari_id"]
 isOneToOne: false
@@ -199,6 +205,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "orders"
       referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "order_items_order_fkey"
+      columns: ["order_id","business_id"]
+isOneToOne: false
+      referencedRelation: "v_piutang_ump"
+      referencedColumns: ["order_id","business_id"]
     },{
       foreignKeyName: "order_items_product_fkey"
       columns: ["product_id","business_id"]
@@ -270,6 +282,12 @@ isOneToOne: false
       referencedRelation: "orders"
       referencedColumns: ["id","business_id"]
     },{
+      foreignKeyName: "payment_event_outcomes_order_fkey"
+      columns: ["order_id","business_id"]
+isOneToOne: false
+      referencedRelation: "v_piutang_ump"
+      referencedColumns: ["order_id","business_id"]
+    },{
       foreignKeyName: "payment_event_outcomes_payment_fkey"
       columns: ["payment_id","business_id"]
 isOneToOne: false
@@ -335,6 +353,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "orders"
       referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "payment_intents_order_fkey"
+      columns: ["order_id","business_id"]
+isOneToOne: false
+      referencedRelation: "v_piutang_ump"
+      referencedColumns: ["order_id","business_id"]
     }
                   ]
                 },"payments": {
@@ -361,6 +385,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "orders"
       referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "payments_order_fkey"
+      columns: ["order_id","business_id"]
+isOneToOne: false
+      referencedRelation: "v_piutang_ump"
+      referencedColumns: ["order_id","business_id"]
     }
                   ]
                 },"product_aliases": {
@@ -454,6 +484,12 @@ isOneToOne: false
       referencedRelation: "orders"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "stock_movements_order_fkey"
+      columns: ["order_id"]
+isOneToOne: false
+      referencedRelation: "v_piutang_ump"
+      referencedColumns: ["order_id"]
+    },{
       foreignKeyName: "stock_movements_product_fkey"
       columns: ["product_id","business_id"]
 isOneToOne: false
@@ -470,7 +506,49 @@ isOneToOne: false
                 }
           }
           Views: {
-            "v_rekap_harian": {
+            "v_arus_kas": {
+                  Row: {
+                    "akun_kode": string | null,"akun_nama": string | null,"business_id": string | null,"keluar": number | null,"masuk": number | null,"tanggal": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "journal_lines_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"v_piutang_ump": {
+                  Row: {
+                    "business_id": string | null,"created_at": string | null,"customer_nama": string | null,"customer_telepon": string | null,"nomor": string | null,"order_id": string | null,"piutang": number | null,"status": Database["public"]['Enums']["order_status"] | null,"total": number | null,"uang_muka": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "orders_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"v_pnl_bulan": {
+                  Row: {
+                    "beban": number | null,"bulan": string | null,"business_id": string | null,"hpp": number | null,"laba_kotor": number | null,"pendapatan": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "journal_lines_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"v_rekap_harian": {
                   Row: {
                     "beban": number | null,"business_id": string | null,"hpp": number | null,"kas_masuk": number | null,"laba_kotor": number | null,"pendapatan": number | null,"piutang": number | null,"tanggal": string | null,"uang_muka": number | null
                   }
