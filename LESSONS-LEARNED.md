@@ -232,6 +232,8 @@ diperbarui.
 
 #68 · 27 Nov 2026 · tooling/env · `supabase` CLI gagal parse `.env` root (`unexpected character "-" in variable name`) karena baris catatan + token Cloudflare ditulis tanpa quoting seperti variabel, sehingga semua perintah CLI berhenti sebelum jalan. · Tindakan: jalankan dari root dengan `--workdir packages` (CLI membaca `.env` workdir Supabase); Docker Desktop harus Start untuk pgTAP lokal; jangan pernah echo isi `.env`. Perbaikan permanen tetap utang split `.env` per environment (#63).
 
+#69 · 27 Nov 2026 · roadmap · Founder ACC: M7 (laporan/export) dikerjakan SEBELUM M6 (pelanggan) — deviasi urutan W3 menjadi M5 → M7 → M6; M6 TIDAK dibatalkan, tetap dijadwalkan setelah M7. Alasan: laporan memvalidasi angka M1–M5 (order → jurnal → stok/HPP) dan menjadi pintu penutupan utang (split `.env` #63/#68, pengecualian entitas smoke, disclosure nilai persediaan). · Tindakan: PREP M7 wajib mempertimbangkan dimensi pelanggan dari data yang sudah ada (`orders.customer_id` → `customers.nama`/`telepon` format `628…`, terverifikasi `0003:40-51`) untuk piutang/repeat; jangan mengasumsikan kolom baru sebelum gate.
+
 ## Backlog (ide yang datang, TIDAK dikerjakan di MVP)
 
 - Buyer order portal multi-order per pembeli (P2 — satu link untuk banyak transaksi;

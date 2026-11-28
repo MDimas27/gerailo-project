@@ -16,6 +16,9 @@
 - W1: infra + M1 (parsial) + M2
 - W2: M3 (utama) + M1 selesai
 - W3: M4 → M5 → M6 → M7 (urutan beku; M4 sebelum M5 karena jurnal kas dulu)
+  - **Deviasi 27 Nov 2026 (ACC founder):** M7 dikerjakan **sebelum M6** —
+    urutan aktual W3 = M4 → M5 → M7 → M6. M6 tidak dibatalkan, tetap setelah
+    M7; alasan: laporan memvalidasi angka M1–M5 + menutup utang `.env`/smoke.
 - W4: M8 (utama, P0) → hardening semua modul + billing + legal
 
 ## DoD Launch (13 item — semua wajib; gagal = launch mundur via changelog SSoT)
