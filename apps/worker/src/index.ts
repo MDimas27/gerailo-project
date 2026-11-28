@@ -15,6 +15,8 @@ import {
 } from "./lib/supabase.js";
 import { createSnapToken, verifyMidtransSignature, type SnapEnvironment } from "./lib/midtrans.js";
 import { parserMetricsHandler } from "./routes/admin.js";
+import { exportHandler } from "./routes/export.js";
+import { fetchExportReport } from "./lib/supabase.js";
 import {
   midtransWebhookHandler,
   snapTokenHandler,
@@ -109,6 +111,14 @@ app.post("/api/webhooks/payments/midtrans", (c) =>
   midtransWebhookHandler(paymentDeps(c.env))(
     c as Parameters<ReturnType<typeof midtransWebhookHandler>>[0],
   ),
+);
+
+app.get("/api/export/:jenis", (c) =>
+  exportHandler({
+    verifyToken: (token) => verifyJwt(c.env, token),
+    fetchReport: (jenis, pengguna, bulan) =>
+      fetchExportReport(c.env, pengguna.token, jenis, bulan),
+  })(c as Parameters<ReturnType<typeof exportHandler>>[0]),
 );
 
 export default app;

@@ -1,8 +1,13 @@
 import type { Database } from "@gerailo/supabase/types";
-import { parseRupiah, toRpcAmount } from "@gerailo/shared";
+import {
+  parseRupiah,
+  toRpcAmount,
+  type JenisExport,
+} from "@gerailo/shared";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import type { CatalogProduct } from "../services/parser/types.js";
+import type { LaporanCsv } from "../routes/export.js";
 
 export type WorkerEnv = {
   APP_ENV?: string;
@@ -354,4 +359,113 @@ export async function applyPaymentEvent(
   }
 
   return data;
+}
+
+function bulanBerikut(bulan: string): string {
+  const [tahun = 0, bulanAngka = 0] = bulan.split("-").map(Number);
+  const berikut = bulanAngka === 12
+    ? `${tahun + 1}-01`
+    : `${tahun}-${String(bulanAngka + 1).padStart(2, "0")}`;
+  return berikut;
+}
+
+type KonfigView = {
+  view: string;
+  kolom: string[];
+  order: string;
+  bulanKolom: string | null;
+};
+
+const KONFIG_EXPORT: Record<Exclude<JenisExport, "persediaan">, KonfigView> = {
+  "rekap-harian": {
+    view: "v_rekap_harian",
+    kolom: ["tanggal", "pendapatan", "hpp", "laba_kotor", "kas_masuk", "piutang", "uang_muka", "beban"],
+    order: "tanggal",
+    bulanKolom: "tanggal",
+  },
+  pnl: {
+    view: "v_pnl_bulan",
+    kolom: ["bulan", "pendapatan", "hpp", "beban", "laba_kotor"],
+    order: "bulan",
+    bulanKolom: "bulan",
+  },
+  "arus-kas": {
+    view: "v_arus_kas",
+    kolom: ["tanggal", "akun_kode", "akun_nama", "masuk", "keluar"],
+    order: "tanggal",
+    bulanKolom: "tanggal",
+  },
+  "piutang-ump": {
+    view: "v_piutang_ump",
+    kolom: ["nomor", "status", "customer_nama", "customer_telepon", "total", "piutang", "uang_muka", "created_at"],
+    order: "created_at",
+    bulanKolom: null,
+  },
+};
+
+export async function fetchExportReport(
+  env: WorkerEnv,
+  token: string,
+  jenis: JenisExport,
+  bulan: string | null,
+): Promise<LaporanCsv> {
+  const klien = klienDasar(env, token);
+
+  if (jenis === "persediaan") {
+    const [saldoRes, produkRes] = await Promise.all([
+      klien.from("v_stock_balance").select("product_id,saldo"),
+      klien.from("products").select("id,nama,hpp_rata_rata").order("nama"),
+    ]);
+
+    if (saldoRes.error) {
+      throw new Error(`EXPORT_GAGAL: ${saldoRes.error.message}`);
+    }
+
+    if (produkRes.error) {
+      throw new Error(`EXPORT_GAGAL: ${produkRes.error.message}`);
+    }
+
+    const saldo = new Map(
+      ((saldoRes.data ?? []) as { product_id: string; saldo: string | number }[]).map(
+        (row) => [row.product_id, parseRupiah(String(row.saldo ?? "0"))],
+      ),
+    );
+
+    const kolom = ["produk", "saldo", "hpp", "nilai", "unit_tanpa_harga"];
+    const baris = ((produkRes.data ?? []) as { id: string; nama: string; hpp_rata_rata: string | number }[]).map(
+      (produk) => {
+        const hpp = parseRupiah(String(produk.hpp_rata_rata ?? "0"));
+        const saldoProduk = saldo.get(produk.id) ?? 0n;
+        const nilai = saldoProduk > 0n && hpp > 0n ? saldoProduk * hpp : null;
+        const unit = saldoProduk > 0n && hpp <= 0n ? 1 : 0;
+        return [produk.nama, saldoProduk, hpp, nilai, unit] as LaporanCsv["baris"][number];
+      },
+    );
+
+    return { kolom, baris };
+  }
+
+  const konfig = KONFIG_EXPORT[jenis];
+  const relasi = konfig.view as Parameters<typeof klien.from>[0];
+  let permintaan = klien.from(relasi).select(konfig.kolom.join(","));
+
+  if (konfig.bulanKolom && bulan) {
+    permintaan = permintaan
+      .gte(konfig.bulanKolom, `${bulan}-01`)
+      .lt(konfig.bulanKolom, `${bulanBerikut(bulan)}-01`);
+  }
+
+  const { data, error } = await permintaan.order(konfig.order, { ascending: true });
+
+  if (error) {
+    throw new Error(`EXPORT_GAGAL: ${error.message}`);
+  }
+
+  const baris = ((data ?? []) as unknown as Record<string, unknown>[]).map((row) =>
+    konfig.kolom.map(
+      (kolom) => (row[kolom] ?? null) as string | null,
+    ),
+  );
+
+  return { kolom: konfig.kolom, baris };
 }
