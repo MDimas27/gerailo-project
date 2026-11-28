@@ -59,6 +59,19 @@ describe("pesanAksi", () => {
     expect(pesanAksi(new Error(pesan))).toBe(pesan);
   });
 
+  it("menerjemahkan error pelanggan menjadi instruksi perbaikan", () => {
+    expect(pesanAksi(new Error("TELEPON_TERDAFTAR"))).toBe(
+      "Nomor telepon sudah terdaftar. Buka pelanggan yang ada.",
+    );
+    expect(
+      pesanAksi(
+        new Error(
+          'update or delete on table "customers" violates foreign key constraint "orders_customer_fkey" on table "orders"',
+        ),
+      ),
+    ).toBe("Pelanggan masih punya pesanan. Gunakan Arsipkan.");
+  });
+
   it("menerjemahkan error RPC stok menjadi instruksi perbaikan", () => {
     expect(pesanAksi(new Error("KELUAR_HANYA_VIA_ORDER"))).toBe(
       "Stok keluar hanya bisa lewat pengiriman pesanan.",
