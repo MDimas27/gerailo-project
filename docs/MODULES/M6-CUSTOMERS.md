@@ -1,5 +1,12 @@
 # M6 — Pelanggan (ringkas, tanpa CRM penuh)
 
+## Status
+- **SELESAI STAGING 28 Nov 2026** (promosi produksi menunggu ACC): pgTAP RED 0/24 →
+  `Files=16, Tests=499`; Vitest 165; CI staging `46130448964` 4/4, bundle
+  `index-BNDjihVf.js`; smoke HP `e8c955c3` 8/8 (PII masked). Skema baru hanya
+  `customers.aktif` (arsip; FK RESTRICT tetap menolak hapus ber-order); view M7
+  tidak difilter `aktif`.
+
 ## Tujuan & nilai
 Pilih pelanggan lama dalam 2 ketukan saat buat order; histori belanja terbentuk otomatis;
 tiga statistik ringkas: total belanja, tanggal terakhir, frekuensi. Segmentasi/kampanye

@@ -1,0 +1,65 @@
+{
+    "stamp":  "1805",
+    "shotDir":  "docs/evidence/m6",
+    "device":  "e8c955c3",
+    "bundle":  "/assets/index-BNDjihVf.js",
+    "ciRun":  "46130448964",
+    "versionId":  "",
+    "results":  [
+                    {
+                        "nama":  "bundle",
+                        "lulus":  true,
+                        "detail":  "/assets/index-BNDjihVf.js"
+                    },
+                    {
+                        "nama":  "CEK1 list pelanggan",
+                        "lulus":  true,
+                        "detail":  "halaman list + input pencarian tampil"
+                    },
+                    {
+                        "nama":  "CEK2 tambah pelanggan",
+                        "lulus":  true,
+                        "detail":  "tersimpan pelanggan baru; telepon ternormalisasi 628…; aktif=true"
+                    },
+                    {
+                        "nama":  "CEK3 edit profil",
+                        "lulus":  true,
+                        "detail":  "nama profiled ter-update"
+                    },
+                    {
+                        "nama":  "CEK4 arsip + toggle",
+                        "lulus":  true,
+                        "detail":  "badge=true sembunyiDefault=true munculToggle=true"
+                    },
+                    {
+                        "nama":  "CEK5 autocomplete + badge",
+                        "lulus":  true,
+                        "detail":  "tersembunyiDefault=true badge=true teleponTerisi=true ajakan=true"
+                    },
+                    {
+                        "nama":  "CEK6 hapus + FK",
+                        "lulus":  true,
+                        "detail":  "hapusTanpaOrder=true fkStatus=409 pesanUI=true"
+                    },
+                    {
+                        "nama":  "CEK7 stats + M7 tetap",
+                        "lulus":  true,
+                        "detail":  "UI total=1230000 hitung=1230000 freqUI=8/8 piutangUI=745000/745000"
+                    }
+                ],
+    "readme":  {
+                   "bisnis":  {
+                                  "id":  "38052ca7-82d4-41c1-8171-ade6c965a84c"
+                              },
+                   "CEK2":  {
+                                "namaAwal":  "M6 Smoke ****",
+                                "telepon":  "628****",
+                                "id":  "0eaf7fcc-a6e9-488c-86f1-d9d3aa724990"
+                            },
+                   "CEK6":  {
+                                "idBerOrder":  "e5c8e5e6-910d-4a6a-94a0-12d33fd7cfae",
+                                "fkStatus":  409,
+                                "fkTeks":  "{\"code\":\"23503\",\"details\":\"Key (id, business_id)=(e5c8e5e6-910d-4a6a-94a0-12d33fd7cfae, 38052ca7-82d4-41c1-8171-ade6c965a84c) is still referenced from table \\\"orders\\\".\",\"hint\":null,\"message\":\"update "
+                            }
+               }
+}

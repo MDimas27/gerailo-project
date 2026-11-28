@@ -45,7 +45,7 @@ Tanpa menyentuh `_post_payment`, core jurnal, enum, dan angka 5 laporan M7.
 | 4 | Implementasi helper + pemetaan pesan → HIJAU | kode | shared + form-error | DeepSeek | [x] |
 | 5 | UI: hooks, `/customers`, `/customers/:id`, autocomplete `/orders/new` | UI | `apps/web/src` | DeepSeek | [x] |
 | 6 | Kontrak: API-CONTRACTS §B/§C, DATA-MODEL, MODULES/M6 | docs | 3 docs | bebas | [x] |
-| 7 | Gate + CI staging + smoke HP CEK1–CEK7 + evidence + review/laporan | ops/docs | evidence | DeepSeek | [ ] |
+| 7 | Gate + CI staging + smoke HP CEK1–CEK7 + evidence + review/laporan | ops/docs | evidence | DeepSeek | [x] |
 
 ## Golden test matrix (RED asli vs re-pin)
 | # | Test | Label | Fixture → Assert | File |
@@ -84,6 +84,19 @@ kosong → { totalBelanja: 0n, frekuensi: 0, tanggalTerakhir: null }
 - [ ] lint/typecheck/test/build + pgTAP hijau; CI staging 4/4.
 - [ ] Smoke HP CEK1–CEK7 (PII telepon di-mask); evidence `docs/evidence/m6/`.
 - [ ] AGENTS/LESSONS/modul/plan diperbarui; promosi produksi setelah ACC.
+
+## Hasil eksekusi & bukti (staging, 28 Nov 2026)
+- **MERAH → HIJAU pgTAP**: `0016` plan(24) RED `function public.upsert_customer does
+  not exist` (0/24) → migrasi `0016_m6_customers.sql` → **`Files=16, Tests=499`**.
+- **MERAH → HIJAU Vitest**: module helper belum ada → **165 test hijau** (stats 3,
+  filter/badge 3, pesan 1 test berisi 2 assert).
+- **CI staging**: `46130448964` 4/4; bundle `/assets/index-BNDjihVf.js`; migrasi `0016` ter-apply.
+- **Smoke HP** `e8c955c3` **8/8** (bundle + CEK1–CEK7): list/cari, tambah, edit,
+  arsip+toggle+sembunyi default, autocomplete+badge arsip (tersembunyi default,
+  muncul saat toggle), hapus tanpa order sukses + FK `23503`/409 → UI "Gunakan
+  Arsipkan", stats 1.230.000/8 = hitung REST, piutang+UMP 745.000 tidak berubah.
+- **Evidence**: `docs/evidence/m6/` (retest-results.json + 7 screenshot, PII telepon
+  di-mask; JSON tanpa telepon mentah).
 
 ## Deviasi dari plan (substansi pasca-ACC)
 - **Model aktif ≠ pemetaan**: Task 4/5/7 (DeepSeek) dikerjakan model aktif (GLM) —
