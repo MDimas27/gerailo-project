@@ -35,10 +35,25 @@ sehingga agent tidak menunggu apa pun. Durasi realistis: 1–2 hari (paralel den
 
 | Kunci | Lokasi | Catatan |
 |---|---|---|
-| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | build env CI + `.env.local` | **publik** (masuk bundle); anon key + RLS |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | GitHub Variables (CI) + `.env.staging`/`.env.production` lokal | **publik** (masuk bundle); anon key + RLS |
+| `SUPABASE_SERVICE_ROLE_KEY` | wrangler secret (Worker) + file env lokal | **hanya Worker** - webhook & cron; jangan ke browser |
+| `SUPABASE_DB_URL` | GitHub Secret per environment + file env lokal | migrasi `supabase db push`; produksi via environment `production` |
+| `CLOUDFLARE_API_TOKEN` | GitHub Secret (CI) / `wrangler login` lokal | token hasil rotasi 27 Nov 2026; token lama di `.env` lama sudah 401/dicabut |
+
+### Split `.env` (Task 1 M7, 27 Nov 2026)
+
+- File: `.env.staging` (dev lokal = staging) dan `.env.production` (build/bundle
+  produksi) — **keduanya di-gitignore**, tidak pernah di-commit; `.env.example`
+  adalah templat tanpa secret.
+- `vite --mode staging` membaca `.env.staging` (script dev web sudah
+  `vite --mode staging`); `vite build` (mode default `production`) membaca
+  `.env.production`.
+- CI **tidak** membaca file env: nilai di-inject via GitHub Variables/Secrets
+  (staging = repo-level; produksi = environment `production`).
+- Satu `.env` root dengan dua blok duplikat sudah DIHAPUS — akar masalah
+  `supabase` CLI gagal parse (LESSONS #68) dan utang split (#63) ditutup.
 | `SUPABASE_URL` / `SUPABASE_ANON_KEY` | wrangler secret (Worker, staging + production) | runtime supabase-js di Worker; anon key + RLS, bukan `service_role` |
-| `SUPABASE_SERVICE_ROLE_KEY` | wrangler secret (Worker) | **hanya Worker** — webhook & cron |
-| `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_URL` | GitHub Secrets (CI) | migrasi `supabase db push` per env |
+| `SUPABASE_ACCESS_TOKEN` | GitHub Secret (CI) | migrasi `supabase db push` per env |
 | `SENTRY_DSN` | per env (Worker secret + Vite build) | |
 | `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` | build env CI | publik |
 | `LLM_API_KEY` | wrangler secret (Worker) | kunci NVIDIA NIM `nvapi-...`, dipakai `services/parser/llm.ts` |
