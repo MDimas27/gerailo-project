@@ -1,43 +1,43 @@
-# W3-M7-REPORTS.md — Rencana Kerja M7 Laporan & Export
+# W3-M7-REPORTS.md Ã¢â‚¬â€ Rencana Kerja M7 Laporan & Export
 
-> W3-M7 · dibuat oleh `/ecc-plan` 27 Nov 2026 · status: **DISETUJUI (GATE PLAN ACC 27 Nov 2026 — tanpa gerbang kedua)**
-> Prasyarat: M5 produksi (`023a5055-2957-4e24-b104-f5fcbcb7813c`, `index-DpG1p5iU.js`); ACC PREP M7 (Q1–Q5) + 6 tambahan GATE PLAN.
+> W3-M7 Ã‚Â· dibuat oleh `/ecc-plan` 27 Nov 2026 Ã‚Â· status: **DISETUJUI + SELESAI STAGING 28 Nov 2026** (promosi produksi menunggu ACC founder)
+> Prasyarat: M5 produksi (`023a5055-2957-4e24-b104-f5fcbcb7813c`, `index-DpG1p5iU.js`); ACC PREP M7 (Q1Ã¢â‚¬â€œQ5) + 6 tambahan GATE PLAN.
 
 ## Tujuan sesi
 5 laporan MVP + export + PDF print, semuanya dari SQL views `security_invoker`
 (aturan: tanpa angka paralel, tanpa neraca/CaLK):
 1. **Dashboard 4 angka (DIPIN)**: penjualan bulan berjalan, laba kotor bulan
-   berjalan, piutang+UMP saldo kini, nilai persediaan (saldo × HPP rata-rata +
+   berjalan, piutang+UMP saldo kini, nilai persediaan (saldo Ãƒâ€” HPP rata-rata +
    disclosure unit tanpa harga).
 2. `/reports/daily` (rekap harian), `/reports/pnl`, `/reports/cashflow`,
    `/reports/receivables` (piutang & UMP **terpisah** + breakdown pelanggan
-   nama+telepon; repeat analytics → M6).
+   nama+telepon; repeat analytics Ã¢â€ â€™ M6).
 3. Export CSV per laporan (`rekap-harian`, `pnl`, `arus-kas`, `piutang-ump`) +
    **`persediaan` per produk** (produk, saldo, HPP, nilai, unit tanpa harga).
 4. PDF = print browser (`window.print` + CSS cetak) dengan footer "mengacu SAK
-   EMKM" (rules/01 §11).
+   EMKM" (rules/01 Ã‚Â§11).
 
 ## Konteks yang dibaca
-[x] AGENTS.md · [x] sop/HARD-RULES.md · [x] sop/MODEL-ROUTING.md · [x] sop/SWARM-DISCIPLINE.md
-[x] docs/MODULES/M7-REPORTS.md + skills/m7-reports/SKILL.md · [x] docs/DATA-MODEL.md (§Views)
-[x] docs/ACCOUNTING-RULES.md (COA + fixture Siti) · [x] docs/API-CONTRACTS.md §A/§B/§C
-[x] docs/UI-UX.md §keuangan + design/stitch/keuangan_sederhana · [x] LESSONS #50–#69
-[x] rules/00–03 · [x] plans/TEMPLATE-PLAN.md · [x] verifikasi lokasi smoke (read-only, bisnis
-`Dapur Bu Siti Smoke` `c1681709-…` — semua smoke di bisnis terpisah, tanpa flag/kolom baru)
+[x] AGENTS.md Ã‚Â· [x] sop/HARD-RULES.md Ã‚Â· [x] sop/MODEL-ROUTING.md Ã‚Â· [x] sop/SWARM-DISCIPLINE.md
+[x] docs/MODULES/M7-REPORTS.md + skills/m7-reports/SKILL.md Ã‚Â· [x] docs/DATA-MODEL.md (Ã‚Â§Views)
+[x] docs/ACCOUNTING-RULES.md (COA + fixture Siti) Ã‚Â· [x] docs/API-CONTRACTS.md Ã‚Â§A/Ã‚Â§B/Ã‚Â§C
+[x] docs/UI-UX.md Ã‚Â§keuangan + design/stitch/keuangan_sederhana Ã‚Â· [x] LESSONS #50Ã¢â‚¬â€œ#69
+[x] rules/00Ã¢â‚¬â€œ03 Ã‚Â· [x] plans/TEMPLATE-PLAN.md Ã‚Â· [x] verifikasi lokasi smoke (read-only, bisnis
+`Dapur Bu Siti Smoke` `c1681709-Ã¢â‚¬Â¦` Ã¢â‚¬â€ semua smoke di bisnis terpisah, tanpa flag/kolom baru)
 
-## Keputusan gate yang mengikat (PREP Q1–Q5 + GATE PLAN)
+## Keputusan gate yang mengikat (PREP Q1Ã¢â‚¬â€œQ5 + GATE PLAN)
 | ID | Putusan |
 |---|---|
 | Q1 | ACC 5 laporan + CSV + PDF print, tanpa neraca/CaLK. Dashboard 4 angka DIPIN (di atas). Nilai persediaan = kartu dashboard + **CSV persediaan per produk** (putusan founder), BUKAN di laba rugi v1. Dimensi pelanggan v1 HANYA breakdown piutang/UMP (nama+telepon). OTP 6 digit = ops task founder sekarang (bukti dicatat). Cleanup `metode_bayar` tetap backlog. |
-| Q2 | Views turunan `journal_lines`/`journal_entries`, `security_invoker = on`, nol agregasi paralel. Pengecualian smoke: **terverifikasi** semua smoke di bisnis `Dapur Bu Siti Smoke` (`c1681709-…`; order M4 `ORD-20261126-003` SELESAI + produk/order M5) → RLS + filter `business_id` menyelesaikan; **TIDAK ADA** flag/backfill/kolom baru; aturan ops "smoke hanya di akun smoke". `.env` split ACC (`.env.staging`/`.env.production` + CI inject + `.env.example`, tanpa secret). |
-| Q3 | Fixture ACC (240.000/165.000/75.000; kas 240.000; piutang 0 setelah lunas; 13×11.000=143.000). RED probe wajib. Tiga tambahan: (1) CSV angka mentah tanpa `Rp`/pemisah, tanggal ISO, fixture produk berisi koma/kutip/baris baru, assert BOM; (2) **piutang & UMP tampil TERPISAH** (`1-1030` vs `2-2010`) sebagai pengingat UMP tertahan; (3) RED probe route export di Vitest. |
+| Q2 | Views turunan `journal_lines`/`journal_entries`, `security_invoker = on`, nol agregasi paralel. Pengecualian smoke: **terverifikasi** semua smoke di bisnis `Dapur Bu Siti Smoke` (`c1681709-Ã¢â‚¬Â¦`; order M4 `ORD-20261126-003` SELESAI + produk/order M5) Ã¢â€ â€™ RLS + filter `business_id` menyelesaikan; **TIDAK ADA** flag/backfill/kolom baru; aturan ops "smoke hanya di akun smoke". `.env` split ACC (`.env.staging`/`.env.production` + CI inject + `.env.example`, tanpa secret). |
+| Q3 | Fixture ACC (240.000/165.000/75.000; kas 240.000; piutang 0 setelah lunas; 13Ãƒâ€”11.000=143.000). RED probe wajib. Tiga tambahan: (1) CSV angka mentah tanpa `Rp`/pemisah, tanggal ISO, fixture produk berisi koma/kutip/baris baru, assert BOM; (2) **piutang & UMP tampil TERPISAH** (`1-1030` vs `2-2010`) sebagai pengingat UMP tertahan; (3) RED probe route export di Vitest. |
 | Q4 | Bukti print-preview PDF; screenshot evidence **WAJIB mask telepon/email**; cross-check angka UI vs REST JWT (pola M4). |
 | Q5 | CSV tanpa masking (data milik seller, RLS melindungi); yang di-mask hanya evidence. Performa `<500ms @10k journal_lines` = target, bukti timing di evidence. Stop: ubah `_post_payment`/core jurnal, enum baru, angka paralel, kolom baru di tabel jurnal, export lintas usaha. |
-| T1 | **G3 pin kode akun dari migrasi aktual**: piutang **`1-1030`**, UMP **`2-2010`** (terverifikasi `docs/ACCOUNTING-RULES.md` §COA + seed 19 akun; koreksi `1-1300→1-1030` dicatat di LESSONS). |
+| T1 | **G3 pin kode akun dari migrasi aktual**: piutang **`1-1030`**, UMP **`2-2010`** (terverifikasi `docs/ACCOUNTING-RULES.md` Ã‚Â§COA + seed 19 akun; koreksi `1-1300Ã¢â€ â€™1-1030` dicatat di LESSONS). |
 | T2 | **`v_arus_kas` definisi eksplisit akun kas/bank** mengikuti `docs/ACCOUNTING-RULES.md`: **`1-1010` Kas + `1-1020` Bank/e-wallet** saja; item non-kas tidak masuk arus kas. |
 | T3 | Route export: **zod whitelist jenis** (`rekap-harian`, `pnl`, `arus-kas`, `piutang-ump`, `persediaan`) + header `Content-Disposition: attachment; filename="<jenis>-YYYY-MM-DD.csv"` (tanggal ekspor ISO; `persediaan-YYYY-MM-DD.csv` untuk jenis persediaan). |
 | T4 | **1 assert Vitest**: 4 angka dashboard dari fixture = **komposisi G1/G3/G4** (dihitung dari view/helper yang sama, bukan agregat kedua). |
-| T5 | Substansi berubah pasca-ACC → wajib masuk kolom **Deviasi** + LESSONS. |
+| T5 | Substansi berubah pasca-ACC Ã¢â€ â€™ wajib masuk kolom **Deviasi** + LESSONS. |
 | T6 | **Task 5**: HP wajib reconnect; smoke offline = **dijadwalkan ulang, bukan dilewati (skip)**. |
 
 ## Pemetaan model per tugas (sop/MODEL-ROUTING.md)
@@ -56,35 +56,35 @@
 > Bila model aktif berbeda dari pemetaan, catat di **Deviasi** + LESSONS.
 
 ## Task berurutan (urutan beku, satu task satu commit)
-| # | Task | Jenis | File utama | Model |
-|---|---|---|---|---|
-| 0a | Founder ubah template OTP 6 digit produksi → bukti `docs/evidence/m7/ops-otp.md` (tanpa PII) | ops | evidence | founder |
-| 0b | `sop/MODEL-ROUTING.md` + 1 baris `AGENTS.md` + plan formal ini | docs | 2 file + plan | bebas |
-| 1 | `.env` split: `.env.staging`/`.env.production` (gitignored) + `.env.example` + dev `vite --mode staging` + `docs/ENV-SETUP.md`; CI inject tetap (ci.yml vars staging, production.yml env vars); verifikasi CI hijau | infra | `.env*`, docs/ENV-SETUP.md | DeepSeek |
-| 2 | pgTAP `0015_m7_reports_test.sql` **MERAH** (views belum ada) → migrasi `0015_m7_reports.sql` (`v_pnl_bulan`, `v_arus_kas`, `v_piutang_ump` + grant; `security_invoker`) → **HIJAU** + `supabase gen types` | DB | tests + migrations + `types/db.ts` | **GLM** |
-| 3a | Golden test Vitest **MERAH**: helper nilai persediaan + formatter CSV (BOM/RFC-4180/angka mentah/tanggal ISO/escaping) + assert dashboard komposisi + RED probe route (401 tanpa JWT, whitelist) | test | `apps/worker/tests`, `packages/shared` | **GLM** |
-| 3b | Implementasi: helper `nilaiPersediaan`/`csvEscape`/`csvBom` di shared; route Worker `GET /api/export/:jenis` (JWT + zod whitelist + streaming CSV + Content-Disposition) → **HIJAU** | kode | `packages/shared/src`, `apps/worker/src/routes` | DeepSeek |
-| 4 | UI: dashboard 4 kartu + 4 route laporan + print CSS + footer SAK EMKM; uang hanya `money.ts`; TanStack Query | UI | `apps/web/src` | DeepSeek |
-| 5 | Gate kualitas (`pnpm lint/typecheck/test/build` + pgTAP) → CI staging hijau → **smoke HP wajib (reconnect dulu; offline = jadwal ulang)** dengan evidence PII-masked + cross-check REST JWT + bukti timing `<500ms @10k` + print-preview PDF | ops | `docs/evidence/m7/` | DeepSeek |
-| 6 | `/ecc-review` → `/ecc-laporan` (status AGENTS, LESSONS, modul M7) | docs | — | draft bebas + review GLM/founder |
+| # | Task | Jenis | File utama | Model | Selesai |
+|---|---|---|---|---|---|
+| 0a | Founder ubah template OTP 6 digit produksi â†’ bukti `docs/evidence/m7/ops-otp.md` (tanpa PII) | ops | evidence | founder | [x] |
+| 0b | `sop/MODEL-ROUTING.md` + 1 baris `AGENTS.md` + plan formal ini | docs | 2 file + plan | bebas | [x] |
+| 1 | `.env` split: `.env.staging`/`.env.production` (gitignored) + `.env.example` + dev `vite --mode staging` + `docs/ENV-SETUP.md`; CI inject tetap (ci.yml vars staging, production.yml env vars); verifikasi CI hijau | infra | `.env*`, docs/ENV-SETUP.md | DeepSeek | [x] |
+| 2 | pgTAP `0015_m7_reports_test.sql` **MERAH** (views belum ada) Ã¢â€ â€™ migrasi `0015_m7_reports.sql` (`v_pnl_bulan`, `v_arus_kas`, `v_piutang_ump` + grant; `security_invoker`) Ã¢â€ â€™ **HIJAU** + `supabase gen types` | DB | tests + migrations + `types/db.ts` | **GLM** | [x] |
+| 3a | Golden test Vitest **MERAH**: helper nilai persediaan + formatter CSV (BOM/RFC-4180/angka mentah/tanggal ISO/escaping) + assert dashboard komposisi + RED probe route (401 tanpa JWT, whitelist) | test | `apps/worker/tests`, `packages/shared` | **GLM** | [x] |
+| 3b | Implementasi: helper `nilaiPersediaan`/`csvEscape`/`csvBom` di shared; route Worker `GET /api/export/:jenis` (JWT + zod whitelist + streaming CSV + Content-Disposition) Ã¢â€ â€™ **HIJAU** | kode | `packages/shared/src`, `apps/worker/src/routes` | DeepSeek | [x] |
+| 4 | UI: dashboard 4 kartu + 4 route laporan + print CSS + footer SAK EMKM; uang hanya `money.ts`; TanStack Query | UI | `apps/web/src` | DeepSeek | [x] |
+| 5 | Gate kualitas (`pnpm lint/typecheck/test/build` + pgTAP) Ã¢â€ â€™ CI staging hijau Ã¢â€ â€™ **smoke HP wajib (reconnect dulu; offline = jadwal ulang)** dengan evidence PII-masked + cross-check REST JWT + bukti timing `<500ms @10k` + print-preview PDF | ops | `docs/evidence/m7/` | DeepSeek | [x] |
+| 6 | `/ecc-review` Ã¢â€ â€™ `/ecc-laporan` (status AGENTS, LESSONS, modul M7) | docs | Ã¢â‚¬â€ | draft bebas + review GLM/founder | [~] |
 
 ## Golden test matrix (ditetapkan di PLAN; fixture dari docs, bukan kode)
 | # | Test | Fixture | Assert | RED proof | File |
 |---|---|---|---|---|---|
-| G1 | `v_pnl_bulan` (akrual) | Siti: 3×75.000+ongkir 15.000, DP 100.000, kirim, lunas 140.000; HPP 165.000 | bulan berjalan: pendapatan **240.000**, HPP **165.000**, laba kotor **75.000**; beban 0 | view belum ada → query error `relation does not exist` | `0015_m7_reports_test.sql` |
+| G1 | `v_pnl_bulan` (akrual) | Siti: 3Ãƒâ€”75.000+ongkir 15.000, DP 100.000, kirim, lunas 140.000; HPP 165.000 | bulan berjalan: pendapatan **240.000**, HPP **165.000**, laba kotor **75.000**; beban 0 | view belum ada Ã¢â€ â€™ query error `relation does not exist` | `0015_m7_reports_test.sql` |
 | G2 | `v_arus_kas` (metode langsung, **hanya 1-1010/1-1020**) | fixture Siti (kas 1-1010) | kas masuk **240.000**; tidak ada item non-kas | view belum ada | `0015` |
-| G3 | `v_piutang_ump` (pin kode **`1-1030`** vs **`2-2010`**) | order DIKIRIM belum lunas → pelunasan | piutang muncul lalu **0**; UMP tetap; **kolom terpisah** + nama/telepon pelanggan; breakdown per order | view belum ada | `0015` |
+| G3 | `v_piutang_ump` (pin kode **`1-1030`** vs **`2-2010`**) | order DIKIRIM belum lunas Ã¢â€ â€™ pelunasan | piutang muncul lalu **0**; UMP tetap; **kolom terpisah** + nama/telepon pelanggan; breakdown per order | view belum ada | `0015` |
 | G4 | Helper nilai persediaan | produk saldo 13, HPP 11.000; produk kedua saldo 5, HPP 0 | nilai **143.000**; `unitTanpaHarga = 1`; disclosure label | helper belum ada (Vitest) | `packages/shared` |
 | G5 | CSV | nilai berisi koma/kutip/baris baru; angka BIGINT; tanggal ISO | BOM `EF BB BF`; RFC-4180 (kutip ganda dilarang lolos); tanpa `Rp`/pemisah ribuan; `Content-Disposition` `<jenis>-YYYY-MM-DD.csv`; 401 tanpa JWT; jenis di luar whitelist ditolak | Vitest route RED | `apps/worker/tests` |
 | G6 | RLS negatif | usaha B membaca views usaha A | 0 baris; export lintas usaha tidak ada (views security_invoker) | pgTAP | `0015` |
 | G7 | Dashboard komposisi (T4) | gabungan G1+G3+G4 | 4 angka dashboard **=** komposisi komponen yang sama (bukan agregat kedua) | Vitest RED sebelum helper | `packages/shared` |
-| G8 | Performa | 10k journal_lines | bukti timing `<500ms` di evidence (bukan assert) | — | evidence |
+| G8 | Performa | 10k journal_lines | bukti timing `<500ms` di evidence (bukan assert) | Ã¢â‚¬â€ | evidence |
 
 ## Lane & kepemilikan berkas
 | Lane | Menulis | Serial/paralel | Gate |
 |---|---|---|---|
-| L1 DB/views/pgTAP/types | `0015_*` + `types/db.ts` | **SERIAL** | MERAH→HIJAU |
-| L2 shared + worker (test dulu) | `packages/shared`, `apps/worker` | SERIAL setelah L2 | MERAH→HIJAU |
+| L1 DB/views/pgTAP/types | `0015_*` + `types/db.ts` | **SERIAL** | MERAHÃ¢â€ â€™HIJAU |
+| L2 shared + worker (test dulu) | `packages/shared`, `apps/worker` | SERIAL setelah L2 | MERAHÃ¢â€ â€™HIJAU |
 | L3 UI | `apps/web/src` | setelah L2 | build hijau |
 | L4 docs/evidence | `docs/`, `plans/`, `sop/`, `LESSONS-LEARNED.md` | bebas | review |
 
@@ -106,11 +106,21 @@
 | PII bocor di evidence | mask telepon/email di screenshot; CSV boleh mentah (RLS) |
 | Smoke device offline | **jadwal ulang, bukan skip** (T6) |
 
+## Hasil eksekusi & bukti (staging, 28 Nov 2026)
+- **MERAH > HIJAU (pgTAP)**: plan(17) RED `relation public.v_pnl_bulan does not exist` (0/17) sebelum migrasi > HIJAU setelah `0015_m7_reports.sql` (`v_pnl_bulan`, `v_arus_kas` 1-1010/1-1020, `v_piutang_ump` 1-1030 vs 2-2010). Kanonik CI: **Files=15, Tests=475** (458 > 475).
+- **MERAH > HIJAU (Vitest)**: 4 file RED (modul belum ada) > implement > **153 test hijau** (csv 11, reports 4, schemas/reports 4, export-route 6 = 25 baru).
+- **CI**: `46100547730` (views+types) 4/4 - `46102778602` (assert BOM byte) 4/4 - `46103496746` (UI) 4/4 - **`46109283876` (fix P&L bulan) 4/4**; staging bundle final **/assets/index-CnT9Rifp.js**.
+- **Smoke HP** `e8c955c3` (CDP 9223): **9/9 PASS** - dashboard 4 angka **= REST JWT** (penjualan Rp1.365.000, laba kotor Rp830.000, piutang+UMP Rp745.000, persediaan Rp9.801.000), rekap harian, P&L, arus kas, piutang/UMP terpisah (telepon di-mask), `Page.printToPDF` > `print-pnl.pdf` (93.452 bytes), CSV persediaan + rekap via Worker (BOM EF BB BF, Content-Disposition <jenis>-YYYY-MM-DD.csv).
+- **Timing**: `v_rekap_harian` @ ~80k `journal_lines` = **90,433 ms** (BEGIN..ROLLBACK, tanpa data tertinggal) - `docs/evidence/m7/timing.md`.
+- **Evidence**: `docs/evidence/m7/` (retest-results.json, 5 screenshot PII-masked, print-pnl.pdf, timing.md, ops-otp.md).
+
 ## Deviasi dari plan (substansi pasca-ACC wajib masuk sini)
-- —
+- **Model aktif > pemetaan**: seluruh Task 1/3b/4/5 dikerjakan GLM (agent aktif) - ACC founder via konfirmasi 27 Nov; pemetaan `sop/MODEL-ROUTING.md` tetap berlaku untuk sesi berikutnya.
+- **Assert BOM** diubah ke byte `EF BB BF` (commit `b1db4db`): `TextDecoder` standar memotong BOM, jadi `charCodeAt(0)` salah - assert tetap membuktikan BOM (T3).
+- **Fix substansi post-ACC**: pemilihan baris P&L bulan berjalan memakai `startsWith(bulan)` karena kolom view berformat tanggal `YYYY-MM-DD` (commit `a40f92e`); ditemukan saat CEK1 - perbandingan dua-sisi dengan fallback nol bisa false-PASS. Utang: pindahkan pemilihan bulan ke helper shared + golden test.
 
 ## BACKLOG (di luar scope M7)
-- Cleanup data `metode_bayar` single-value warisan (tetap backlog — ACC Q1).
-- Repeat analytics pelanggan → M6.
+- Cleanup data `metode_bayar` single-value warisan (tetap backlog Ã¢â‚¬â€ ACC Q1).
+- Repeat analytics pelanggan Ã¢â€ â€™ M6.
 - Neraca penuh + wizard saldo awal + CaLK (bulan ke-2, SSoT 6.2).
 - Export PDF server-side (ADR terpisah bila benar-benar dibutuhkan).

@@ -1,0 +1,68 @@
+{
+  "stamp": "m7",
+  "shotDir": "docs/evidence/m7",
+  "device": "e8c955c3",
+  "bundle": "/assets/index-CnT9Rifp.js",
+  "ciRun": "46109283876",
+  "versionId": "",
+  "results": [
+    {
+      "nama": "bundle",
+      "lulus": true,
+      "detail": "/assets/index-CnT9Rifp.js"
+    },
+    {
+      "nama": "CEK1 dashboard 4 angka = REST JWT",
+      "lulus": true,
+      "detail": "UI={\"penjualan\":\"Rp1.365.000\",\"laba\":\"Rp830.000\",\"piutang\":\"Rp745.000\",\"persediaan\":\"Rp9.801.000\"} REST={\"penjualan\":1365000,\"laba\":830000,\"piutangUmp\":745000,\"persediaan\":9801000}"
+    },
+    {
+      "nama": "CEK2 rekap harian",
+      "lulus": true,
+      "detail": "tabel + label SAK EMKM tampil"
+    },
+    {
+      "nama": "CEK3 laba rugi",
+      "lulus": true,
+      "detail": "kolom P&L tampil"
+    },
+    {
+      "nama": "CEK3b printToPDF",
+      "lulus": true,
+      "detail": "print-pnl.pdf 93452 bytes"
+    },
+    {
+      "nama": "CEK4 arus kas",
+      "lulus": true,
+      "detail": "kolom kas 1-1010/1-1020 tampil"
+    },
+    {
+      "nama": "CEK5 piutang & UMP",
+      "lulus": true,
+      "detail": "kolom terpisah; telepon di-mask di screenshot"
+    },
+    {
+      "nama": "CEK6 export CSV persediaan",
+      "lulus": true,
+      "detail": "status 200; bom 239,187,191; attachment; filename=\"persediaan-2026-11-28.csv\""
+    },
+    {
+      "nama": "CEK6b export CSV rekap-harian?bulan",
+      "lulus": true,
+      "detail": "status 200; attachment; filename=\"rekap-harian-2026-11-28.csv\""
+    }
+  ],
+  "readme": {
+    "CEK1": {
+      "bulan": "2026-11",
+      "bundle": "/assets/index-CnT9Rifp.js"
+    },
+    "CEK6": {
+      "awal": "﻿produk,saldo,hpp,nilai,unit_tanpa_harga\r\nCEK10-14 Prepaid 038395,17,40000,680000,0\r\nCEK10-14 Prepaid 170555,17,40000,680000,0\r\nCEK10-14 Prepaid 207625,19,40000,760000,0\r\nCEK10-14 Prepaid 392026,19,40",
+      "disposisi": "attachment; filename=\"persediaan-2026-11-28.csv\""
+    },
+    "CEK6b": {
+      "awal": "﻿tanggal,pendapatan,hpp,laba_kotor,kas_masuk,piutang,uang_muka,beban\r\n2026-11-26,990000,480000,510000,1080000,140000,230000,0\r\n2026-11-27,375000,55000,320000,0,375000,0,0"
+    }
+  }
+}

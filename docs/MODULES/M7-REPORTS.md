@@ -1,5 +1,12 @@
 # M7 — Laporan & Export
 
+## Status
+- **SELESAI STAGING 28 Nov 2026** (promosi produksi menunggu ACC): pgTAP RED 0/17 →
+  kanonik `Files=15, Tests=475`; Vitest 153; CI staging `46109283876` 4/4, bundle
+  `index-CnT9Rifp.js`; smoke HP `e8c955c3` 9/9 (dashboard = REST JWT, PII masked,
+  print PDF); timing 90,4 ms @ ~80k journal_lines; evidence `docs/evidence/m7/`.
+- Urutan deviasi (ACC): M7 sebelum M6 (`docs/ROADMAP.md`, LESSONS #69).
+
 ## Tujuan & nilai
 Lima laporan yang BISA DIPERCAYA karena semuanya SQL views atas journal_lines —
 tidak ada angka paralel. Export CSV/PDF untuk akuntan/pembeli potensial.
