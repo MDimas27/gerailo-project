@@ -27,6 +27,15 @@ const PEMETAAN_RPC: ReadonlyArray<readonly [string, string]> = [
   ["DP_TIDAK_VALID", "DP tidak valid."],
   ["QTY_TIDAK_VALID", "Jumlah produk tidak valid."],
   [
+    "TELEPON_TERDAFTAR",
+    "Nomor telepon sudah terdaftar. Buka pelanggan yang ada.",
+  ],
+  ["PELANGGAN_TIDAK_DITEMUKAN", "Pelanggan tidak ditemukan."],
+  ["NAMA_PELANGGAN_TIDAK_VALID", "Nama pelanggan wajib diisi (maks. 120)."],
+  ["TELEPON_TIDAK_VALID", "Nomor telepon tidak valid."],
+  ["ALAMAT_TERLALU_PANJANG", "Alamat maksimal 300 karakter."],
+  ["CATATAN_TERLALU_PANJANG", "Catatan maksimal 500 karakter."],
+  [
     "KELUAR_HANYA_VIA_ORDER",
     "Stok keluar hanya bisa lewat pengiriman pesanan.",
   ],
@@ -100,6 +109,14 @@ export function pesanAksi(
 
   if (teks.includes("STOK_TIDAK_CUKUP")) {
     return teks;
+  }
+
+  if (
+    teks.includes("23503") ||
+    (teks.includes("violates foreign key constraint") &&
+      teks.includes("orders_customer_fkey"))
+  ) {
+    return "Pelanggan masih punya pesanan. Gunakan Arsipkan.";
   }
 
   for (const [kode, pesan] of PEMETAAN_RPC) {
