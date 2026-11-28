@@ -21,6 +21,7 @@
    run, evidence `docs/evidence/<m>/`, update status AGENTS + LESSONS.
 
 - Slash command: `/ecc-prep`, `/ecc-plan`, `/ecc-review`, `/ecc-laporan` (`.opencode/command/`).
+- Routing model per fase: PREP/PLAN/golden test + RED probe/review laporan = GLM 5.3 Flash; implementasi pasca-test beku/docs/smoke/evidence = DeepSeek 4.1 Flash (`sop/MODEL-ROUTING.md`); CI satu-satunya hakim implementasi.
 - Larangan: deploy manual; enum/status baru tanpa ADR; guard tanpa RED probe; menyalin logika `_post_payment`; menyatakan selesai tanpa CI hijau.
 - Deployment HANYA via CI dari `main`; produksi dari tag yang lolos CI + smoke HP.
 
