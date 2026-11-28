@@ -15,7 +15,7 @@
 | products | Master produk (+ data katalog publik M9) | id, business_id, nama, harga_jual BIGINT, harga_promo BIGINT?, hpp_rata_rata BIGINT (default 0), foto_paths text[] (max 3), deskripsi_singkat, kategori, tampil_katalog (default false), stok_min, aktif |
 | product_aliases | Alias nama untuk parser M3 (unik case-insensitive per usaha) | id, business_id, product_id, alias |
 | product_variants | Varian teks sederhana | id, business_id, product_id, nama, selisih_harga BIGINT, aktif |
-| customers | Pelanggan | id, business_id, nama, telepon (unique per usaha, bentuk 628…), alamat, catatan |
+| customers | Pelanggan | id, business_id, nama, telepon (unique per usaha, bentuk 628…), alamat, catatan, aktif (default true; arsip — bukan hapus) |
 | orders | Pesanan | id, business_id, customer_id, status enum, ongkir BIGINT, dp BIGINT (informasi dari chat, BUKAN pembayaran), metode_bayar, nomor (ORD-YYYYMMDD-###, unik), share_token (hex 32, unik), kurir_nama?, nomor_resi?, due_date? (batas pelunasan DP) |
 | order_items | Item per order | id, order_id, product_id/variant_id, qty, harga_satuan BIGINT |
 | payments | Riwayat pembayaran (append-only) | id, business_id, order_id, jenis (DP/PELUNASAN/COD), jumlah BIGINT, kanal (MANUAL/COD/QRIS/VA/E_WALLET/MIDTRANS/LAINNYA), bukti_path? (bucket privat `bukti-pembayaran`), catatan? |
@@ -52,6 +52,10 @@
   dengan harga snapshot tersebut (mis. pool `30 @15.500` + retur `5 @11.000` →
   `round(520.000/35) = 14.857`). T8 tidak otomatis:
   template manual, prefill dari MASUK terakhir + risiko divergensi ledger-vs-stok.
+- `customers` (M6): arsip = `aktif=false` (bukan hapus); order tetap auto-link ke
+  pelanggan arsip (dedup telepon). Hapus keras ditolak FK `orders_customer_fkey`
+  (`ON DELETE RESTRICT`, 0003:73) bila pelanggan punya order. Semua view M7
+  (termasuk `v_piutang_ump`) TIDAK memfilter `aktif` agar angka laporan tidak berubah.
 - Index wajib: journal_lines (business_id, account_id, tanggal); orders (business_id,
   status) + UNIQUE (business_id, nomor) + UNIQUE (share_token); products (business_id +
   trigram nama) + product_aliases (UNIQUE business_id + lower(alias), trigram
@@ -70,6 +74,10 @@
 | `log_parser_extraction(...)` | Log parser pola tanpa kuota; teks asli hanya dengan consent |
 | `mark_extraction_corrected(...)` | Tandai log pernah dikoreksi untuk metrik akurasi final; guard owner |
 | `record_stock_move(...)` | MASUK/PENYESUAIAN; MASUK memperbarui HPP rata-rata bergerak; PENYESUAIAN wajib alasan; KELUAR ditolak dari klien |
+| `upsert_customer(p_nama, p_telepon, p_alamat?, p_catatan?)` | Insert pelanggan + `normalize_telepon` server-side; `TELEPON_TERDAFTAR` bila sudah ada (termasuk arsip); guard owner; `aktif=true` |
+| `update_customer(p_customer_id, p_nama, p_telepon, p_alamat?, p_catatan?)` | Edit profil/telepon; normalisasi + cek tabrakan; guard owner |
+| `set_customer_aktif(p_customer_id, p_aktif)` | Arsip/reaktivasi; TIDAK menyentuh order/jurnal/report |
+| `hapus_customer(p_customer_id)` | Hapus hanya tanpa order; ber-order ditolak FK `23503`; guard owner |
 | `ship_order(p_order_id, p_kurir_nama?, p_nomor_resi?, p_biaya_kurir?)` | DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM; cek stok dulu (`STOK_TIDAK_CUKUP` → rollback tanpa jurnal/movement); kurir/resi opsional; satu transaksi T2/T5/T6 + T3 HPP + T7 bila biaya kurir > 0 + movement KELUAR unik per order/produk |
 | `receive_order(p_order_id)` | DIKIRIM lunas → SELESAI; sisa > 0 ditolak "MASIH ADA SISA — catat pelunasan dulu"; tanpa payment/jurnal baru; guard owner |
 | `record_payment(p_order_id, p_jenis, p_jumlah, p_kanal, p_bukti_path?, p_biaya_gateway?)` | Tulis `payments` + hitung sisa di server + tolak overpay + update status + T1/T4/T12; dua DP parsial tetap akumulasi benar; auto-SELESAI saat lunas HANYA COD — non-COD di DIKIRIM tetap DIKIRIM |

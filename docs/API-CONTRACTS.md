@@ -36,6 +36,10 @@ Web memakai `VITE_WORKER_URL` publik untuk memanggil Worker.
 | `log_parser_extraction(p_skor, p_teks_asli?)` | Log ekstraksi pola tanpa kuota; teks asli hanya dengan consent | parser pola M3 |
 | `mark_extraction_corrected(p_log_id)` | Tandai ekstraksi pernah dikoreksi user (metrik akurasi final); guard owner | koreksi Smart Paste M3 |
 | `record_stock_move(p_product_id, p_type, p_qty, p_unit_price, p_reason, p_order_id?)` | Signature TETAP lean (tanpa parameter kas/utang); MASUK/PENYESUAIAN; MASUK berharga memperbarui `products.hpp_rata_rata` (half-up); MASUK tanpa harga tidak mengubah HPP; PENYESUAIAN wajib alasan (`ALASAN_WAJIB`, 22023) dan ditolak bila saldo < 0 (`STOK_TIDAK_CUKUP`, 22023); KELUAR dari klien = DITOLAK 42501 (hanya `ship_order`) | stok awal & pembelian M5 |
+| `upsert_customer(p_nama, p_telepon, p_alamat?, p_catatan?)` | Satu transaksi: `normalize_telepon` server-side + insert pelanggan (M6); `TELEPON_TERDAFTAR` bila telepon sudah ada (termasuk arsip); guard owner; `aktif=true` default | tambah pelanggan M6 |
+| `update_customer(p_customer_id, p_nama, p_telepon, p_alamat?, p_catatan?)` | Edit profil + telepon; `normalize_telepon`; `TELEPON_TERDAFTAR` bila tabrakan; guard owner | edit pelanggan M6 |
+| `set_customer_aktif(p_customer_id, p_aktif)` | Arsip/reaktivasi (`aktif`); guard owner; **tidak** menyentuh order/jurnal/report | arsip pelanggan M6 |
+| `hapus_customer(p_customer_id)` | Hapus keras HANYA pelanggan tanpa order; pelanggan ber-order ditolak FK `23503` (arahkan ke Arsipkan); guard owner | hapus pelanggan M6 |
 | `create_manual_order(p_items, p_ongkir, p_dp, p_nama, p_telepon, p_alamat?, p_catatan?, p_metode_bayar[]?, p_due_date?)` | SATU transaksi: customer dedup + order DRAFT + items; `p_items` wajib `product_id, qty, harga_satuan` — harga manual HANYA lewat form `/orders/new`; product_id harus milik usaha; tanpa jurnal/payment/stok | order manual M4 |
 | `confirm_order(p_order_id)` | DRAFT → DIKONFIRMASI; guard owner; tanpa jurnal | konfirmasi order M4 |
 | `ship_order(p_order_id, p_kurir_nama?, p_nomor_resi?, p_biaya_kurir?)` | DIKONFIRMASI/DP_DITERIMA/SIAP_DIKIRIM → DIKIRIM + kurir/resi opsional; CEK STOK dulu — kurang = `STOK_TIDAK_CUKUP: <nama> — tersedia X, butuh Y` (22023), tanpa jurnal/movement parsial; satu transaksi: jurnal T2/T5/T6 + T3 HPP + T7 bila `p_biaya_kurir > 0` + movement KELUAR unik per order/produk | aksi "kirim" M4 |
@@ -83,7 +87,10 @@ ditutup dari akses langsung (termasuk `service_role`).
 - Order manual `/orders/new`: TIDAK ada INSERT langsung; semua lewat RPC
   `create_manual_order` (0006) karena GRANT tabel hanya SELECT. Bedanya dengan
   `confirm_draft_order`: `harga_satuan` dikirim klien HANYA di form manual ini.
-- UPDATE/DELETE langsung pada `orders`, `payments`, `journal_*` = DILARANG —
+- `customers` (M6): GRANT hanya SELECT; INSERT/UPDATE/DELETE HANYA lewat RPC
+  `upsert_customer`/`update_customer`/`set_customer_aktif`/`hapus_customer`
+  (dedup telepon server-side; arsip bukan hapus).
+- UPDATE/DELETE langsung pada `orders`, `payments`, `journal_*` = DILARANG -
   hanya lewat RPC (REVOKE di migrasi). Laporan = SQL views `security_invoker`
   (`v_rekap_harian`, `v_pnl_bulan`, `v_arus_kas`, `v_piutang_ump`).
 
