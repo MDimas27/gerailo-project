@@ -70,14 +70,15 @@ describe("GET /api/export/:jenis", () => {
     const respons = await app.request("/api/export/persediaan", {
       headers: { Authorization: "Bearer valid" },
     });
-    const body = await respons.text();
+    const bytes = new Uint8Array(await respons.arrayBuffer());
+    const body = new TextDecoder("utf-8", { ignoreBOM: true }).decode(bytes);
 
     expect(respons.status).toBe(200);
     expect(respons.headers.get("Content-Type")).toContain("text/csv");
     expect(respons.headers.get("Content-Disposition")).toMatch(
       /^attachment; filename="persediaan-\d{4}-\d{2}-\d{2}\.csv"$/,
     );
-    expect(body.charCodeAt(0)).toBe(0xfeff);
+    expect([bytes[0], bytes[1], bytes[2]]).toEqual([0xef, 0xbb, 0xbf]);
     expect(body).toContain('"Sambal, ""Pedas""\n200g",13,11000,143000,0');
     expect(body).toContain("Tanpa harga,5,0,,1");
     expect(body).not.toMatch(/Rp\d/);
