@@ -1,6 +1,15 @@
 import { Link, Navigate } from "react-router";
 
+import { formatRupiah } from "@gerailo/shared";
+
+import {
+  bulanBerjalan,
+  usePersediaan,
+  usePiutangUmp,
+  usePnlBulan,
+} from "@/hooks/use-reports";
 import { useBusinesses } from "@/hooks/use-businesses";
+import { dashboardLaporan } from "@gerailo/shared";
 import { useAuth } from "@/lib/auth";
 
 const jenisLabel: Record<string, string> = {
@@ -20,6 +29,30 @@ const metodeLabel: Record<string, string> = {
 export function HomePage() {
   const { signOut } = useAuth();
   const businesses = useBusinesses();
+  const business = businesses.data?.[0];
+  const bulan = bulanBerjalan();
+
+  const pnl = usePnlBulan(business?.id);
+  const piutang = usePiutangUmp(business?.id);
+  const persediaan = usePersediaan(business?.id);
+
+  const pnlRow =
+    (pnl.data ?? []).find((row) => row.bulan === bulan) ?? {
+      bulan,
+      pendapatan: 0n,
+      hpp: 0n,
+      laba_kotor: 0n,
+      beban: 0n,
+    };
+
+  const angka = dashboardLaporan({
+    pnl: pnlRow,
+    piutangUmp: piutang.data ?? [],
+    persediaan: {
+      nilai: persediaan.data?.nilai ?? 0n,
+      unitTanpaHarga: persediaan.data?.unitTanpaHarga ?? 0,
+    },
+  });
 
   if (businesses.isPending) {
     return <p className="p-6 text-sm text-muted">Memuat usaha...</p>;
@@ -33,11 +66,24 @@ export function HomePage() {
     );
   }
 
-  const business = businesses.data?.[0];
-
   if (!business) {
     return <Navigate to="/onboarding" replace />;
   }
+
+  const kartu = [
+    { label: "Penjualan bulan ini", nilai: angka.penjualanBulan, warna: "text-ink" },
+    { label: "Laba kotor bulan ini", nilai: angka.labaKotorBulan, warna: "text-success" },
+    { label: "Piutang + UMP", nilai: angka.piutangUmp, warna: "text-warning" },
+    {
+      label: "Nilai persediaan",
+      nilai: angka.nilaiPersediaan,
+      warna: "text-info",
+      catatan:
+        (persediaan.data?.unitTanpaHarga ?? 0) > 0
+          ? `${persediaan.data?.unitTanpaHarga} produk HPP belum di-set`
+          : undefined,
+    },
+  ];
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-5 py-10">
@@ -62,6 +108,63 @@ export function HomePage() {
           Keluar
         </button>
       </header>
+
+      <section className="rounded-card border border-border bg-surface p-5">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h2 className="text-base font-semibold text-ink">
+              Ringkasan {bulan}
+            </h2>
+            <p className="mt-0.5 text-xs text-muted">
+              Dari jurnal double-entry; mengacu SAK EMKM.
+            </p>
+          </div>
+          <Link className="text-xs font-semibold text-primary no-print" to="/reports/daily">
+            Laporan →
+          </Link>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {kartu.map((satu) => (
+            <div className="rounded-control border border-border px-3 py-2" key={satu.label}>
+              <p className="text-xs text-muted">{satu.label}</p>
+              <p className={`text-lg font-semibold tabular-nums ${satu.warna}`}>
+                {formatRupiah(satu.nilai)}
+              </p>
+              {satu.catatan ? (
+                <p className="text-[11px] text-muted">{satu.catatan}</p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2 no-print">
+          <Link
+            className="inline-flex min-h-9 items-center justify-center rounded-control border border-border px-3 text-xs font-semibold text-ink"
+            to="/reports/pnl"
+          >
+            Laba rugi
+          </Link>
+          <Link
+            className="inline-flex min-h-9 items-center justify-center rounded-control border border-border px-3 text-xs font-semibold text-ink"
+            to="/reports/cashflow"
+          >
+            Arus kas
+          </Link>
+          <Link
+            className="inline-flex min-h-9 items-center justify-center rounded-control border border-border px-3 text-xs font-semibold text-ink"
+            to="/reports/receivables"
+          >
+            Piutang &amp; UMP
+          </Link>
+          <Link
+            className="inline-flex min-h-9 items-center justify-center rounded-control border border-border px-3 text-xs font-semibold text-ink"
+            to="/reports/daily"
+          >
+            Rekap harian
+          </Link>
+        </div>
+      </section>
 
       <section className="rounded-card border border-border bg-surface p-5">
         <h2 className="text-base font-semibold text-ink">Buku usaha siap</h2>

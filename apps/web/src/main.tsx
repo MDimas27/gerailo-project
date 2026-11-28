@@ -16,6 +16,10 @@ import { PasteConfirmPage } from "./routes/paste-confirm.js";
 import { PastePage } from "./routes/paste.js";
 import { ProductFormPage } from "./routes/product-form.js";
 import { ProductsPage } from "./routes/products.js";
+import { ReportsCashflowPage } from "./routes/reports-cashflow.js";
+import { ReportsDailyPage } from "./routes/reports-daily.js";
+import { ReportsPnlPage } from "./routes/reports-pnl.js";
+import { ReportsReceivablesPage } from "./routes/reports-receivables.js";
 import { SharePage } from "./routes/share.js";
 import { StockAdjustPage } from "./routes/stock-adjust.js";
 import { StockPage } from "./routes/stock.js";
@@ -145,6 +149,38 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <StockAdjustPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/reports/daily",
+    element: (
+      <RequireAuth>
+        <ReportsDailyPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/reports/pnl",
+    element: (
+      <RequireAuth>
+        <ReportsPnlPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/reports/cashflow",
+    element: (
+      <RequireAuth>
+        <ReportsCashflowPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/reports/receivables",
+    element: (
+      <RequireAuth>
+        <ReportsReceivablesPage />
       </RequireAuth>
     ),
   },
