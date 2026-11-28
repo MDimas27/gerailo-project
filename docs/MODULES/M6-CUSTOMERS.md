@@ -1,11 +1,14 @@
 # M6 — Pelanggan (ringkas, tanpa CRM penuh)
 
 ## Status
-- **SELESAI STAGING 28 Nov 2026** (promosi produksi menunggu ACC): pgTAP RED 0/24 →
-  `Files=16, Tests=499`; Vitest 165; CI staging `46130448964` 4/4, bundle
-  `index-BNDjihVf.js`; smoke HP `e8c955c3` 8/8 CEK1–CEK8 (PII masked). Skema baru hanya
-  `customers.aktif` (arsip; FK RESTRICT tetap menolak hapus ber-order); view M7
-  tidak difilter `aktif`.
+- **SELESAI PRODUKSI 28 Nov 2026** (tag `m6-production-v1` → `e967b8d`): pgTAP RED
+  0/24 → `Files=16, Tests=499`; Vitest 165; staging CI `46130448964` 4/4
+  (`index-BNDjihVf.js`); produksi CI `46132777400` 4/4, Worker
+  `80fc7512-9cc2-41d6-bd50-9daec8385b8b`, bundle `index-CYTvk6cO.js`, migrasi `0016`
+  ter-apply; smoke HP produksi 8/8 CEK1–CEK8 (stats 375.000/1, piutang+UMP 0;
+  pelanggan uji dibersihkan 204; PII masked). Skema baru hanya `customers.aktif`
+  (arsip; FK RESTRICT tetap menolak hapus ber-order); view M7 tidak difilter `aktif`.
+  Rollback Worker target M7 `3b4e9c52-6013-4ef5-bd36-e41c79cbbabb`; `0016` additive.
 
 ## Tujuan & nilai
 Pilih pelanggan lama dalam 2 ketukan saat buat order; histori belanja terbentuk otomatis;

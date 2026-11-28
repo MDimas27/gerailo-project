@@ -98,6 +98,17 @@ kosong → { totalBelanja: 0n, frekuensi: 0, tanggalTerakhir: null }
 - **Evidence**: `docs/evidence/m6/` (retest-results.json + 7 screenshot, PII telepon
   di-mask; JSON tanpa telepon mentah).
 
+## Hasil produksi (28 Nov 2026)
+- **ACC founder** → `production.yml` run **`46132777400` 4/4** (approval reviewer),
+  commit `e967b8d`; migrasi `0016` ter-apply; Worker
+  `80fc7512-9cc2-41d6-bd50-9daec8385b8b`; bundle `/assets/index-CYTvk6cO.js`; health OK.
+- **Tag** `m6-production-v1` → `e967b8d`. Rollback target Worker M7
+  `3b4e9c52-6013-4ef5-bd36-e41c79cbbabb`; `0016` additive-only.
+- **Smoke HP produksi** `e8c955c3` **8/8 CEK1–CEK8**: stats 375.000/1 = REST,
+  piutang+UMP 0 tidak berubah; hapus tanpa order 204; FK 409/23503 → UI "Gunakan
+  Arsipkan"; pelanggan uji dibersihkan 204. Evidence `docs/evidence/m6/production/`
+  (PII masked).
+
 ## Deviasi dari plan (substansi pasca-ACC)
 - **Model aktif ≠ pemetaan**: Task 4/5/7 (DeepSeek) dikerjakan model aktif (GLM) —
   override ke atas; CI tetap hakim. Dicatat di laporan + LESSONS.

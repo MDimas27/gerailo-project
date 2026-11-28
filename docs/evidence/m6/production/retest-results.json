@@ -1,0 +1,66 @@
+{
+    "stamp":  "1156",
+    "shotDir":  "docs/evidence/m6/production",
+    "device":  "e8c955c3",
+    "bundle":  "/assets/index-CYTvk6cO.js",
+    "ciRun":  "46132777400",
+    "versionId":  "80fc7512-9cc2-41d6-bd50-9daec8385b8b",
+    "results":  [
+                    {
+                        "nama":  "CEK1 list pelanggan",
+                        "lulus":  true,
+                        "detail":  "halaman list + input pencarian tampil"
+                    },
+                    {
+                        "nama":  "CEK2 tambah pelanggan",
+                        "lulus":  true,
+                        "detail":  "tersimpan pelanggan baru; telepon ternormalisasi 628***; aktif=true"
+                    },
+                    {
+                        "nama":  "CEK3 edit profil",
+                        "lulus":  true,
+                        "detail":  "nama profiled ter-update"
+                    },
+                    {
+                        "nama":  "CEK4 arsip + toggle",
+                        "lulus":  true,
+                        "detail":  "badge=true sembunyiDefault=true munculToggle=true"
+                    },
+                    {
+                        "nama":  "CEK5 autocomplete + badge",
+                        "lulus":  true,
+                        "detail":  "tersembunyiDefault=true badge=true teleponTerisi=true ajakan=true"
+                    },
+                    {
+                        "nama":  "CEK6 hapus + FK",
+                        "lulus":  true,
+                        "detail":  "hapusTanpaOrder=true fkStatus=409 pesanUI=true"
+                    },
+                    {
+                        "nama":  "CEK7 stats + M7 tetap",
+                        "lulus":  true,
+                        "detail":  "UI total=375000 hitung=375000 freqUI=1/1 piutangUI=0/0"
+                    },
+                    {
+                        "nama":  "CEK8 bundle produksi (sama dengan CI)",
+                        "lulus":  true,
+                        "detail":  "/assets/index-CYTvk6cO.js"
+                    }
+                ],
+    "readme":  {
+                   "bisnis":  {
+                                  "id":  "c1681709-902a-4dc0-9467-f663bf970d90"
+                              },
+                   "CEK2":  {
+                                "namaAwal":  "M6 Smoke ****",
+                                "telepon":  "628****",
+                                "id":  "f8808163-623f-45c9-9a9c-4dc41e282a89"
+                            },
+                   "CEK6":  {
+                                "idBerOrder":  "77714ca4-650a-40af-9949-205b6b29eb25",
+                                "fkStatus":  409,
+                                "fkTeks":  "{\"code\":\"23503\",\"details\":\"Key (id, business_id)=(77714ca4-650a-40af-9949-205b6b29eb25, c1681709-902a-4dc0-9467-f663bf970d90) is still referenced from table \\\"orders\\\".\",\"hint\":null,\"message\":\"update "
+                            },
+                   "cleanup":  "pelanggan uji dihapus via hapus_customer (204); produksi bersih"
+               }
+}
