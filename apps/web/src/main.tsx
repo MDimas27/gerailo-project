@@ -4,6 +4,8 @@ import { createRoot } from "react-dom/client";
 import { Navigate, RouterProvider, createBrowserRouter } from "react-router";
 
 import { AdminParserPage } from "./routes/admin-parser.js";
+import { CustomerDetailPage } from "./routes/customers-detail.js";
+import { CustomersPage } from "./routes/customers.js";
 import { AuthPage } from "./routes/auth.js";
 import { AuthCallbackPage } from "./routes/auth-callback.js";
 import { HomePage } from "./routes/home.js";
@@ -133,6 +135,22 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <ProductFormPage mode="edit" />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/customers",
+    element: (
+      <RequireAuth>
+        <CustomersPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/customers/:id",
+    element: (
+      <RequireAuth>
+        <CustomerDetailPage />
       </RequireAuth>
     ),
   },

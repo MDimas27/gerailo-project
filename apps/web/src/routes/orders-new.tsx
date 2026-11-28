@@ -1,5 +1,5 @@
 import type { Json } from "@gerailo/supabase/types";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -9,14 +9,18 @@ import {
   moneyAdd,
   moneyMultiply,
   parseRupiah,
+  labelPelangganArsip,
+  saringPelangganArsip,
   type MetodeBayar,
 } from "@gerailo/shared";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, FieldError } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCustomers } from "@/hooks/use-customers";
 import { usePrimaryBusiness } from "@/hooks/use-primary-business";
 import { useProducts } from "@/hooks/use-products";
 import { fieldErrorsFrom, pesanAksi } from "@/lib/form-error";
@@ -40,6 +44,9 @@ export function OrderNewPage() {
   const navigate = useNavigate();
   const { business, isPending, error: businessError } = usePrimaryBusiness();
   const products = useProducts(business?.id);
+  const customers = useCustomers(business?.id);
+  const [tampilkanArsipPelanggan, setTampilkanArsipPelanggan] = useState(false);
+  const [pelangganDipilih, setPelangganDipilih] = useState<string | null>(null);
   const [form, setForm] = useState({
     nama: "",
     telepon: "",
@@ -55,6 +62,27 @@ export function OrderNewPage() {
   const [galat, setGalat] = useState("");
   const [galatField, setGalatField] = useState<Record<string, string>>({});
   const [kunciBerikut, setKunciBerikut] = useState(2);
+
+  const saranPelanggan = useMemo(() => {
+    const namaNeedle = form.nama.trim().toLowerCase();
+    const teleponNeedle = form.telepon.replace(/\D/g, "");
+
+    if (namaNeedle.length < 2 && teleponNeedle.length < 3) {
+      return [];
+    }
+
+    return saringPelangganArsip(customers.data ?? [], tampilkanArsipPelanggan)
+      .filter(
+        (row) =>
+          (namaNeedle.length >= 2 &&
+            row.nama.toLowerCase().includes(namaNeedle)) ||
+          (teleponNeedle.length >= 3 && row.telepon.includes(teleponNeedle)),
+      )
+      .slice(0, 5);
+  }, [customers.data, form.nama, form.telepon, tampilkanArsipPelanggan]);
+
+  const pelangganTerpilih =
+    (customers.data ?? []).find((row) => row.id === pelangganDipilih) ?? null;
 
   if (isPending) {
     return <p className="p-6 text-sm text-muted">Memuat usaha...</p>;
@@ -194,7 +222,7 @@ export function OrderNewPage() {
     <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-5 px-5 py-8">
       <div className="flex flex-col gap-1">
         <Link className="text-xs font-semibold text-primary" to="/orders">
-          ← Daftar pesanan
+          â† Daftar pesanan
         </Link>
         <h1 className="text-2xl font-semibold text-ink">Order manual</h1>
         <p className="text-sm text-muted">
@@ -223,6 +251,78 @@ export function OrderNewPage() {
             <FieldError>{galatField.telepon}</FieldError>
           </label>
         </div>
+
+        <div className="rounded-control border border-border p-2">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-muted">
+              Pilih pelanggan lama
+            </p>
+            <label className="flex items-center gap-1 text-[11px] text-muted">
+              <input
+                checked={tampilkanArsipPelanggan}
+                className="size-3.5 rounded border-border text-primary"
+                type="checkbox"
+                onChange={(event) =>
+                  setTampilkanArsipPelanggan(event.target.checked)
+                }
+              />
+              Tampilkan arsip
+            </label>
+          </div>
+
+          {saranPelanggan.length === 0 ? (
+            <p className="mt-1 text-[11px] text-muted">
+              Ketik nama (≥2 huruf) atau telepon (≥3 angka).
+            </p>
+          ) : (
+            <ul className="mt-1 flex flex-col gap-1">
+              {saranPelanggan.map((row) => (
+                <li key={row.id}>
+                  <button
+                    className="flex w-full items-center justify-between gap-2 rounded-control px-2 py-1 text-left hover:bg-background"
+                    type="button"
+                    onClick={() => {
+                      setForm((value) => ({
+                        ...value,
+                        nama: row.nama,
+                        telepon: row.telepon,
+                        alamat: row.alamat ?? value.alamat,
+                      }));
+                      setPelangganDipilih(row.id);
+                    }}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-xs font-semibold text-ink">
+                        {row.nama}
+                      </span>
+                      <span className="block text-[11px] tabular-nums text-muted">
+                        {row.telepon}
+                      </span>
+                    </span>
+                    {!row.aktif ? (
+                      <Badge variant="warning">
+                        {labelPelangganArsip(row.aktif)}
+                      </Badge>
+                    ) : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {pelangganTerpilih && !pelangganTerpilih.aktif ? (
+            <p className="mt-1 text-[11px] text-warning">
+              Pelanggan ini diarsipkan; order tetap terhubung.{" "}
+              <Link
+                className="font-semibold underline"
+                to={`/customers/${pelangganTerpilih.id}`}
+              >
+                Aktifkan lagi
+              </Link>
+            </p>
+          ) : null}
+        </div>
+
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-muted">Alamat (opsional)</span>
           <Input
