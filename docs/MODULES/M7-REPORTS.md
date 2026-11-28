@@ -1,10 +1,13 @@
 # M7 — Laporan & Export
 
 ## Status
-- **SELESAI STAGING 28 Nov 2026** (promosi produksi menunggu ACC): pgTAP RED 0/17 →
-  kanonik `Files=15, Tests=475`; Vitest 153; CI staging `46109283876` 4/4, bundle
-  `index-CnT9Rifp.js`; smoke HP `e8c955c3` 9/9 (dashboard = REST JWT, PII masked,
-  print PDF); timing 90,4 ms @ ~80k journal_lines; evidence `docs/evidence/m7/`.
+- **SELESAI PRODUKSI 28 Nov 2026** (tag `m7-production-v1` → `f6e1be6`): pgTAP
+  `Files=15, Tests=475`; Vitest 158; CI produksi `46111829074` 4/4, migrasi `0015`
+  ter-apply, Worker Version `3b4e9c52-6013-4ef5-bd36-e41c79cbbabb`, bundle
+  `index-q9tXteDE.js`; smoke HP `e8c955c3` staging 9/9 + produksi 10/10 (dashboard =
+  REST JWT, rekap per-akun, Σ CSV = kartu persediaan, PII masked, print PDF);
+  timing 90,4 ms @ ~80k journal_lines; evidence `docs/evidence/m7/` +
+  `docs/evidence/m7/production/`.
 - Urutan deviasi (ACC): M7 sebelum M6 (`docs/ROADMAP.md`, LESSONS #69).
 
 ## Tujuan & nilai

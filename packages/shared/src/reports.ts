@@ -1,7 +1,7 @@
 /**
  * Agregator laporan M7 di sisi klien/Worker.
  * Sumber angka tetap SQL views; file ini HANYA komposisi (tanpa agregat paralel
- * terhadap jurnal) â€” nilai persediaan = saldo stok Ã— HPP rata-rata (M5).
+ * terhadap jurnal) — nilai persediaan = saldo stok × HPP rata-rata (M5).
  */
 
 export type PersediaanBaris = {

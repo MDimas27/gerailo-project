@@ -1,0 +1,28 @@
+{
+  "diambilPada": "2026-11-28T07:24:09.809Z",
+  "businessId": "c1681709-902a-4dc0-9467-f663bf970d90",
+  "bulan": "2026-11",
+  "akun": {
+    "kas_1_1010": "615000",
+    "bank_1_1020": "0",
+    "piutang_1_1030": "0",
+    "ump_2_2010": "0",
+    "pendapatan_4_40xx": "615000",
+    "hpp_5_5010": "205000",
+    "beban_6_60xx": "0"
+  },
+  "dashboard": {
+    "penjualanBulan": "615000",
+    "labaKotorBulan": "410000",
+    "piutangUmp": "0",
+    "nilaiPersediaan": "993000"
+  },
+  "persediaan": {
+    "unitTanpaHarga": 0,
+    "jumlahProduk": 2,
+    "sigmaCsv": "993000"
+  },
+  "cocok": {
+    "nilaiPersediaanVsCsv": true
+  }
+}

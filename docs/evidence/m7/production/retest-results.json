@@ -1,0 +1,101 @@
+{
+  "stamp": "m7-prod",
+  "shotDir": "docs/evidence/m7/production",
+  "device": "e8c955c3",
+  "bundle": "/assets/index-q9tXteDE.js",
+  "ciRun": "46111829074",
+  "versionId": "3b4e9c52-6013-4ef5-bd36-e41c79cbbabb",
+  "results": [
+    {
+      "nama": "bundle produksi",
+      "lulus": true,
+      "detail": "/assets/index-q9tXteDE.js"
+    },
+    {
+      "nama": "CEK1 dashboard 4 angka = REST JWT",
+      "lulus": true,
+      "detail": "UI={\"penjualan\":\"Rp615.000\",\"laba\":\"Rp410.000\",\"piutang\":\"Rp0\",\"persediaan\":\"Rp993.000\"} REST={\"penjualan\":615000,\"laba\":410000,\"piutangUmp\":0,\"persediaan\":993000}"
+    },
+    {
+      "nama": "CEK2 rekap harian",
+      "lulus": true,
+      "detail": "tabel + label SAK EMKM tampil"
+    },
+    {
+      "nama": "CEK3 laba rugi",
+      "lulus": true,
+      "detail": "kolom P&L tampil"
+    },
+    {
+      "nama": "CEK3b printToPDF",
+      "lulus": true,
+      "detail": "print-pnl.pdf 85824 bytes"
+    },
+    {
+      "nama": "CEK4 arus kas",
+      "lulus": true,
+      "detail": "kolom kas/bank tampil"
+    },
+    {
+      "nama": "CEK5 piutang & UMP",
+      "lulus": true,
+      "detail": "kolom terpisah; telepon di-mask"
+    },
+    {
+      "nama": "CEK6 export CSV persediaan",
+      "lulus": true,
+      "detail": "status 200; bom 239,187,191; attachment; filename=\"persediaan-2026-11-28.csv\""
+    },
+    {
+      "nama": "CEK6b export CSV rekap-harian?bulan",
+      "lulus": true,
+      "detail": "status 200; attachment; filename=\"rekap-harian-2026-11-28.csv\""
+    },
+    {
+      "nama": "CEK7 rekap per-akun = buku",
+      "lulus": true,
+      "detail": "kas 615000 bank 0 piutang 0 UMP 0; dashboard {\"penjualanBulan\":\"615000\",\"labaKotorBulan\":\"410000\",\"piutangUmp\":\"0\",\"nilaiPersediaan\":\"993000\"}; ΣCSV 993000"
+    }
+  ],
+  "readme": {
+    "bisnis": {
+      "id": "c1681709-902a-4dc0-9467-f663bf970d90",
+      "nama": "Dapur Bu Siti Smoke"
+    },
+    "CEK6": {
+      "awal": "﻿produk,saldo,hpp,nilai,unit_tanpa_harga\r\nSMOKE M5 1624,13,11000,143000,0\r\nSosis Bakar Spesial,17,50000,850000,0",
+      "disposisi": "attachment; filename=\"persediaan-2026-11-28.csv\""
+    },
+    "CEK6b": {
+      "awal": "﻿tanggal,pendapatan,hpp,laba_kotor,kas_masuk,piutang,uang_muka,beban\r\n2026-11-26,240000,150000,90000,240000,0,0,0\r\n2026-11-27,375000,55000,320000,375000,0,0,0"
+    },
+    "CEK7": {
+      "diambilPada": "2026-11-28T07:24:09.809Z",
+      "businessId": "c1681709-902a-4dc0-9467-f663bf970d90",
+      "bulan": "2026-11",
+      "akun": {
+        "kas_1_1010": "615000",
+        "bank_1_1020": "0",
+        "piutang_1_1030": "0",
+        "ump_2_2010": "0",
+        "pendapatan_4_40xx": "615000",
+        "hpp_5_5010": "205000",
+        "beban_6_60xx": "0"
+      },
+      "dashboard": {
+        "penjualanBulan": "615000",
+        "labaKotorBulan": "410000",
+        "piutangUmp": "0",
+        "nilaiPersediaan": "993000"
+      },
+      "persediaan": {
+        "unitTanpaHarga": 0,
+        "jumlahProduk": 2,
+        "sigmaCsv": "993000"
+      },
+      "cocok": {
+        "nilaiPersediaanVsCsv": true
+      }
+    }
+  }
+}
