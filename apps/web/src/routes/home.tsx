@@ -37,7 +37,7 @@ export function HomePage() {
   const persediaan = usePersediaan(business?.id);
 
   const pnlRow =
-    (pnl.data ?? []).find((row) => row.bulan === bulan) ?? {
+    (pnl.data ?? []).find((row) => row.bulan.startsWith(bulan)) ?? {
       bulan,
       pendapatan: 0n,
       hpp: 0n,
