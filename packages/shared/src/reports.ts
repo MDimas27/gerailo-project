@@ -1,7 +1,7 @@
 /**
  * Agregator laporan M7 di sisi klien/Worker.
  * Sumber angka tetap SQL views; file ini HANYA komposisi (tanpa agregat paralel
- * terhadap jurnal) — nilai persediaan = saldo stok × HPP rata-rata (M5).
+ * terhadap jurnal) â€” nilai persediaan = saldo stok Ã— HPP rata-rata (M5).
  */
 
 export type PersediaanBaris = {
@@ -72,4 +72,22 @@ export function dashboardLaporan(input: {
     piutangUmp,
     nilaiPersediaan: input.persediaan.nilai,
   };
+}
+
+export type BarisBulan = {
+  bulan: string;
+};
+
+/**
+ * Pilih baris laporan untuk periode `YYYY-MM`.
+ * Kolom `bulan` pada view berupa tanggal (`YYYY-MM-DD`), jadi perbandingan
+ * kesetaraan string MENTAH salah (mis. `2026-11-01` !== `2026-11`).
+ */
+export function pilihBarisBulan<T extends BarisBulan>(
+  rows: readonly T[],
+  bulan: string,
+): T | null {
+  const periode = bulan.trim().slice(0, 7);
+
+  return rows.find((row) => row.bulan.slice(0, 7) === periode) ?? null;
 }

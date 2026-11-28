@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router";
 
-import { formatRupiah } from "@gerailo/shared";
+import { formatRupiah, pilihBarisBulan } from "@gerailo/shared";
 
 import {
   bulanBerjalan,
@@ -36,14 +36,13 @@ export function HomePage() {
   const piutang = usePiutangUmp(business?.id);
   const persediaan = usePersediaan(business?.id);
 
-  const pnlRow =
-    (pnl.data ?? []).find((row) => row.bulan.startsWith(bulan)) ?? {
-      bulan,
-      pendapatan: 0n,
-      hpp: 0n,
-      laba_kotor: 0n,
-      beban: 0n,
-    };
+  const pnlRow = pilihBarisBulan(pnl.data ?? [], bulan) ?? {
+    bulan,
+    pendapatan: 0n,
+    hpp: 0n,
+    laba_kotor: 0n,
+    beban: 0n,
+  };
 
   const angka = dashboardLaporan({
     pnl: pnlRow,
@@ -94,7 +93,7 @@ export function HomePage() {
           </p>
           <h1 className="text-2xl font-semibold text-ink">{business.nama}</h1>
           <p className="text-sm text-muted">
-            {jenisLabel[business.jenis] ?? business.jenis} ·{" "}
+            {jenisLabel[business.jenis] ?? business.jenis} Â·{" "}
             {metodeLabel[business.metode_bayar] ?? business.metode_bayar}
           </p>
         </div>
@@ -120,7 +119,7 @@ export function HomePage() {
             </p>
           </div>
           <Link className="text-xs font-semibold text-primary no-print" to="/reports/daily">
-            Laporan →
+            Laporan â†’
           </Link>
         </div>
 
